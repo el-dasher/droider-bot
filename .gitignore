@@ -14,7 +14,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -245,5 +244,5 @@ fabric.properties
 # End of https://www.toptal.com/developers/gitignore/api/pycharm,vscode
 
 # My database
-src/lib/db/data/db/database.db
+/src/lib/db/data/db/database.db
 .env
