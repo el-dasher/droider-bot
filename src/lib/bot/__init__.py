@@ -1,4 +1,4 @@
-from discord.ext.commands import Bot as BotBase
+from discord.ext import commands
 import src.settings as setup
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import discord
@@ -7,14 +7,19 @@ import json
 import os
 
 
-class DroiderBR(BotBase):
+class DroiderBR(commands.Bot):
     def __init__(self):
         self.TOKEN = setup.BOT_TOKEN
         self.PREFIX = setup.PREFIX
         self.ready = False
         self.scheduler = AsyncIOScheduler
 
-        super().__init__(command_prefix=setup.PREFIX, owner_ids=setup.OWNERS_ID, intents=discord.Intents.all())
+        super().__init__(
+            command_prefix=setup.PREFIX,
+            # owner_ids=setup.PRIVILEGED["bot_owners"]["mscoy"],
+            owner_ids="",
+            intents=discord.Intents.all()
+        )
 
     def run(self):
         print(f'Iniciando o bot')
@@ -26,6 +31,24 @@ class DroiderBR(BotBase):
     async def on_disconnect(self):
         print(f'O "{self.user}" se desconectou...')
 
+    async def on_error(self, error, *args, **kwargs):
+        # if error == "on_command_error":
+        #   pass
+        _channel = self.get_channel(702077490423922748)
+        await _channel.send(
+            f"/shrug Algo de errado, não está certo, talvez você tente falar com o"
+            f" <@{setup.MSCOY['user_id']}>, e ver o que ele pode fazer"
+        )
+        raise
+
+    async def on_command_error(self, ctx, exc):
+        if isinstance(exc, commands.CommandNotFound):
+            await ctx.send("Esse comando não existe..., cê ta bem mano?")
+        elif hasattr(exc, "original"):
+            raise exc.original
+        else:
+            raise exc
+
     @staticmethod
     def guild_dict(guild_name: str, guild_id: str) -> dict:
         return {"guild_name": str(guild_name), "guild_id": str(guild_id)}
@@ -35,7 +58,7 @@ class DroiderBR(BotBase):
         _main_guild = self.get_guild(769012183790256170)
         _br_guild = self.get_guild(702064150750429194)
         _bot_user = self.user
-        _channel = self.get_channel(702218625079181342)
+        _channel = self.get_channel(702077490423922748)
         _mscoy = _main_guild.get_member(750129701129027594)
 
         def export_data() -> None:
@@ -50,15 +73,25 @@ class DroiderBR(BotBase):
                         "name": str(_bot_user),
                         "user_id": str(_bot_user.id)
                     },
-                    "mscoy": {
-                        "name": str(_mscoy),
-                        "user_id": str(_mscoy.id)
+                    "privileged": {
+                        "bot_owners": {
+                            "mscoy": {
+                                "name": str(_mscoy),
+                                "user_id": str(_mscoy.id)
+                            }
+                        },
+                        "guild_owners": {
+                            "zalur": {
+                                "name": str(_zalur := self.get_user(323516956642902016)),
+                                "user_id": str(_zalur.id)
+                            }
+                        }
                     }
                 }
             }
 
             with open(os.path.abspath("./lib/db/data/json/useful_data.json"), "w+") as outfile:
-                json.dump(data, outfile)
+                json.dump(data, outfile, indent=4)
 
             return None
 
@@ -78,7 +111,7 @@ class DroiderBR(BotBase):
                     f"{setup.PREFIX}help",
                     "> Peça uma ajudinha com os comandos do bot, aproveita e me faz um café.", True
                 ),
-                ("Criador", "> Não foi O MsCoy", True)
+                ("Criador", f"> Não foi O <@{setup.MSCOY['user_id']}>", True)
             ]
             for name, value, inline in embed_fields:
                 ready_embed.add_field(name=name, value=value, inline=inline)
