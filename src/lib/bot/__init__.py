@@ -5,8 +5,9 @@ import discord
 from datetime import datetime
 import json
 import os
-import traceback
 import asyncio
+from ..db import db
+# from apscheduler.triggers.cron import CronTrigger
 
 
 class DroiderBR(commands.Bot):
@@ -14,7 +15,7 @@ class DroiderBR(commands.Bot):
         self.TOKEN = setup.BOT_TOKEN
         self.PREFIX = setup.PREFIX
         self.ready = False
-        self.scheduler = AsyncIOScheduler
+        self.scheduler = AsyncIOScheduler()
 
         super().__init__(
             command_prefix=setup.PREFIX,
@@ -51,11 +52,17 @@ class DroiderBR(commands.Bot):
         else:
             raise exc
 
+    # async def auto_msg(self):
+    #   _channel = self.get_channel(702077490423922748)
+    #   await _channel.send("Eu sou uma mensagem automatizada")
+
     @staticmethod
     def guild_dict(guild_name: str, guild_id: str) -> dict:
         return {"guild_name": str(guild_name), "guild_id": str(guild_id)}
 
     async def on_ready(self):
+        self.scheduler = AsyncIOScheduler()
+
         _main_guild, _br_guild, _bot_user, _channel, _mscoy = None, None, None, None, None
 
         for x in range(3):
@@ -66,6 +73,7 @@ class DroiderBR(commands.Bot):
                 _bot_user = self.user
                 _channel = self.get_channel(702077490423922748)
                 _mscoy = _main_guild.get_member(750129701129027594)
+
             except Exception:
                 # print(traceback.print_exc())
                 await asyncio.sleep(3)
@@ -102,11 +110,18 @@ class DroiderBR(commands.Bot):
             with open(os.path.abspath("./lib/db/data/json/useful_data.json"), "w+") as outfile:
                 json.dump(data, outfile, indent=4)
 
+            print('"useful_data.json" got created succesfully')
+
             return None
 
         if not self.ready:
+            # self.scheduler.add_job(self.auto_msg, CronTrigger(second="0, 15, 30, 45"))
+            self.scheduler.start()
+
+            db.autosave(self.scheduler)
+
             self.ready = True
-            print("O bot já ta pronto pra ação!")
+            print("O bot já está pronto para a ação!")
 
             export_data()  # Exports useful data in a json file
             # await channel.send("Eu tô online!")
@@ -137,6 +152,10 @@ class DroiderBR(commands.Bot):
 
     async def on_message(self, msg):
         pass
+
+    async def on_member_join(self, member: discord.Member):
+        _channel = self.get_channel(702064151236968531)
+        await _channel.send(f"Seja bem vindo ao ~~inferno~~ osu!droid brasil, <@{member.id}>")
 
 
 bot = DroiderBR()

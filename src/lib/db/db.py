@@ -1,19 +1,12 @@
 from os.path import isfile
 from sqlite3 import connect
+from apscheduler.triggers.cron import CronTrigger
+from os.path import abspath
 
-DB_PATH = "./data/db/database.db"
-BUILD_PATH = "./data/db/build.sql"
-
-connection = connect(DB_PATH)
-cursor = connection.cursor()
-
-
-def commit():
-    connection.commit()
-
-
-def close():
-    connection.close()
+DB_PATH = abspath("./lib/db/data/db/database.db")
+BUILD_PATH = abspath("./lib/db/data/db/build.sql")
+cxn = connect(DB_PATH, check_same_thread=False)
+cur = cxn.cursor()
 
 
 def with_commit(func):
@@ -24,46 +17,57 @@ def with_commit(func):
     return inner
 
 
-def scriptexec(path):
-    with open(path, "r", encoding="utf-8") as script:
-        cursor.execute(script.read())
-
-
 @with_commit
 def build_db():
-    if isfile(DB_PATH):
+    if isfile(BUILD_PATH):
         scriptexec(BUILD_PATH)
 
 
-def execute(command, *values):
-    cursor.execute(command, tuple(*values))
+def commit():
+    cxn.commit()
+
+
+def autosave(sched):
+    sched.add_job(commit, CronTrigger(second=0))
+
+
+def close():
+    cxn.close()
 
 
 def field(command, *values):
-    execute(command, *values)
+    cur.execute(command, tuple(values))
 
-    if fetch := cursor.fetchone() is not None:
+    if (fetch := cur.fetchone()) is not None:
         return fetch[0]
 
 
 def record(command, *values):
-    execute(command, *values)
+    cur.execute(command, tuple(values))
 
-    return cursor.fetchone()
+    return cur.fetchone()
 
 
 def records(command, *values):
-    execute(command, *values)
+    cur.execute(command, tuple(values))
 
-    return cursor.fetchall()
+    return cur.fetchall()
 
 
 def column(command, *values):
-    execute(command, *values)
+    cur.execute(command, tuple(values))
 
-    return [item[0] for item in cursor.fetchall()]
+    return [item[0] for item in cur.fetchall()]
+
+
+def execute(command, *values):
+    cur.execute(command, tuple(values))
 
 
 def multiexec(command, valueset):
-    cursor.executemany(command, valueset)
+    cur.executemany(command, valueset)
 
+
+def scriptexec(path):
+    with open(path, "r", encoding="utf-8") as script:
+        cur.executescript(script.read())

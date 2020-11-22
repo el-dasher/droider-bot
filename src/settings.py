@@ -23,13 +23,13 @@ try:
 
     USERS = data["users"]
     PRIVILEGED = USERS["privileged"]
-
     BOT_USER = USERS["bot_user"]
+
     MSCOY = PRIVILEGED["bot_owners"]["mscoy"]
     ZALUR = PRIVILEGED["guild_owners"]["zalur"]
 
 except Exception:
-    print(traceback.print_exc())
-
+    # print(traceback.print_exc())
+    pass
 
 logging.basicConfig(level=logging.INFO)
