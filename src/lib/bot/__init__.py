@@ -5,6 +5,8 @@ import discord
 from datetime import datetime
 import json
 import os
+import traceback
+import asyncio
 
 
 class DroiderBR(commands.Bot):
@@ -54,12 +56,19 @@ class DroiderBR(commands.Bot):
         return {"guild_name": str(guild_name), "guild_id": str(guild_id)}
 
     async def on_ready(self):
+        _main_guild, _br_guild, _bot_user, _channel, _mscoy = None, None, None, None, None
 
-        _main_guild = self.get_guild(769012183790256170)
-        _br_guild = self.get_guild(702064150750429194)
-        _bot_user = self.user
-        _channel = self.get_channel(702077490423922748)
-        _mscoy = _main_guild.get_member(750129701129027594)
+        for x in range(3):
+            # noinspection PyBroadException
+            try:
+                _main_guild = self.get_guild(769012183790256170)
+                _br_guild = self.get_guild(702064150750429194)
+                _bot_user = self.user
+                _channel = self.get_channel(702077490423922748)
+                _mscoy = _main_guild.get_member(750129701129027594)
+            except Exception:
+                # print(traceback.print_exc())
+                await asyncio.sleep(3)
 
         def export_data() -> None:
 
