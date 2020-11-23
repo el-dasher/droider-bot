@@ -25,9 +25,14 @@ class Ready(object):
 
 
 class DroiderBR(commands.Bot):
+    main_guild: discord.guild.Guild
+    br_guild: discord.guild.Guild
+    mscoy: discord.user.User
+    zalur: discord.user.User
+    stdout: discord.channel.TextChannel
+    bot_user: discord.client.User
+
     def __init__(self):
-        self.stdout, self.main_guild, self.br_guild, self.bot_user = None, None, None, None
-        self.mscoy, self.zalur = None, None
         self.ready = False
         self.cogs_ready = False
 
@@ -102,6 +107,8 @@ class DroiderBR(commands.Bot):
             ready_embed.set_footer(text="O MsCoy...", icon_url=self.mscoy.avatar_url)
             ready_embed.set_author(name="osu!droid Brasil", icon_url=self.br_guild.icon_url)
             ready_embed.set_thumbnail(url=self.bot_user.avatar_url)
+
+            await self.stdout.send(ready_embed)
 
         else:
             print("O bot se reconectou")
