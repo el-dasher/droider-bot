@@ -51,7 +51,6 @@ try:
     else:
         print('O BOT NÃO CONSEGUIU RECUPERAR O "useful_data.json"')
 except Exception:
-    pass
-    # print("Ocorreu um erro mas o bot fez de tudo pra recuperar o JSON novamente, então deve estar tudo ok!")
+    print("Ocorreu um erro mas o bot fez de tudo pra recuperar o JSON novamente, então deve estar tudo ok!")
 
 logging.basicConfig(level=logging.INFO)

@@ -1,10 +1,12 @@
 from discord.ext import commands
 import src.settings as settings
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 import discord
 from datetime import datetime
 from src.lib.db.data.json.datagen import gendata
 from os.path import abspath
+import asyncio
 
 from ..db import db
 # from apscheduler.triggers.cron import CronTrigger
@@ -29,12 +31,12 @@ class DroiderBR(commands.Bot):
     br_guild: discord.guild.Guild
     mscoy: discord.user.User
     zalur: discord.user.User
-    stdout: discord.channel.TextChannel
+    stdout: any
     bot_user: discord.client.User
 
     def __init__(self):
         self.ready = False
-        self.cogs_ready = False
+        self.cogs_ready = Ready()
 
         self.scheduler = AsyncIOScheduler()
 
@@ -75,19 +77,28 @@ class DroiderBR(commands.Bot):
         self.main_guild = self.get_guild(769012183790256170)
         self.br_guild = self.get_guild(702064150750429194)
         self.bot_user = self.user
-        self.stdout = self.get_channel(702077490423922748)
+        self.stdout = self.get_channel(769012183790256175)
         self.mscoy = self.get_user(750129701129027594)
         self.zalur = self.get_user(323516956642902016)
 
-        gendata(self, abspath("./lib/db/data/json/useful_data.json"))
-
         if not self.ready:
-            gendata(self, abspath("./lib/db/data/json/useful_data.json"))
-            # self.scheduler.add_job(self.auto_msg, CronTrigger(second="0, 15, 30, 45"))
+
+            # Updates our useful_data.json
+            self.scheduler.add_job(
+                lambda: gendata(self, abspath("./lib/db/data/json/useful_data.json")),
+                CronTrigger(second="0")
+            )
+
+            # self.scheduler.add_job(lambda: print("a"), CronTrigger(second="0, 15, 30, 45"))
             self.scheduler.start()
 
             db.autosave(self.scheduler)
+
+            while not self.cogs_ready.all_ready:
+                await asyncio.sleep(0.5)
+
             self.ready = True
+            print("O BOT ESTÁ PRONTO")
             ready_embed = discord.Embed(
                 title="Droider online!",
                 description="O Droider tá online, se eu fosse você eu teria cuidado, mero membro comum.",
@@ -108,14 +119,14 @@ class DroiderBR(commands.Bot):
             ready_embed.set_author(name="osu!droid Brasil", icon_url=self.br_guild.icon_url)
             ready_embed.set_thumbnail(url=self.bot_user.avatar_url)
 
-            await self.stdout.send(ready_embed)
+            await self.stdout.send(embed=ready_embed)
 
         else:
             print("O bot se reconectou")
             await self.stdout.send("Eu tô online denovo!")
 
     async def on_message(self, msg):
-        pass
+        await self.process_commands(msg)
 
 
 bot = DroiderBR()
