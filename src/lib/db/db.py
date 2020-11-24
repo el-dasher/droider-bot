@@ -6,7 +6,7 @@ import sys
 
 DB_PATH = Path(".src/lib/db/data/db/database.db").absolute()
 BUILD_PATH = Path("./data/db/build.sql")
-sys.exit(DB_PATH, BUILD_PATH)
+sys.exit(f"{DB_PATH}, {BUILD_PATH}")
 cxn = connect(DB_PATH, check_same_thread=False)
 cur = cxn.cursor()
 
