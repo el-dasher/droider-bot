@@ -90,7 +90,7 @@ class DroiderBR(commands.Bot):
             # Updates our useful_data.json
             self.scheduler.add_job(
                 lambda: gendata(self, abspath("./lib/db/data/json/useful_data.json")),
-                CronTrigger(second="0")
+                CronTrigger(second="0, 30")
             )
             self.scheduler.add_job(update_users, CronTrigger(second=0))
 

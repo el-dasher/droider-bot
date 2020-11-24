@@ -23,8 +23,8 @@ except FileNotFoundError as exc:
                     f"\n{exc}")
 
 if f is None:
-    sys.exit("Como o arquivo não pôde ser encontrado o processo foi encerrado")
 
+    sys.exit("Como o arquivo não pôde ser encontrado o processo foi encerrado")
 # noinspection PyBroadException
 try:
     data = json.load(f)

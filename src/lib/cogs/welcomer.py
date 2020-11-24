@@ -1,3 +1,5 @@
+from typing import List, Any
+
 from discord.ext.commands import Cog
 import discord
 from src.lib.utils.basic_utils import ready_up_cog, get_member_name
@@ -7,23 +9,41 @@ import json
 from os.path import abspath
 from discord.ext import commands
 
-json_path = abspath("../src/lib/db/data/json/months.json")
-month_data = json.load(open(json_path, encoding="utf-8"))
+month_data = json.load(open(mo_path := abspath("../src/lib/db/data/json/months.json"), encoding="utf-8"))
+
+welcomer_data = (
+    wd_data := json.load(open(wd_path := abspath("../src/lib/db/data/json/welcomer_data.json")),
+                         encoding="utf-8")
+)
+
+
+class PyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (list, dict, str, int, float, bool, type(None))):
+            return json.JSONEncoder.default(self, obj)
 
 
 class Welcomer(Cog):
-    welcome_channel: discord.TextChannel
+    welcome_channels: List[Any]
 
     def __init__(self, bot):
+
+        global wd_data
+
         self.bot = bot
+        self.guilds = []
+
+        # self.welcome_channels = list(wd_data)
 
     @Cog.listener()
     async def on_ready(self):
+
         ready_up_cog(self.bot, __name__)
 
     @Cog.listener()
     async def on_member_join(self, member: discord.Member):
         welcome_msg = ("SEJA BEM VIADO", "SEJA BEM VINDO")
+
         join_embed = discord.Embed(
             title=f"{choice(welcome_msg)} {get_member_name(member).upper()}",
             description=f"Um novo <@{member.id}> entrou no server",
@@ -44,30 +64,79 @@ class Welcomer(Cog):
 
         # server_joined = member.server.channels
 
-        await self.bot.stdout.send(embed=join_embed)
+        joined_guild = str(member.guild.id)
+
+        welcome_channel = wd_data[joined_guild]["id"]
+        welcome_channel = self.bot.get_channel(welcome_channel)
+
+        await welcome_channel.send(f"<@{member.id}>", embed=join_embed)
 
     @Cog.listener()
     async def on_member_remove(self, member: discord.Member):
-        await self.bot.stdout.send(f"Que pena, o {get_member_name(member)} saiu do servidor, compreensivel apenas...")
+
+        left_embed = discord.Embed(title=f"O {get_member_name(member)} saiu do servidor",
+                                   description=f"Estou muito triste com uma notícia dessas..."
+                                               f" <a:emojidanssa:780835162916651018>")
+
+        left_guild = str(member.guild.id)
+
+        welcome_channel = wd_data[left_guild]["id"]
+        welcome_channel = self.bot.get_channel(welcome_channel)
+
+        await welcome_channel.send(embed=left_embed)
 
     @commands.command(aliases=("welcome_channel", "convidados"))
     @commands.has_permissions(manage_channels=True)
-    async def set_welcome(self, ctx: discord.ext.commands.context, channel: discord.TextChannel = None):
+    async def set_welcome(self, ctx: discord.ext.commands.context, channel=None):
         channels = []
 
-        for channel_ in ctx.message.guild.channels:
-            channels.append(channel_)
+        for channel_ in ctx.message.guild.text_channels:
+            channels.append(channel_.id)
 
         if channel is None:
             channel = ctx.message.channel
-            print(channel)
 
-        # elif channel != ctx.message.guild:
-        #    await ctx.send(f"Não foi possivel encontrar o canal: <#{channel.id}>")
+        if channel not in channels and channel != ctx.message.channel:
+            count = 0
+            while True:
+                if channel not in channels:
+                    if count < 1:
+                        # noinspection PyBroadException
+                        try:
+                            channel = channel.split("<#")[1].split(">")[0]
+                            break
+                        except Exception:
+                            await ctx.send(f"Não foi possível encontrar o canal: {channel}")
 
-            return None
+                            return None
+                    count += 1
+                else:
+                    break
 
-        self.welcome_channel = ctx.message.guild.name
+        if channel != ctx.message.channel:
+            channel = self.bot.get_channel(int(channel))
+
+        self.guilds.append(ctx.message.guild)
+
+        def gendata() -> dict:
+
+            for guild_data in self.guilds:
+                wd_data[str(guild_data.id)] = {
+                    "id": channel.id,
+                    "name": channel.name,
+                    "position": channel.position,
+                    "nsfw": channel.nsfw,
+                    "category_id": channel.category_id
+                }
+
+            return wd_data
+
+        generated_data = gendata()
+
+        with open(wd_path, "w") as outfile:
+            json.dump(generated_data, outfile, indent=4)
+            outfile.close()
+
         await ctx.send(f"O novo canal de boas vindas é o <#{channel.id}>")
 
 

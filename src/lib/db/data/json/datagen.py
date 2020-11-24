@@ -38,4 +38,6 @@ def gendata(bot: commands.bot, abspath: path.abspath) -> dict:
     with open(abspath, "w+") as outfile:
         dump(data, outfile, indent=4)
 
+        outfile.close()
+
     return data
