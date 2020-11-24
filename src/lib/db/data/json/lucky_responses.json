@@ -1,0 +1,41 @@
+{
+    "TRUE": {
+        "GOOD PROBABLY": [
+            "Eu acho que sim <a:blobhype:780576199558299649>",
+            "Talvez <a:blobhype:780576199558299649>",
+            "Depende <a:blobhype:780576199558299649>"
+        ],
+        "GOOD": [
+            "Sim isso mesmo <:blobyes:780574873814171668>",
+            "Exatamente! <:blobyes:780574873814171668>",
+            "Sim, faz! <:blobyes:780574873814171668>"
+        ]
+    },
+
+    "NONE": {
+        "MAYBE UNSURE": [
+            "Não sei... <:blobvixi:780575480893931520>",
+            "Sei lá <:blobvixi:780575480893931520>",
+            "Sim? Não? eu realmente não sei... <:blobvixi:780575480893931520>"
+        ],
+        "NOT WANT": [
+            "Eu não quero falar sobre isso... <a:blobcry:780574271398871070>",
+            "Se eu falasse tu ia ficar com raiva <a:blobcry:780574271398871070>",
+            "Não vou falar sobre isso, VOCÊ NÃO MANDA EM MIM <a:blobcry:780574271398871070>"
+        ]
+    },
+
+    "FALSE": {
+        "BAD": [
+            "Não, infelizmente... <:blobnobully:780577284884529182>",
+            "Não, não é <:blobnobully:780577284884529182>",
+            "Nah... <:blobnobully:780577284884529182>"
+        ],
+        "BAD PROBABLY": [
+            "Eu acho que não <a:blobhype:780576199558299649>",
+            "Provavelmente não <a:blobhype:780576199558299649>",
+            "Acho que não <a:blobhype:780576199558299649>"
+        ]
+    }
+
+}

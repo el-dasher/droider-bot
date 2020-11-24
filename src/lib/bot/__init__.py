@@ -7,6 +7,7 @@ from datetime import datetime
 from src.lib.db.data.json.datagen import gendata
 from os.path import abspath
 import asyncio
+from src.lib.utils.basic_utils import get_member_name
 
 from ..db import db
 # from apscheduler.triggers.cron import CronTrigger
@@ -81,13 +82,17 @@ class DroiderBR(commands.Bot):
         self.mscoy = self.get_user(750129701129027594)
         self.zalur = self.get_user(323516956642902016)
 
-        if not self.ready:
+        def update_users():
+            self.mscoy = self.get_user(750129701129027594)
+            self.zalur = self.get_user(323516956642902016)
 
+        if not self.ready:
             # Updates our useful_data.json
             self.scheduler.add_job(
                 lambda: gendata(self, abspath("./lib/db/data/json/useful_data.json")),
                 CronTrigger(second="0")
             )
+            self.scheduler.add_job(update_users, CronTrigger(second=0))
 
             # self.scheduler.add_job(lambda: print("a"), CronTrigger(second="0, 15, 30, 45"))
             self.scheduler.start()
@@ -115,7 +120,7 @@ class DroiderBR(commands.Bot):
                 ready_embed.add_field(name=name, value=value, inline=inline)
 
             # ready_embed.set_author(name="Droider")
-            ready_embed.set_footer(text="O MsCoy...", icon_url=self.mscoy.avatar_url)
+            ready_embed.set_footer(text=f"{get_member_name(self.mscoy)}...", icon_url=self.mscoy.avatar_url)
             ready_embed.set_author(name="osu!droid Brasil", icon_url=self.br_guild.icon_url)
             ready_embed.set_thumbnail(url=self.bot_user.avatar_url)
 

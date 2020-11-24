@@ -2,6 +2,7 @@ from discord.ext import commands
 import discord
 from src.lib.utils.basic_utils import ready_up_cog, get_member_name
 from random import choice
+from datetime import datetime
 
 
 class Avatar(commands.Cog):
@@ -25,10 +26,12 @@ class Avatar(commands.Cog):
 
         avatar_embed = discord.Embed(
             title=f"Avatar do {member_name}",
-            description=f"{ava_desc} [Link]({member.avatar_url})"
+            description=f"{ava_desc} [Link]({member.avatar_url})",
+            timestamp=datetime.utcnow()
         )
 
         avatar_embed.set_image(url=member.avatar_url)
+        avatar_embed.set_footer(text=get_member_name(self.bot.bot_user), icon_url=self.bot.bot_user.avatar_url)
 
         await ctx.send(embed=avatar_embed)
 

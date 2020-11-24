@@ -1,4 +1,5 @@
 import discord
+from typing import Union
 
 
 def ready_up_cog(bot, __name___: __name__):
@@ -11,5 +12,5 @@ def get_pyfn(filename: __name__) -> str:
     return f
 
 
-def get_member_name(member: discord.Member) -> str:
+def get_member_name(member: Union[discord.Member, discord.User]) -> str:
     return str(member).split("#")[-2]

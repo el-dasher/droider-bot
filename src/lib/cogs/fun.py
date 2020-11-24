@@ -1,5 +1,6 @@
 from src.lib.utils.basic_utils import ready_up_cog
 from discord.ext import commands
+from random import choice
 
 
 class Funny(commands.Cog):

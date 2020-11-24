@@ -44,7 +44,6 @@ try:
 
         USERS = data["users"]
         PRIVILEGED = USERS["privileged"]
-        BOT_USER = USERS["bot_user"]
 
         MSCOY = PRIVILEGED["bot_owners"]["mscoy"]
         ZALUR = PRIVILEGED["guild_owners"]["zalur"]
