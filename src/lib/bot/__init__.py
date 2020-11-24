@@ -8,7 +8,6 @@ from src.lib.db.data.json.datagen import gendata
 from pathlib import Path
 import asyncio
 from src.lib.utils.basic_utils import get_member_name
-import sys
 
 from ..db import db
 # from apscheduler.triggers.cron import CronTrigger
@@ -51,8 +50,7 @@ class DroiderBR(commands.Bot):
 
     def setup(self):
         for cog in settings.COGS:
-            sys.exit(f"{settings.COGS}, {cog}")
-            self.load_extension(f"src.lib.cogs.{cog}")
+            self.load_extension(cog).replace("/", ".")
             print(f"A cog {cog} foi carregada!")
 
         print("Todas as cogs foram carregadas")
