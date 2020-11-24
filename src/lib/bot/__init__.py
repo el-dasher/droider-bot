@@ -8,6 +8,7 @@ from src.lib.db.data.json.datagen import gendata
 from pathlib import Path
 import asyncio
 from src.lib.utils.basic_utils import get_member_name
+import sys
 
 from ..db import db
 # from apscheduler.triggers.cron import CronTrigger
@@ -89,8 +90,9 @@ class DroiderBR(commands.Bot):
 
         if not self.ready:
             # Updates our useful_data.json
+            sys.exit(str(Path("src/lib/db/data/json/useful_data.json").absolute()).split(".")[:-1]))
             self.scheduler.add_job(
-                lambda: gendata(self, Path("src/lib/db/data/json/useful_data.json").absolute().split("/", 1)),
+                lambda: gendata(self, str(Path("src/lib/db/data/json/useful_data.json").absolute()).split(".")[:-1]),
                 CronTrigger(second="0, 30")
             )
             self.scheduler.add_job(update_users, CronTrigger(second=0))
