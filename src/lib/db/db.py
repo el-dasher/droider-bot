@@ -2,11 +2,10 @@ from os.path import isfile
 from sqlite3 import connect
 from apscheduler.triggers.cron import CronTrigger
 from pathlib import Path
-import sys
 
-DB_PATH = Path(".src/lib/db/data/db/database.db").absolute()
-BUILD_PATH = Path("./data/db/build.sql")
-sys.exit(f"{DB_PATH}, {BUILD_PATH}")
+
+DB_PATH = Path("src/lib/db/data/db/database.db").absolute()
+BUILD_PATH = Path("src/lib/db/data/db/build.sql").abolute()
 cxn = connect(DB_PATH, check_same_thread=False)
 cur = cxn.cursor()
 
