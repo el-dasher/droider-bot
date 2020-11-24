@@ -79,6 +79,7 @@ class DroiderBR(commands.Bot):
         self.br_guild = self.get_guild(702064150750429194)
         self.bot_user = self.user
         self.stdout = self.get_channel(769012183790256175)
+
         self.mscoy = self.get_user(750129701129027594)
         self.zalur = self.get_user(323516956642902016)
 

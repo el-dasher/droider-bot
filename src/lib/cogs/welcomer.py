@@ -30,6 +30,7 @@ class Welcomer(Cog):
 
         global wd_data
 
+        self.gen_channel = None
         self.bot = bot
         self.guilds = []
 
@@ -46,16 +47,18 @@ class Welcomer(Cog):
 
         join_embed = discord.Embed(
             title=f"{choice(welcome_msg)} {get_member_name(member).upper()}",
-            description=f"Um novo <@{member.id}> entrou no server",
+            description=f"Um(a) novo(a) <@{member.id}> entrou no server",
         )
 
         created_month = month_data["MONTHS"][member.created_at.month]
         join_embed.set_thumbnail(url=member.avatar_url)
-        join_embed.add_field(name="Nome de usuário", value=get_member_name(member))
-        join_embed.add_field(name="ID do discord", value=member.id)
+        join_embed.add_field(name="Nome de usuário", value=f"<@{member.id}>"),
+        join_embed.add_field(name=f"ID do(a) {get_member_name(member)}", value=member.id)
 
-        join_embed.add_field(name="É o lywi ou não?", value=f"Entrou no discord em {member.created_at.year}"
-                                                            f" No dia {member.created_at.day} de {created_month}")
+        join_embed.add_field(
+            name="É o lywi ou não?",
+            value=f"Entrou no discord em {member.created_at.year}, no dia {member.created_at.day} de {created_month}"
+        )
 
         join_embed.set_footer(
             text=f"{get_member_name(member)} Entrou no servidor às {datetime.utcnow().hour} horas"
@@ -74,9 +77,17 @@ class Welcomer(Cog):
     @Cog.listener()
     async def on_member_remove(self, member: discord.Member):
 
-        left_embed = discord.Embed(title=f"O {get_member_name(member)} saiu do servidor",
+        created_month = month_data["MONTHS"][member.created_at.month]
+        left_embed = discord.Embed(title=f"O(A) {get_member_name(member)} saiu do servidor",
                                    description=f"Estou muito triste com uma notícia dessas..."
                                                f" <a:emojidanssa:780835162916651018>")
+        left_embed.set_thumbnail(url=member.avatar_url)
+
+        left_embed.add_field(name="Tag do usuário", value=get_member_name(member))
+        left_embed.add_field(name=f"ID do(a) {get_member_name(member)}", value=member.id)
+        left_embed.add_field(
+            name="Será que era o lywi?",
+            value=f"Entrou no discord em {member.created_at.year}, no dia {member.created_at.day} de {created_month}")
 
         left_guild = str(member.guild.id)
 
@@ -85,7 +96,7 @@ class Welcomer(Cog):
 
         await welcome_channel.send(embed=left_embed)
 
-    @commands.command(aliases=("welcome_channel", "convidados"))
+    @commands.command(aliases=("welcome", "convidados", "setwelcome"))
     @commands.has_permissions(manage_channels=True)
     async def set_welcome(self, ctx: discord.ext.commands.context, channel=None):
         channels = []
@@ -132,12 +143,22 @@ class Welcomer(Cog):
             return wd_data
 
         generated_data = gendata()
+        self.gen_channel = ctx.message.channel
 
         with open(wd_path, "w") as outfile:
             json.dump(generated_data, outfile, indent=4)
             outfile.close()
 
         await ctx.send(f"O novo canal de boas vindas é o <#{channel.id}>")
+
+    @set_welcome.error
+    async def set_welcome_error(self, error, ctx):
+        print(ctx.message.channel)
+        if isinstance(error, commands.MissingPermissions):
+            print("YE")
+            await self.gen_channel.send(
+                "Você não tem permissão para usar esse comando, você tem que saber gerenciar canais"
+            )
 
 
 def setup(bot):

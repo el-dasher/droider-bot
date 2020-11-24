@@ -5,12 +5,12 @@ from os.path import abspath
 from random import choice
 
 json_path = abspath("lib/db/data/json/lucky_responses.json")
-f = json.load(open(json_path, encoding="utf-8"))
 
 
 class EightBall(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.f = json.load(open(json_path, encoding="utf-8"))
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -21,7 +21,7 @@ class EightBall(commands.Cog):
         if question is None:
             await ctx.send("Aprende a usar o bot, BURRO, cadê a pergunta?")
         else:
-            lucky_response = choice(list(choice(list(choice((list(f.values()))).values()))))
+            lucky_response = choice(list(choice(list(choice((list(self.f.values()))).values()))))
             await ctx.send(lucky_response)
 
 
