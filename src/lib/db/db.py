@@ -4,9 +4,9 @@ from apscheduler.triggers.cron import CronTrigger
 from pathlib import Path
 
 
-DB_PATH = Path("./lib/db/data/db/database.db")
+DB_PATH = Path(".src/lib/db/data/db/database.db").absolute()
 BUILD_PATH = Path("./data/db/build.sql")
-cxn = connect(DB_PATH.absolute(), check_same_thread=False)
+cxn = connect(DB_PATH, check_same_thread=False)
 cur = cxn.cursor()
 
 
