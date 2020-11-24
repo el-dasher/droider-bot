@@ -5,7 +5,7 @@ from apscheduler.triggers.cron import CronTrigger
 import discord
 from datetime import datetime
 from src.lib.db.data.json.datagen import gendata
-from os.path import abspath
+from pathlib import Path
 import asyncio
 from src.lib.utils.basic_utils import get_member_name
 
@@ -90,7 +90,7 @@ class DroiderBR(commands.Bot):
         if not self.ready:
             # Updates our useful_data.json
             self.scheduler.add_job(
-                lambda: gendata(self, abspath("./lib/db/data/json/useful_data.json")),
+                lambda: gendata(self, Path("src/lib/db/data/json/useful_data.json").absolute()),
                 CronTrigger(second="0, 30")
             )
             self.scheduler.add_job(update_users, CronTrigger(second=0))

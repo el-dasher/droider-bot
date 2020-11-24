@@ -7,7 +7,7 @@ def guild_dict(guild_name: str, guild_id: str) -> dict:
     return {"guild_name": str(guild_name), "guild_id": str(guild_id)}
 
 
-def gendata(bot: commands.bot, abspath: path.abspath) -> dict:
+def gendata(bot: commands.bot, abspath) -> dict:
     data = {
         "guilds": {
             "main_guild": guild_dict(guild_name=bot.main_guild, guild_id=bot.main_guild.id),
