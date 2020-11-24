@@ -244,5 +244,4 @@ fabric.properties
 # End of https://www.toptal.com/developers/gitignore/api/pycharm,vscode
 
 # My database
-/src/lib/db/data/db/database.db
 .env
