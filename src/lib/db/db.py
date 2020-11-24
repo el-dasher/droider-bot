@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 DB_PATH = Path("src/lib/db/data/db/database.db").absolute()
-BUILD_PATH = Path("src/lib/db/data/db/build.sql").abolute()
+BUILD_PATH = Path("src/lib/db/data/db/build.sql").absolute()
 cxn = connect(DB_PATH, check_same_thread=False)
 cur = cxn.cursor()
 
