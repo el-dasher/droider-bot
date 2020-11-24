@@ -51,6 +51,7 @@ class DroiderBR(commands.Bot):
 
     def setup(self):
         for cog in settings.COGS:
+            sys.exit(f"{settings.COGS}, {cog}")
             self.load_extension(f"src.lib.cogs.{cog}")
             print(f"A cog {cog} foi carregada!")
 
@@ -91,7 +92,7 @@ class DroiderBR(commands.Bot):
         if not self.ready:
             # Updates our useful_data.json
             self.scheduler.add_job(
-                lambda: gendata(self, str(Path("src/lib/db/data/json/useful_data.json").absolute()).split(".")[:-1]),
+                lambda: gendata(self, Path("src/lib/db/data/json/useful_data.json").absolute()),
                 CronTrigger(second="0, 30")
             )
             self.scheduler.add_job(update_users, CronTrigger(second=0))
