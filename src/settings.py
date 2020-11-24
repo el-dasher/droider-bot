@@ -9,6 +9,7 @@ import sys
 env_path = Path('..') / '.env'
 load_dotenv(dotenv_path=env_path)
 
+sys.exit(str(Path("src/lib/db/data/json/useful_data.json").absolute()).split(".")[:-1])
 COGS = [path.split("\\")[-1][:-3] for path in glob("src/lib/cogs/*.py")]
 BOT_TOKEN = getenv("BOT_TOKEN")
 PREFIX = getenv("PREFIX")
