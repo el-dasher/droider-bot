@@ -14,7 +14,8 @@ BOT_TOKEN = getenv("BOT_TOKEN")
 PREFIX = getenv("PREFIX")
 
 # noinspection PyBroadException
-f_path = Path("./lib/db/data/json/useful_data.json").absolute()
+f_path = Path("./src/lib/db/data/json/useful_data.json").absolute()
+print(f_path)
 try:
     f = open(f_path)
 except FileNotFoundError as exc:
