@@ -50,8 +50,7 @@ class DroiderBR(commands.Bot):
 
     def setup(self):
         for cog in settings.COGS:
-            self.load_extension((a := f"lib.cogs.{cog}"))
-            print(a)
+            self.load_extension(f"lib.cogs.{cog}")
             print(f"A cog {cog} foi carregada!")
 
         print("Todas as cogs foram carregadas")
