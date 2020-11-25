@@ -4,7 +4,6 @@ from os import getenv
 import logging
 import json
 from glob import glob
-import sys
 
 env_path = Path('..') / '.env'
 load_dotenv(dotenv_path=env_path)
