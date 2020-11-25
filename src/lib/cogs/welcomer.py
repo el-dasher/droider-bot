@@ -13,7 +13,7 @@ from pathlib import Path
 month_data = json.load(open(mo_path := Path("src/lib/db/data/json/months.json").absolute(), encoding="utf-8"))
 
 welcomer_data = (
-    wd_data := json.load(open(wd_path := Path("src/lib/db/data/json/welcomer_data.json").absolute())),
+    wd_data := json.load(open(wd_path := Path("src/lib/db/data/json/welcomer_data.json").absolute()),
                          encoding="utf-8")
 )
 
