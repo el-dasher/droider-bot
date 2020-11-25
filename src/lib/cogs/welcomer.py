@@ -17,7 +17,7 @@ welcomer_data = (
                          encoding="utf-8")
 )
 
-
+print()
 class PyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (list, dict, str, int, float, bool, type(None))):
