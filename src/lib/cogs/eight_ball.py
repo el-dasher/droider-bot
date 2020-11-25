@@ -3,6 +3,7 @@ from discord.ext import commands
 import json
 from os.path import abspath
 from random import choice
+from pathlib import Path
 
 json_path = Path("src/lib/db/data/json/lucky_responses.json").absolute()
 
