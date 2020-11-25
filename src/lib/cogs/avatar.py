@@ -11,7 +11,6 @@ class Avatar(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print("meedw9ndewuweiuonewjifneiufnieninrifnreifnweifnwifnwifwnifnwe")
         ready_up_cog(self.bot, __name__)
 
     @commands.command()
