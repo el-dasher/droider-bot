@@ -10,7 +10,7 @@ env_path = Path('..') / '.env'
 load_dotenv(dotenv_path=env_path)
 
 COGS = [path.split("\\")[-1][:-3] for path in glob("src/lib/cogs/*.py")]
-COGS = [Path(cog).absolute() for cog in COGS]
+COGS = [Path(cog.replace("/", ".")).absolute() for cog in COGS]
 
 sys.exit(COGS)
 
