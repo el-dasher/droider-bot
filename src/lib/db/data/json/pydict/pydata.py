@@ -16,6 +16,6 @@ bot_presences = (
     discord.Activity(type=discord.ActivityType.listening, name="Alts do lywi se aproximando!!!"),
     discord.Activity(type=discord.ActivityType.listening, name="Felipon malhando"),
     discord.Activity(type=discord.ActivityType.competing, name="Bad vs Yungo"),
-    discord.Activity(type=discord.ActivityType.listening, name="Nathan interterpretando texto")
+    discord.Activity(type=discord.ActivityType.listening, name="Nathan interpretando texto")
 
 )
