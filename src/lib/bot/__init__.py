@@ -51,11 +51,10 @@ class DroiderBR(commands.Bot):
         )
 
     def setup(self):
-        sys.exit(settings.COGS)
         for cog in settings.COGS:
-            self.load_extension(f"cogs.{cog}")
+            self.load_extension(f"src.lib.cogs.{cog}")
             print(f"A cog {cog} foi carregada!")
-            print(f"{cog}")
+       
         print("Todas as cogs foram carregadas")
 
     def run(self):
