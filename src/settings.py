@@ -13,7 +13,7 @@ COGS = []
 
 for path in Path('./src/lib/cogs').absolute().glob('*.py'):
     COGS.append(path.name[:-3])
-sys.exit(COGS)
+
 
 BOT_TOKEN = getenv("BOT_TOKEN")
 PREFIX = getenv("PREFIX")
