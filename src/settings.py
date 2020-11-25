@@ -9,7 +9,17 @@ import sys
 env_path = Path('..') / '.env'
 load_dotenv(dotenv_path=env_path)
 
-COGS = [path.split("\\")[-1][:-3] for path in Path(glob("src/lib/cogs/*.py")).absolute()]
+COGS = [path.split("\\")[-1][:-3] for path in glob("src/lib/cogs/*.py")]
+NEW_COGS = []
+
+for cog in COGS:
+    cog = NEW_COGS.append(Path(cog))
+
+COGS = NEW_COGS
+
+sys.exit(COGS)
+
+
 sys.exit(COGS)
 BOT_TOKEN = getenv("BOT_TOKEN")
 PREFIX = getenv("PREFIX")
