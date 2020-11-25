@@ -4,7 +4,7 @@ import json
 from os.path import abspath
 from random import choice
 
-json_path = abspath("lib/db/data/json/lucky_responses.json")
+json_path = Path("src/lib/db/data/json/lucky_responses.json").absolute()
 
 
 class EightBall(commands.Cog):
