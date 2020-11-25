@@ -3,13 +3,13 @@ from pathlib import Path
 from os import getenv
 import logging
 import json
-# from glob import glob
+from glob import glob
 import sys
 
 env_path = Path('..') / '.env'
 load_dotenv(dotenv_path=env_path)
 
-COGS = [path.split("\\")[-1][:-3] for path in Path("./src/lib/cogs/*.py").absolute()]
+COGS = [path.split("\\")[-1][:-3] for path in Path(glob("src/lib/cogs/*.py")).absolute()]
 sys.exit(COGS)
 BOT_TOKEN = getenv("BOT_TOKEN")
 PREFIX = getenv("PREFIX")
