@@ -159,7 +159,7 @@ class Welcomer(Cog):
                     "id": channel.id,
                     "name": channel.name,
                     "position": channel.position,
-                    "nsfw": channel.nsfw,
+                    "nsfw": str(channel.nsfw),
                     "category_id": channel.category_id
                 }
 
