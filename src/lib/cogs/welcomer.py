@@ -8,7 +8,7 @@ from random import choice
 import json
 from discord.ext import commands
 from pathlib import Path
-from settings import DASHERGIT
+from src.settings import DASHERGIT
 from urllib.request import urlopen
 
 
