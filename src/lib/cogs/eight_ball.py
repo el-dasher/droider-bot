@@ -2,9 +2,9 @@ from src.lib.utils.basic_utils import ready_up_cog
 from discord.ext import commands
 import json
 from random import choice
-from pathlib import Path
+from paths import LUCKY_PATH
 
-json_path = Path("src/lib/db/data/json/lucky_responses.json").absolute()
+json_path = LUCKY_PATH
 
 
 class EightBall(commands.Cog):

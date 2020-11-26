@@ -1,11 +1,8 @@
 from discord.ext import commands
 import src.settings as settings
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger
 import discord
 from datetime import datetime
-from src.lib.db.data.json.datagen import gendata
-from pathlib import Path
 import asyncio
 from src.lib.utils.basic_utils import get_member_name
 
@@ -83,21 +80,11 @@ class DroiderBR(commands.Bot):
         self.mscoy = self.get_user(750129701129027594)
         self.zalur = self.get_user(323516956642902016)
 
-        def update_users():
-            self.mscoy = self.get_user(750129701129027594)
-            self.zalur = self.get_user(323516956642902016)
-
         if not self.ready:
             # Updates our useful_data.json
-            self.scheduler.add_job(
-                lambda: gendata(self, Path("src/lib/db/data/json/useful_data.json").absolute()),
-                CronTrigger(second="0, 30")
-            )
-            self.scheduler.add_job(update_users, CronTrigger(second=0))
 
             # self.scheduler.add_job(lambda: print("a"), CronTrigger(second="0, 15, 30, 45"))
             self.scheduler.start()
-
             db.autosave(self.scheduler)
 
             while not self.cogs_ready.all_ready:

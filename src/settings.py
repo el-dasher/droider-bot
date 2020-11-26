@@ -5,6 +5,7 @@ import logging
 import json
 import sys
 from github import Github
+from paths import F_PATH, COGS_PATH
 
 env_path = Path('..') / '.env'
 load_dotenv(dotenv_path=env_path)
@@ -12,7 +13,7 @@ load_dotenv(dotenv_path=env_path)
 
 COGS = []
 
-for path in Path('./src/lib/cogs').absolute().glob('*.py'):
+for path in COGS_PATH.glob('*.py'):
     COGS.append(path.name[:-3])
 
 DASHERGIT = Github(getenv("ACCESS_TOKEN"))
@@ -21,7 +22,7 @@ PREFIX = getenv("PREFIX")
 
 
 # noinspection PyBroadException
-f_path = Path("./src/lib/db/data/json/useful_data.json").absolute()
+f_path = F_PATH
 try:
     f = open(f_path)
 except FileNotFoundError as exc:

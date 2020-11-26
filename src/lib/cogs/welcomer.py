@@ -8,7 +8,7 @@ from datetime import datetime
 from random import choice
 import json
 from discord.ext import commands
-from pathlib import Path
+from paths import MONTHS_PATH
 from src.settings import DASHERGIT
 from urllib.request import urlopen
 
@@ -25,7 +25,7 @@ load_wd_data()
 welcomer_guist = DASHERGIT.get_gist("ddc5ae305a3cb4093393a140b55c53b3")
 
 
-month_data = json.load(open(mo_path := Path("src/lib/db/data/json/months.json").absolute(), encoding="utf-8"))
+month_data = json.load(open(MONTHS_PATH.absolute(), encoding="utf-8"))
 
 # welcomer_data = (
 #     wd_data := json.load(open(wd_path := Path("src/lib/db/data/json/welcomer_data.json").absolute()),
