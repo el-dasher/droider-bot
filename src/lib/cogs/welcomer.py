@@ -13,11 +13,14 @@ from src.settings import DASHERGIT
 from urllib.request import urlopen
 
 
-wd_data = json.load(urlopen(
-    "https://gist.githubusercontent.com/el-dasher/ddc5ae305a3cb4093393a140b55c53b3/raw/"
-    "3643a16a81e4a7b5a01c52348a6d3b39cda60239/welcomer_data.json"
-))
+def load_wd_data():
 
+    wd_data = json.load(urlopen("https://gist.githubusercontent.com/el-dasher/ddc5ae305a3cb4093393a140b55c53b3/raw/"))
+
+    return wd_data
+
+
+load_wd_data()
 welcomer_guist = DASHERGIT.get_gist("ddc5ae305a3cb4093393a140b55c53b3")
 
 
@@ -40,7 +43,7 @@ class Welcomer(Cog):
 
     def __init__(self, bot):
 
-        global wd_data
+        load_wd_data()
 
         self.gen_channel = None
         self.bot = bot
@@ -56,12 +59,7 @@ class Welcomer(Cog):
     @Cog.listener()
     async def on_member_join(self, member: discord.Member):
 
-        global wd_data
-
-        wd_data = json.load(urlopen(
-            "https://gist.githubusercontent.com/el-dasher/ddc5ae305a3cb4093393a140b55c53b3/raw/"
-            "3643a16a81e4a7b5a01c52348a6d3b39cda60239/welcomer_data.json"
-        ))
+        wd_data = load_wd_data()
 
         welcome_msg = ("SEJA BEM VIADO", "SEJA BEM VINDO")
 
@@ -97,12 +95,7 @@ class Welcomer(Cog):
     @Cog.listener()
     async def on_member_remove(self, member: discord.Member):
 
-        global wd_data
-
-        wd_data = json.load(urlopen(
-            "https://gist.githubusercontent.com/el-dasher/ddc5ae305a3cb4093393a140b55c53b3/raw/"
-            "3643a16a81e4a7b5a01c52348a6d3b39cda60239/welcomer_data.json"
-        ))
+        wd_data = load_wd_data()
 
         created_month = month_data["MONTHS"][member.created_at.month]
         left_embed = discord.Embed(title=f"O(A) {get_member_name(member)} saiu do servidor",
@@ -126,6 +119,8 @@ class Welcomer(Cog):
     @commands.command(aliases=("welcome", "convidados", "setwelcome"))
     @commands.has_permissions(manage_channels=True)
     async def set_welcome(self, ctx: discord.ext.commands.context, channel=None):
+
+        wd_data = load_wd_data()
         channels = []
 
         for channel_ in ctx.message.guild.text_channels:
