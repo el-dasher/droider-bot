@@ -175,7 +175,7 @@ class Welcomer(Cog):
 
         welcomer_guist.edit(
             description="NEW WELCOME DATA POGGERS?",
-            files={"welcomer_data.json": InputFileContent(str(wd_data))}
+            files={"welcomer_data.json": InputFileContent(str(wd_data).replace("'", '"'))}
         )
 
         await ctx.send(f"O novo canal de boas vindas é o <#{channel.id}>")
