@@ -182,7 +182,18 @@ class Welcomer(Cog):
                                  f" (Vai levar cerca de 1 minuto à 5 minutos <a:blobhype:780576199558299649>)")
 
         wd_urldata = load_wd_data()
-
+        
+        edit_msgs = (
+            "1 minuto já se passou, e nada...",
+            "2 minutos já se passaram, e nada...",
+            "3 minutos já se passaram, e nada...",
+            "4 minuto já se passaram, e nada...",
+            "5 minutos já se passaram, e nada...",
+            "Já se passou mais de 5 minutos, estou relativamente preocupado"
+        )
+        
+        counter = 0
+        
         while wd_urldata != old_data:
             wd_urldata = load_wd_data()
 
@@ -193,6 +204,8 @@ class Welcomer(Cog):
 
             if wd_urldata != old_data:
                 await asyncio.sleep(60)
+                await cfg_msg.edit(content=edit_msgs[counter])
+                counter += 1 if counter != 5
 
         await cfg_msg.edit(content="O canal de boas vindas foi configurado com sucesso! <:blobyes:780574873814171668>")
 
