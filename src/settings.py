@@ -16,6 +16,8 @@ COGS = []
 for path in COGS_PATH.glob('*.py'):
     COGS.append(path.name[:-3])
 
+print(COGS)
+
 DASHERGIT = Github(getenv("ACCESS_TOKEN"))
 BOT_TOKEN = getenv("BOT_TOKEN")
 PREFIX = getenv("PREFIX")
