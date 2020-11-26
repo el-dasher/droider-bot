@@ -15,9 +15,7 @@ from urllib.request import urlopen
 
 def load_wd_data():
 
-    wd_data = json.load(urlopen(
-        "https://gist.githubusercontent.com/el-dasher/ddc5ae305a3cb4093393a140b55c53b3/raw/welcomer_data.json"
-    ))
+    wd_data = json.load(urlopen("https://git.io/Jk919"))
 
     return wd_data
 
@@ -60,7 +58,7 @@ class Welcomer(Cog):
 
     @Cog.listener()
     async def on_member_join(self, member: discord.Member):
-    
+
         wd_data = load_wd_data()
 
         welcome_msg = ("SEJA BEM VIADO", "SEJA BEM VINDO")
