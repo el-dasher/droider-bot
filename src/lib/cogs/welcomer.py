@@ -80,7 +80,7 @@ class Welcomer(Cog):
         )
 
         join_embed.set_footer(
-            text=f"{get_member_name(member)} Entrou no servidor às {datetime.utcnow().hour} horas"
+            text=f"{get_member_name(member)} Entrou no servidor às"
                  f" e {datetime.utcnow().minute} minutos hoje", icon_url=member.avatar_url
         )
 
@@ -101,7 +101,8 @@ class Welcomer(Cog):
         created_month = month_data["MONTHS"][member.created_at.month]
         left_embed = discord.Embed(title=f"O(A) {get_member_name(member)} saiu do servidor",
                                    description=f"Estou muito triste com uma notícia dessas..."
-                                               f" <a:emojidanssa:780835162916651018>")
+                                               f" <a:emojidanssa:780835162916651018>",
+                                   timestamp=datetime.utcnow())
         left_embed.set_thumbnail(url=member.avatar_url)
 
         left_embed.add_field(name="Tag do usuário", value=get_member_name(member))
@@ -117,7 +118,7 @@ class Welcomer(Cog):
 
         await welcome_channel.send(embed=left_embed)
 
-    @commands.command(aliases=("welcome", "convidados", "setwelcome"))
+    @commands.command(aliases=("welcome", "convidados", "setwelcome", "welcome"))
     @commands.has_permissions(manage_channels=True)
     async def set_welcome(self, ctx: discord.ext.commands.context, channel=None):
 
