@@ -2,8 +2,7 @@
 
 from pathlib import Path
 
-local = False
-# local = True SE VOCÊ FOR RODAR O PROJETO LOCALMENTE!!!
+local = False  # local = True SE VOCÊ FOR RODAR O PROJETO LOCALMENTE!!!
 
 if local:
     F_PATH = Path("./lib/db/data/json/useful_data.json").absolute()

@@ -5,7 +5,7 @@ import logging
 import json
 import sys
 from github import Github
-from paths import F_PATH, COGS_PATH
+from src.paths import F_PATH, COGS_PATH
 
 env_path = Path('..') / '.env'
 load_dotenv(dotenv_path=env_path)

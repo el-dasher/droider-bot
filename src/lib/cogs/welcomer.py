@@ -8,7 +8,7 @@ from datetime import datetime
 from random import choice
 import json
 from discord.ext import commands
-from paths import MONTHS_PATH
+from src.paths import MONTHS_PATH
 from src.settings import DASHERGIT
 from urllib.request import urlopen
 

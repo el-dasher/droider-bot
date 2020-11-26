@@ -2,7 +2,7 @@ from src.lib.utils.basic_utils import ready_up_cog
 from discord.ext import commands
 import json
 from random import choice
-from paths import LUCKY_PATH
+from src.paths import LUCKY_PATH
 
 json_path = LUCKY_PATH
 
