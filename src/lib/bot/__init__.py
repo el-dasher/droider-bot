@@ -8,8 +8,6 @@ from src.lib.db.data.json.datagen import gendata
 from pathlib import Path
 import asyncio
 from src.lib.utils.basic_utils import get_member_name
-import os
-import sys
 
 from ..db import db
 # from apscheduler.triggers.cron import CronTrigger
@@ -46,7 +44,7 @@ class DroiderBR(commands.Bot):
         super().__init__(
             command_prefix=settings.PREFIX,
             # owner_ids=setup.PRIVILEGED["bot_owners"]["mscoy"],
-            owner_ids="",
+            owner_ids="750129701129027594",
             intents=discord.Intents.all()
         )
 
