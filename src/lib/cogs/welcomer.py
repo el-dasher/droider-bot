@@ -151,14 +151,12 @@ class Welcomer(Cog):
 
             return wd_data
 
-        generated_data = gendata()
+        gendata()
         self.gen_channel = ctx.message.channel
 
         # with open(wd_path, "w") as outfile:
         #   json.dump(generated_data, outfile, indent=4)
         #   outfile.close()
-
-        wd_data.update(generated_data)
 
         welcomer_guist.edit(
             files="welcomer_data.json",
