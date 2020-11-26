@@ -1,5 +1,6 @@
 from typing import List, Any
 
+from github import InputFileContent
 from discord.ext.commands import Cog
 import discord
 from src.lib.utils.basic_utils import ready_up_cog, get_member_name
@@ -151,16 +152,18 @@ class Welcomer(Cog):
 
             return wd_data
 
-        gendata()
+        generated_data = gendata()
         self.gen_channel = ctx.message.channel
 
         # with open(wd_path, "w") as outfile:
         #   json.dump(generated_data, outfile, indent=4)
         #   outfile.close()
 
+        wd_data.update(generated_data)
+
         welcomer_guist.edit(
             files="welcomer_data.json",
-            description=wd_data
+            description=InputFileContent(content=wd_data)
         )
 
         await ctx.send(f"O novo canal de boas vindas é o <#{channel.id}>")
