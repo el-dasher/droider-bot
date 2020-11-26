@@ -79,11 +79,6 @@ class Welcomer(Cog):
             value=f"Entrou no discord em {member.created_at.year}, no dia {member.created_at.day} de {created_month}"
         )
 
-        join_embed.set_footer(
-            text=f"{get_member_name(member)} Entrou no servidor às"
-                 f" e {datetime.utcnow().minute} minutos hoje", icon_url=member.avatar_url
-        )
-
         # server_joined = member.server.channels
 
         joined_guild = str(member.guild.id)
