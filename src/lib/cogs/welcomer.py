@@ -15,12 +15,14 @@ from urllib.request import urlopen
 
 def load_wd_data():
 
-    wd_data = json.load(urlopen("https://gist.githubusercontent.com/el-dasher/ddc5ae305a3cb4093393a140b55c53b3/raw"))
+    wd_data = json.load(urlopen(
+        "https://gist.githubusercontent.com/el-dasher/ddc5ae305a3cb4093393a140b55c53b3/raw/welcomer_data.json"
+    ))
 
     return wd_data
 
 
-load_wd_data()
+wd_data = load_wd_data()
 welcomer_guist = DASHERGIT.get_gist("ddc5ae305a3cb4093393a140b55c53b3")
 
 
@@ -168,6 +170,7 @@ class Welcomer(Cog):
         #   outfile.close()
 
         wd_data.update(generated_data)
+
         wd_data = json.dumps(wd_data, indent=4, ensure_ascii=False)
 
         welcomer_guist.edit(

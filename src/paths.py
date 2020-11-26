@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-local = False  # local = True SE VOCÊ FOR RODAR O PROJETO LOCALMENTE!!!
+local = True  # local = True SE VOCÊ FOR RODAR O PROJETO LOCALMENTE!!!
 
 if local:
     COGS_PATH = Path('./lib/cogs').absolute()
