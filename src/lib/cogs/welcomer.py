@@ -205,7 +205,8 @@ class Welcomer(Cog):
             if wd_urldata != old_data:
                 await asyncio.sleep(60)
                 await cfg_msg.edit(content=edit_msgs[counter])
-                counter += 1 if counter != 5
+                if counter != 5:
+                    counter += 1
 
         await cfg_msg.edit(content="O canal de boas vindas foi configurado com sucesso! <:blobyes:780574873814171668>")
 
