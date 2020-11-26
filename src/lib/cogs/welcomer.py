@@ -118,7 +118,7 @@ class Welcomer(Cog):
 
         await welcome_channel.send(embed=left_embed)
 
-    @commands.command(aliases=("welcome", "convidados", "setwelcome", "welcome"))
+    @commands.command(aliases=("welcome", "convidados", "setwelcome", "welcomechannel"))
     @commands.has_permissions(manage_channels=True)
     async def set_welcome(self, ctx: discord.ext.commands.context, channel=None):
 
