@@ -22,7 +22,17 @@ def load_wd_data():
     return wd_data
 
 
+def load_read_wd():
+
+    wd_data = json.load(urlopen(
+        "https://gist.githubusercontent.com/el-dasher/ddc5ae305a3cb4093393a140b55c53b3/raw/welcomer_data.json"
+    ))
+
+    return wd_data
+
+
 load_wd_data()
+load_read_wd()
 welcomer_guist = DASHERGIT.get_gist("ddc5ae305a3cb4093393a140b55c53b3")
 
 
