@@ -165,14 +165,6 @@ class Welcomer(Cog):
 
         await ctx.send(f"O novo canal de boas vindas é o <#{channel.id}>")
 
-    @set_welcome.error
-    async def set_welcome_error(self, error, ctx):
-        print(ctx.message.channel)
-        if isinstance(error, commands.MissingPermissions):
-            await self.gen_channel.send(
-                "Você não tem permissão para usar esse comando, você tem que saber gerenciar canais"
-            )
-
 
 def setup(bot):
     bot.add_cog(Welcomer(bot))
