@@ -186,8 +186,13 @@ class Welcomer(Cog):
         while wd_urldata != old_data:
             wd_urldata = load_wd_data()
 
+            print("-" * 100)
+            print(f"OLD_DATA: {wd_urldata}")
+            print(f"URL_DATA; {wd_urldata}")
+            print("-" * 100)
+
             if wd_urldata != old_data:
-                await asyncio.sleep(30)
+                await asyncio.sleep(15)
 
         await cfg_msg.edit(content="O canal de boas vindas foi configurado com sucesso! <:blobyes:780574873814171668>")
 
