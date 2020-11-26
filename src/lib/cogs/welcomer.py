@@ -10,7 +10,6 @@ import json
 from discord.ext import commands
 from pathlib import Path
 from src.settings import DASHERGIT
-from sys import exit
 from urllib.request import urlopen
 
 
@@ -18,9 +17,9 @@ wd_data = json.load(urlopen(
     "https://gist.githubusercontent.com/el-dasher/ddc5ae305a3cb4093393a140b55c53b3/raw/"
     "3643a16a81e4a7b5a01c52348a6d3b39cda60239/welcomer_data.json"
 ))
+
 welcomer_guist = DASHERGIT.get_gist("ddc5ae305a3cb4093393a140b55c53b3")
 
-exit(wd_data)
 
 month_data = json.load(open(mo_path := Path("src/lib/db/data/json/months.json").absolute(), encoding="utf-8"))
 
@@ -56,6 +55,14 @@ class Welcomer(Cog):
 
     @Cog.listener()
     async def on_member_join(self, member: discord.Member):
+
+        global wd_data
+
+        wd_data = json.load(urlopen(
+            "https://gist.githubusercontent.com/el-dasher/ddc5ae305a3cb4093393a140b55c53b3/raw/"
+            "3643a16a81e4a7b5a01c52348a6d3b39cda60239/welcomer_data.json"
+        ))
+
         welcome_msg = ("SEJA BEM VIADO", "SEJA BEM VINDO")
 
         join_embed = discord.Embed(
@@ -89,6 +96,13 @@ class Welcomer(Cog):
 
     @Cog.listener()
     async def on_member_remove(self, member: discord.Member):
+
+        global wd_data
+
+        wd_data = json.load(urlopen(
+            "https://gist.githubusercontent.com/el-dasher/ddc5ae305a3cb4093393a140b55c53b3/raw/"
+            "3643a16a81e4a7b5a01c52348a6d3b39cda60239/welcomer_data.json"
+        ))
 
         created_month = month_data["MONTHS"][member.created_at.month]
         left_embed = discord.Embed(title=f"O(A) {get_member_name(member)} saiu do servidor",
