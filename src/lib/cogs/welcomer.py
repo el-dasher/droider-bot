@@ -169,7 +169,7 @@ class Welcomer(Cog):
         #   outfile.close()
 
         wd_data.update(generated_data)
-        wd_data = json.dumps(wd_data, indent=4)
+        wd_data = json.dumps(wd_data, indent=4, ensure_ascii=False)
 
         welcomer_guist.edit(
             description="NEW WELCOME DATA POGGERS?",
