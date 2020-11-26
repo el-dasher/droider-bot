@@ -179,7 +179,7 @@ class Welcomer(Cog):
         )
 
         cfg_msg = await ctx.send(f"O novo canal de boas vindas será o <#{channel.id}>, configurando..."
-                                 f" (Vai levar cerca de 1 minuto à 3 minutos <a:blobhype:780576199558299649>)")
+                                 f" (Vai levar cerca de 1 minuto à 5 minutos <a:blobhype:780576199558299649>)")
 
         wd_urldata = load_wd_data()
 
