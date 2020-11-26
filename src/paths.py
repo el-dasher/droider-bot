@@ -15,7 +15,7 @@ if local:
     MONTHS_PATH = Path("./lib/db/data/json/months.json").absolute()
 else:
     F_PATH = Path("./src/lib/db/data/json/useful_data.json").absolute()
-    COGS_PATH = Path('./src./lib/cogs').absolute()
+    COGS_PATH = Path('./src/lib/cogs').absolute()
 
     DB_PATH = Path("./src/lib/db/data/db/database.db").absolute()
     BUILD_PATH = Path("./src/lib/db/data/db/build.sql").absolute()
