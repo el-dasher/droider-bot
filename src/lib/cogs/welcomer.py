@@ -6,18 +6,26 @@ from src.lib.utils.basic_utils import ready_up_cog, get_member_name
 from datetime import datetime
 from random import choice
 import json
-from os.path import abspath
 from discord.ext import commands
 from pathlib import Path
+from settings import DASHERGIT
+from urllib.request import urlopen
+
+
+wd_data = json.load(urlopen(
+    "https://gist.githubusercontent.com/el-dasher/ddc5ae305a3cb4093393a140b55c53b3/raw/"
+    "3643a16a81e4a7b5a01c52348a6d3b39cda60239/welcomer_data.json"
+))
+welcomer_guist = DASHERGIT.get_gist("ddc5ae305a3cb4093393a140b55c53b3")
 
 month_data = json.load(open(mo_path := Path("src/lib/db/data/json/months.json").absolute(), encoding="utf-8"))
 
-welcomer_data = (
-    wd_data := json.load(open(wd_path := Path("src/lib/db/data/json/welcomer_data.json").absolute()),
-                         encoding="utf-8")
-)
+# welcomer_data = (
+#     wd_data := json.load(open(wd_path := Path("src/lib/db/data/json/welcomer_data.json").absolute()),
+#                         encoding="utf-8")
+# )
 
-print()
+
 class PyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (list, dict, str, int, float, bool, type(None))):
@@ -146,9 +154,14 @@ class Welcomer(Cog):
         generated_data = gendata()
         self.gen_channel = ctx.message.channel
 
-        with open(wd_path, "w") as outfile:
-            json.dump(generated_data, outfile, indent=4)
-            outfile.close()
+        # with open(wd_path, "w") as outfile:
+        #   json.dump(generated_data, outfile, indent=4)
+        #   outfile.close()
+
+        welcomer_guist.edit(
+            files="welcomer_data.json",
+            description=wd_data.update(generated_data)
+        )
 
         await ctx.send(f"O novo canal de boas vindas é o <#{channel.id}>")
 
@@ -156,7 +169,6 @@ class Welcomer(Cog):
     async def set_welcome_error(self, error, ctx):
         print(ctx.message.channel)
         if isinstance(error, commands.MissingPermissions):
-            print("YE")
             await self.gen_channel.send(
                 "Você não tem permissão para usar esse comando, você tem que saber gerenciar canais"
             )

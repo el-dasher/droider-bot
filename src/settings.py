@@ -3,17 +3,19 @@ from pathlib import Path
 from os import getenv
 import logging
 import json
-from glob import glob
+import sys
+from github import Github
 
 env_path = Path('..') / '.env'
 load_dotenv(dotenv_path=env_path)
+
 
 COGS = []
 
 for path in Path('./src/lib/cogs').absolute().glob('*.py'):
     COGS.append(path.name[:-3])
 
-
+DASHERGIT = Github(getenv("ACCESS_TOKEN"))
 BOT_TOKEN = getenv("BOT_TOKEN")
 PREFIX = getenv("PREFIX")
 
@@ -28,8 +30,8 @@ except FileNotFoundError as exc:
                     f"\n{exc}")
 
 if f is None:
-
     sys.exit("Como o arquivo não pôde ser encontrado o processo foi encerrado")
+
 # noinspection PyBroadException
 try:
     data = json.load(f)
