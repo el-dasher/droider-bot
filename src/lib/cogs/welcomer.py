@@ -16,15 +16,6 @@ from urllib.request import urlopen
 def load_wd_data():
 
     wd_data = json.load(urlopen(
-        "https://gist.githubusercontent.com/el-dasher/ddc5ae305a3cb4093393a140b55c53b3/raw"
-    ))
-
-    return wd_data
-
-
-def load_read_wd():
-
-    wd_data = json.load(urlopen(
         "https://gist.githubusercontent.com/el-dasher/ddc5ae305a3cb4093393a140b55c53b3/raw/welcomer_data.json"
     ))
 
@@ -32,7 +23,6 @@ def load_read_wd():
 
 
 load_wd_data()
-load_read_wd()
 welcomer_guist = DASHERGIT.get_gist("ddc5ae305a3cb4093393a140b55c53b3")
 
 
@@ -70,7 +60,7 @@ class Welcomer(Cog):
 
     @Cog.listener()
     async def on_member_join(self, member: discord.Member):
-
+    
         wd_data = load_wd_data()
 
         welcome_msg = ("SEJA BEM VIADO", "SEJA BEM VINDO")
