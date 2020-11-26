@@ -40,7 +40,6 @@ class DroiderBR(commands.Bot):
 
         super().__init__(
             command_prefix=settings.PREFIX,
-            # owner_ids=setup.PRIVILEGED["bot_owners"]["mscoy"],
             owner_ids="750129701129027594",
             intents=discord.Intents.all()
         )
@@ -81,8 +80,6 @@ class DroiderBR(commands.Bot):
         self.zalur = self.get_user(323516956642902016)
 
         if not self.ready:
-            # Updates our useful_data.json
-
             # self.scheduler.add_job(lambda: print("a"), CronTrigger(second="0, 15, 30, 45"))
             self.scheduler.start()
             db.autosave(self.scheduler)
