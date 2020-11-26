@@ -9,6 +9,7 @@ from random import choice
 import json
 from discord.ext import commands
 from src.paths import MONTHS_PATH
+import asyncio
 from src.settings import DASHERGIT
 from urllib.request import urlopen
 
@@ -168,6 +169,7 @@ class Welcomer(Cog):
         #   outfile.close()
 
         wd_data.update(generated_data)
+        old_data = wd_data.copy()
 
         wd_data = json.dumps(wd_data, indent=4, ensure_ascii=False)
 
@@ -176,7 +178,18 @@ class Welcomer(Cog):
             files={"welcomer_data.json": InputFileContent(str(wd_data).replace("'", '"'))}
         )
 
-        await ctx.send(f"O novo canal de boas vindas é o <#{channel.id}>")
+        cfg_msg = await ctx.send(f"O novo canal de boas vindas será o <#{channel.id}>, configurando..."
+                                 f" (Vai levar cerca de 30 segundos ou mais <a:blobhype:780576199558299649>)")
+
+        wd_urldata = load_wd_data()
+
+        while wd_urldata != old_data:
+            wd_urldata = load_wd_data()
+
+            if wd_urldata != old_data:
+                await asyncio.sleep(30)
+
+        await cfg_msg.edit(content="O canal de boas vindas foi configurado com sucesso! <:blobyes:780574873814171668>")
 
 
 def setup(bot):
