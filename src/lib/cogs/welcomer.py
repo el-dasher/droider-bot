@@ -16,13 +16,13 @@ from urllib.request import urlopen
 def load_wd_data():
 
     wd_data = json.load(urlopen(
-        "https://gist.githubusercontent.com/el-dasher/ddc5ae305a3cb4093393a140b55c53b3/raw/welcomer_data.json"
+        "https://gist.githubusercontent.com/el-dasher/ddc5ae305a3cb4093393a140b55c53b3/raw"
     ))
 
     return wd_data
 
 
-wd_data = load_wd_data()
+load_wd_data()
 welcomer_guist = DASHERGIT.get_gist("ddc5ae305a3cb4093393a140b55c53b3")
 
 
