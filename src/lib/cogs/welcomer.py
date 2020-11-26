@@ -19,6 +19,8 @@ wd_data = json.load(urlopen(
 ))
 welcomer_guist = DASHERGIT.get_gist("ddc5ae305a3cb4093393a140b55c53b3")
 
+print(wd_data)
+
 month_data = json.load(open(mo_path := Path("src/lib/db/data/json/months.json").absolute(), encoding="utf-8"))
 
 # welcomer_data = (
