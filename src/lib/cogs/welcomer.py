@@ -179,9 +179,10 @@ class Welcomer(Cog):
         )
 
         cfg_msg = await ctx.send(f"O novo canal de boas vindas será o <#{channel.id}>, configurando..."
-                                 f" (Vai levar cerca de 30 segundos ou mais <a:blobhype:780576199558299649>)")
+                                 f" (Vai levar cerca de 60 segundos ou mais <a:blobhype:780576199558299649>)")
 
         # while wd_urldata != old_data:
+        count = 0
         while True:
             wd_urldata = load_wd_data()
 
@@ -190,8 +191,11 @@ class Welcomer(Cog):
             print(f"URL_DATA; {wd_urldata}")
             print("-" * 100)
 
-            if wd_urldata != old_data:
-                await asyncio.sleep(15)
+            count += 1
+            if wd_urldata != old_data and count < 1:
+                await asyncio.sleep(60)
+            elif wd_urldata != old_data and count > 1:
+                await asyncio.sleep(30)
             else:
                 break
 
