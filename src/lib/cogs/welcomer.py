@@ -10,6 +10,7 @@ import json
 from discord.ext import commands
 from pathlib import Path
 from src.settings import DASHERGIT
+from sys import exit
 from urllib.request import urlopen
 
 
@@ -19,7 +20,7 @@ wd_data = json.load(urlopen(
 ))
 welcomer_guist = DASHERGIT.get_gist("ddc5ae305a3cb4093393a140b55c53b3")
 
-print(wd_data)
+exit(wd_data)
 
 month_data = json.load(open(mo_path := Path("src/lib/db/data/json/months.json").absolute(), encoding="utf-8"))
 
