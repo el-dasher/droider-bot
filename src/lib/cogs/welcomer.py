@@ -162,7 +162,7 @@ class Welcomer(Cog):
         wd_data.update(generated_data)
 
         welcomer_guist.edit(
-            description=wd_data,
+            description="NEW WELCOME DATA POGGERS?",
             files={"welcome_data.json": InputFileContent(wd_data)}
         )
 
