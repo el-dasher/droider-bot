@@ -175,7 +175,10 @@ class Welcomer(Cog):
             files={"welcomer_data.json": InputFileContent(str(wd_data).replace("'", '"'))}
         )
 
-        await ctx.send(f"O novo canal de boas vindas é o <#{channel.id}>")
+        await ctx.send(
+            f"O novo canal de boas vindas é o <#{channel.id}>,"
+            f" pode ser que demore alguns minutos paraas mudanças acontecerem"
+        )
 
 
 def setup(bot):
