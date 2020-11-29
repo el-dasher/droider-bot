@@ -65,7 +65,7 @@ class Welcomer(Cog):
         welcome_msg = ("SEJA BEM VIADO", "SEJA BEM VINDO")
 
         join_embed = discord.Embed(
-            title=f"{choice(welcome_msg)} {get_member_name(member).upper()}",
+            title=f"{choice(welcome_msg)}, {get_member_name(member).upper()}",
             description=f"Um(a) novo(a) <@{member.id}> entrou no server",
         )
 
