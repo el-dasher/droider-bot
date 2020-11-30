@@ -6,7 +6,6 @@ from datetime import datetime
 import asyncio
 from src.lib.utils.basic_utils import get_member_name
 
-from ..db import db
 # from apscheduler.triggers.cron import CronTrigger
 
 
@@ -69,11 +68,9 @@ class DroiderBR(commands.Bot):
     #   await _channel.send("Eu sou uma mensagem automatizada")
 
     async def on_ready(self):
-        self.scheduler = AsyncIOScheduler()
+        # self.scheduler = AsyncIOScheduler()
 
-        self.main_guild = self.get_guild(769012183790256170)
         self.br_guild = self.get_guild(702064150750429194)
-        self.bot_user = self.user
         self.stdout = self.get_channel(769012183790256175)
 
         self.mscoy = self.get_user(750129701129027594)
@@ -81,8 +78,7 @@ class DroiderBR(commands.Bot):
 
         if not self.ready:
             # self.scheduler.add_job(lambda: print("a"), CronTrigger(second="0, 15, 30, 45"))
-            self.scheduler.start()
-            db.autosave(self.scheduler)
+            # self.scheduler.start()
 
             while not self.cogs_ready.all_ready:
                 await asyncio.sleep(0.5)
@@ -107,7 +103,7 @@ class DroiderBR(commands.Bot):
             # ready_embed.set_author(name="Droider")
             ready_embed.set_footer(text=f"{get_member_name(self.mscoy)}...", icon_url=self.mscoy.avatar_url)
             ready_embed.set_author(name="osu!droid Brasil", icon_url=self.br_guild.icon_url)
-            ready_embed.set_thumbnail(url=self.bot_user.avatar_url)
+            ready_embed.set_thumbnail(url=self.user.avatar_url)
 
             await self.stdout.send(embed=ready_embed)
 

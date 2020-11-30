@@ -17,7 +17,7 @@ class EightBall(commands.Cog):
         ready_up_cog(self.bot, __name__)
 
     @commands.command(aliases=("8ball", "sorte"))
-    async def lucky(self, ctx, question=None):
+    async def lucky(self, ctx: commands.Context, question=None):
         if question is None:
             await ctx.reply("Aprende a usar o bot, BURRO, cadê a pergunta?")
         else:

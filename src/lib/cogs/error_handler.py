@@ -4,7 +4,7 @@ from src.lib.utils.basic_utils import ready_up_cog
 
 
 class ErrorHandler(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.Cog.listener()
@@ -12,7 +12,7 @@ class ErrorHandler(commands.Cog):
         ready_up_cog(self.bot, __name__)
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx, exc):
+    async def on_command_error(self, ctx: commands.Context, exc: Exception):
         if isinstance(exc, commands.CommandNotFound):
             await ctx.reply("Esse comando não existe..., cê ta bem mano?")
         elif hasattr(exc, "original"):
