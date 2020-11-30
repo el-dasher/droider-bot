@@ -5,7 +5,7 @@ from random import choice
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from src.lib.db.data.json.pydict.pydata import bot_presences
+from lib.db.data.pydata.pydata import bot_presences
 
 
 class Funny(commands.Cog):
