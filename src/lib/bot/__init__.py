@@ -99,11 +99,8 @@ class DroiderBR(commands.Bot):
             return
 
         elif isinstance(msg.channel, discord.DMChannel):
-            if msg.channel.id not in self.sent_channels:
-                self.sent_channels.append(msg.channel.id)
-                await msg.channel.send("Não respondo a mensagens diretas, kthx ;)")
-                await asyncio.sleep(60)
-                self.sent_channels.remove(msg.channel.id)
+            await msg.channel.send("Não respondo a mensagens diretas, kthx ;)")
+            return
 
         print(f"{msg.author}: {msg}")
         await self.process_commands(msg)
