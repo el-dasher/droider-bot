@@ -2,9 +2,8 @@ from discord.ext import commands
 import src.settings as settings
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import discord
-from datetime import datetime
 import asyncio
-from src.lib.utils.basic_utils import get_member_name
+from typing import Union
 
 # from apscheduler.triggers.cron import CronTrigger
 
@@ -24,12 +23,12 @@ class Ready(object):
 
 
 class DroiderBR(commands.Bot):
+
     main_guild: discord.guild.Guild
     br_guild: discord.guild.Guild
-    mscoy: discord.user.User
-    zalur: discord.user.User
-    stdout: any
-    bot_user: discord.client.User
+    mscoy: Union[discord.User, discord.Member]
+    zalur: Union[discord.User, discord.Member]
+    stdout: discord.TextChannel
 
     def __init__(self):
         self.ready = False
@@ -39,7 +38,7 @@ class DroiderBR(commands.Bot):
 
         super().__init__(
             command_prefix=settings.PREFIX,
-            owner_ids="750129701129027594",
+            owner_ids=[750129701129027594],
             intents=discord.Intents.all()
         )
 
@@ -85,33 +84,19 @@ class DroiderBR(commands.Bot):
 
             self.ready = True
             print("O BOT ESTÁ PRONTO")
-            ready_embed = discord.Embed(
-                title="Droider online!",
-                description="O Droider tá online, se eu fosse você eu teria cuidado, mero membro comum.",
-                colour=0xf769ff, timestamp=datetime.utcnow()
-            )
-            embed_fields = [
-                (
-                    f"{settings.PREFIX}help",
-                    "> Peça uma ajudinha com os comandos do bot, aproveita e me faz um café.", True
-                ),
-                ("Criador", f"> Não foi o <@{self.mscoy.id}>", True)
-            ]
-            for name, value, inline in embed_fields:
-                ready_embed.add_field(name=name, value=value, inline=inline)
 
-            # ready_embed.set_author(name="Droider")
-            ready_embed.set_footer(text=f"{get_member_name(self.mscoy)}...", icon_url=self.mscoy.avatar_url)
-            ready_embed.set_author(name="osu!droid Brasil", icon_url=self.br_guild.icon_url)
-            ready_embed.set_thumbnail(url=self.user.avatar_url)
-
-            await self.stdout.send(embed=ready_embed)
+            await self.stdout.send("O droider está online!")
 
         else:
             print("O bot se reconectou")
             await self.stdout.send("Eu tô online denovo!")
 
     async def on_message(self, msg):
+        if msg.author.id == self.user.id:
+            return
+
+        print(f"{msg.author}: {msg}")
+
         await self.process_commands(msg)
 
 
