@@ -29,7 +29,7 @@ class Funny(commands.Cog):
 
     @commands.command()
     async def ping(self, ctx):
-        await ctx.reply(f"Pingo, tô levando {self.bot.latency:.3f} milissegundos pra responder!")
+        await ctx.reply(f"Pingo, tô levando {self.bot.latency:.3f} milissegundos pra responder a api do Discord.")
 
 
 def setup(bot):
