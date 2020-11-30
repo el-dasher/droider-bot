@@ -30,13 +30,6 @@ month_data = json.load(open(MONTHS_PATH, encoding="utf-8"))
 #                         encoding="utf-8")
 # )
 
-
-class PyEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, (list, dict, str, int, float, bool, type(None))):
-            return json.JSONEncoder.default(self, obj)
-
-
 class Welcomer(Cog):
     welcome_channels: List[Any]
 
