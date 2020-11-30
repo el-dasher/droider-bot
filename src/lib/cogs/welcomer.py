@@ -15,7 +15,6 @@ from urllib.request import urlopen
 
 
 def load_wd_data():
-
     wd_data = json.load(urlopen("https://git.io/Jk919"))
 
     return wd_data
@@ -24,8 +23,8 @@ def load_wd_data():
 load_wd_data()
 welcomer_guist = DASHERGIT.get_gist("ddc5ae305a3cb4093393a140b55c53b3")
 
-
 month_data = json.load(open(MONTHS_PATH.absolute(), encoding="utf-8"))
+
 
 # welcomer_data = (
 #     wd_data := json.load(open(wd_path := Path("src/lib/db/data/json/welcomer_data.json").absolute()),
@@ -178,11 +177,11 @@ class Welcomer(Cog):
             files={"welcomer_data.json": InputFileContent(str(wd_data).replace("'", '"'))}
         )
 
-        cfg_msg = await ctx.send(f"O novo canal de boas vindas será o <#{channel.id}>, configurando..."
-                                 f" (Vai levar cerca de 1 minuto à 5 minutos <a:blobhype:780576199558299649>)")
+        cfg_msg = await ctx.reply(f"O novo canal de boas vindas será o <#{channel.id}>, configurando..."
+                                  f" (Vai levar cerca de 1 minuto à 5 minutos <a:blobhype:780576199558299649>)")
 
         wd_urldata = load_wd_data()
-        
+
         edit_msgs = (
             "1 minuto já se passou, e nada...",
             "2 minutos já se passaram, e nada...",
@@ -191,9 +190,9 @@ class Welcomer(Cog):
             "5 minutos já se passaram, e nada...",
             "Já se passou mais de 5 minutos, estou relativamente preocupado"
         )
-        
+
         counter = 0
-        
+
         while wd_urldata != old_data:
             wd_urldata = load_wd_data()
 

@@ -14,7 +14,7 @@ class ErrorHandler(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx, exc):
         if isinstance(exc, commands.CommandNotFound):
-            await ctx.send("Esse comando não existe..., cê ta bem mano?")
+            await ctx.reply("Esse comando não existe..., cê ta bem mano?")
         elif hasattr(exc, "original"):
             raise exc.original
         else:

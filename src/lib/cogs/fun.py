@@ -4,7 +4,7 @@ from random import choice
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from ..db.data.json.pydict.pydata import bot_presences
+from src.lib.db.data.json.pydict.pydata import bot_presences
 
 
 class Funny(commands.Cog):
@@ -21,7 +21,7 @@ class Funny(commands.Cog):
 
     @commands.command()
     async def owo(self, ctx):
-        await ctx.send("UwU")
+        await ctx.reply("UwU")
 
     async def presences(self):
         await self.bot.change_presence(activity=(choice(bot_presences)))

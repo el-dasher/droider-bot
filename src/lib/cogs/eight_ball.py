@@ -19,10 +19,10 @@ class EightBall(commands.Cog):
     @commands.command(aliases=("8ball", "sorte"))
     async def lucky(self, ctx, question=None):
         if question is None:
-            await ctx.send("Aprende a usar o bot, BURRO, cadê a pergunta?")
+            await ctx.reply("Aprende a usar o bot, BURRO, cadê a pergunta?")
         else:
             lucky_response = choice(list(choice(list(choice((list(self.f.values()))).values()))))
-            await ctx.send(lucky_response)
+            await ctx.reply(lucky_response)
 
 
 def setup(bot):
