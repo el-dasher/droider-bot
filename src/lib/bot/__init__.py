@@ -5,6 +5,7 @@ import discord
 import asyncio
 from typing import Union
 
+
 # from apscheduler.triggers.cron import CronTrigger
 
 
@@ -23,7 +24,6 @@ class Ready(object):
 
 
 class DroiderBR(commands.Bot):
-
     main_guild: discord.guild.Guild
     br_guild: discord.guild.Guild
     mscoy: Union[discord.User, discord.Member]
@@ -31,10 +31,12 @@ class DroiderBR(commands.Bot):
     stdout: discord.TextChannel
 
     def __init__(self):
+
+        self.sent_time = 0
         self.ready = False
         self.cogs_ready = Ready()
-
         self.scheduler = AsyncIOScheduler()
+        self.sent_channels = []
 
         super().__init__(
             command_prefix=settings.PREFIX,
@@ -46,7 +48,7 @@ class DroiderBR(commands.Bot):
         for cog in settings.COGS:
             self.load_extension(f"src.lib.cogs.{cog}")
             print(f"A cog {cog} foi carregada!")
-       
+
         print("Todas as cogs foram carregadas")
 
     def run(self):
@@ -91,12 +93,16 @@ class DroiderBR(commands.Bot):
             print("O bot se reconectou")
             await self.stdout.send("Eu tô online denovo!")
 
-    async def on_message(self, msg):
+    async def on_message(self, msg: discord.Message, already_timed=False, counter=0):
+
         if msg.author.id == self.user.id:
             return
 
-        print(f"{msg.author}: {msg}")
+        elif isinstance(msg.channel, discord.DMChannel):
+            await msg.channel.send("Não respondo a mensagens diretas, kthx ;)")
+            return
 
+        print(f"{msg.author}: {msg}")
         await self.process_commands(msg)
 
 
