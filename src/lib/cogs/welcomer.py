@@ -23,7 +23,7 @@ def load_wd_data():
 load_wd_data()
 welcomer_guist = DASHERGIT.get_gist("ddc5ae305a3cb4093393a140b55c53b3")
 
-month_data = json.load(open(MONTHS_PATH.absolute(), encoding="utf-8"))
+month_data = json.load(open(MONTHS_PATH, encoding="utf-8"))
 
 
 # welcomer_data = (
