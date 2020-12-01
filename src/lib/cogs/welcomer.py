@@ -10,23 +10,25 @@ from src.paths import MONTHS_PATH
 from src.settings import DATABASE
 
 month_data = json.load(open(MONTHS_PATH, encoding="utf-8"))
-welcomer_data = DATABASE.get("").val()["WELCOMER_DATA"]
-
 
 # welcomer_data = (
 #     wd_data := json.load(open(wd_path := Path("src/lib/db/data/json/welcomer_data.json").absolute()),
 #                         encoding="utf-8")
 # )
 
+
 class Welcomer(Cog):
     welcome_channels: List[Any]
 
     def __init__(self, bot):
 
-        self.gen_channel = None
         self.bot = bot
 
         # self.welcome_channels = list(wd_data)
+
+    @staticmethod
+    def welcomer_data():
+        return DATABASE.child("WELCOMER_DATA").get().val()
 
     @Cog.listener()
     async def on_ready(self):
@@ -58,7 +60,7 @@ class Welcomer(Cog):
 
         joined_guild = str(member.guild.id)
 
-        welcome_channel = self.bot.get_channel(welcomer_data[joined_guild]["id"])
+        welcome_channel = self.bot.get_channel(self.welcomer_data()[joined_guild]["id"])
 
         await welcome_channel.send(f"<@{member.id}>", embed=join_embed)
 
@@ -79,7 +81,7 @@ class Welcomer(Cog):
             value=f"Entrou no discord em {member.created_at.year}, no dia {member.created_at.day} de {created_month}")
 
         left_guild = str(member.guild.id)
-        welcome_channel = self.bot.get_channel(welcomer_data[left_guild]["id"])
+        welcome_channel = self.bot.get_channel(self.welcomer_data()[left_guild]["id"])
 
         await welcome_channel.send(embed=left_embed)
 
