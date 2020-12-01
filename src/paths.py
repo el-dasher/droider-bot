@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-debug = True  # debug = True SE VOCÊ FOR RODAR O PROJETO LOCALMENTE!!!
+debug = False  # debug = True SE VOCÊ FOR RODAR O PROJETO LOCALMENTE!!!
 
 if debug:
     print("O BOT ESTÁ RODANDO LOCALMENTE")
@@ -11,7 +11,6 @@ if debug:
 
     LUCKY_PATH = Path("./lib/db/data/json/lucky_responses.json")
     MONTHS_PATH = Path("./lib/db/data/json/months.json")
-    FIREBASE_CONFIG_PATH = Path("./lib/db/data/json/firebase_config.json")
 else:
     print('O BOT ESTÁ RODANDO EM "PRODUÇÃO')
 
@@ -19,4 +18,3 @@ else:
 
     LUCKY_PATH = Path("./src/lib/db/data/json/lucky_responses.json")
     MONTHS_PATH = Path("./src/lib/db/data/json/months.json")
-    FIREBASE_CONFIG_PATH = Path("./src/lib/db/data/json/firebase_config.json")
