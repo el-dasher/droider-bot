@@ -17,6 +17,7 @@ for path in COGS_PATH.glob('*.py'):
 
 DATABASE: Database = firebase
 
+DASHERGIT: Github = Github(getenv("ACCESS_TOKEN"))
 BOT_TOKEN: str = getenv("BOT_TOKEN")
 PREFIX: str = getenv("PREFIX")
 
