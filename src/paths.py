@@ -19,4 +19,4 @@ else:
 
     LUCKY_PATH = Path("./src/lib/db/data/json/lucky_responses.json")
     MONTHS_PATH = Path("./src/lib/db/data/json/months.json")
-    FIREBASE_CONFIG_PATH = Path("./src/lib/db/data/json/firebase_config.json").absolute()
+    FIREBASE_CONFIG_PATH = Path("./src/lib/db/data/json/firebase_config.json")
