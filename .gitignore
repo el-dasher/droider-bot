@@ -246,4 +246,3 @@ fabric.properties
 # My database
 # /src/lib/db/data/db/database.db
 .env
-/src/lib/db/data/json/firebase_config.json
