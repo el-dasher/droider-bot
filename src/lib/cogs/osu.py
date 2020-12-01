@@ -18,8 +18,7 @@ class OsuGame(commands.Cog):
 
     @commands.command(aliases=["osu"])
     async def osuplayer(self, ctx: commands.Context, user: discord.Member = None):
-        user_json = None
-
+        
         while True:
             try:
                 user_json = api.get_user({"u": user})[0]
