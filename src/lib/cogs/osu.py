@@ -34,7 +34,7 @@ class OsuGame(commands.Cog):
 
                 except KeyError:
                     user_json = api.get_user({"u": user})
- 
+
                     if user_json == []:
                         await ctx.reply("Não foi possivel encontrar o usuário!")
 
@@ -60,7 +60,10 @@ class OsuGame(commands.Cog):
         user_embed.add_field(name="Rank global", value=f'#{user_json["pp_rank"]}')
         user_embed.add_field(name="Rank local", value=f"#{user_json['pp_country_rank']}")
         user_embed.add_field(name="Precisão", value=f'{user_json["accuracy"]}%')
-        user_embed.add_field(name="Level", value=f"{float(user_json['level']):.2f}")
+
+        user_embed.add_field(name="Level", value=f"{float(user_json['level']):.2f}") if type(user_json["level"]) \
+            is float \
+            else user_embed.add_field(name="Level", value=f"0.00")
 
         await ctx.reply(content=f"<@{ctx.author.id}>", embed=user_embed)
 
