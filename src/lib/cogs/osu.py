@@ -34,7 +34,7 @@ class OsuGame(commands.Cog):
 
                 except KeyError:
                     user_json = api.get_user({"u": user})
- z
+ 
                     if user_json == []:
                         await ctx.reply("Não foi possivel encontrar o usuário!")
 
