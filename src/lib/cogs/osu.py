@@ -30,7 +30,8 @@ class OsuGame(commands.Cog):
                     user = user.replace("<@", "").replace(">", "")
 
                 try:
-                    user_json = api.get_user({"u": DATABASE.child("OSU_USERS").child(user).get().val()["user"]})
+                    user_json = api.get_user({"u": DATABASE.child("OSU_USERS").get().val()[user]["user"]})
+                    print(user_json)
                 except KeyError:
                     await ctx.reply("O usuário mencionado não cadastrou uma conta do osu!")
                 print("AQUI")
