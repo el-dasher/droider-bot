@@ -17,60 +17,59 @@ class OsuGame(commands.Cog):
         ready_up_cog(self.bot, __name__)
 
     @commands.command(aliases=["osu"])
-    async def osuplayer(self, ctx: commands.Context, user: discord.Member = None):
-        
-        while True:
-            try:
-                user_json = api.get_user({"u": user})[0]
+    async def osuplayer(self, ctx: commands.Context, user=None):
+        # user_json = api.get_user({"u": user})[0]
 
-                if not user_json:
-                    user_json = api.get_user(
-                            {"u": (user := DATABASE.child("OSU_USERS").child(user.id).get().val()["user"])}
-                        )[0]
-                else:
-                    break
+        user_json = api.get_user({"u": DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"]})[0]
 
-                print(user_json)
+        if user:
+            if "" in user:
+                if "<@!" in user:
+                    user = user.replace("<@!", "").replace(">", "")
+                elif "<@" in user:
+                    user = user.replace("<@", "").replace(">", "")
 
-            except (IndexError, ValueError):
-                if user is None:
-
-                    user_json = api.get_user(
-                        {"u": (user := DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"])}
-                    )[0]
-                    if user_json:
-                        break
-                    elif not user:
-                        await ctx.reply("Você precisa informar um usuário,"
-                                        " talvez você queira setar seu usuário utilizado `ms!osuset`")
-                        return
-                else:
-                    await ctx.reply("Usuário não encontrado")
+                try:
+                    user_json = api.get_user({"u": DATABASE.child("OSU_USERS").get().val()[user]["user"]})
+                except KeyError:
+                    await ctx.reply("O usuário mencionado não cadastrou uma conta do osu!")
                     return
 
-        if user_json is None:
-            return
+        try:
+            user_json = user_json[0]
+        except (IndexError, KeyError):
+            user_json = user_json
+
+        print(user_json)
 
         user_embed = discord.Embed(
             title=f"Perfil do {user_json['username']}",
             description=f"[Link do perfil](https://osu.ppy.sh/users/{user_json['user_id']})",
         )
 
-        user_json["accuracy"] = f"{float(user_json['accuracy']):.2f}"
+        try:
+            user_json["accuracy"] = f"{float(user_json['accuracy']):.2f}"
+        except TypeError:
+            user_json["accuracy"] = "0.00"
+        if type(user_json) == float:
+            user_json["pp_raw"] = f"{float(user_json['pp_raw']):.2f}"
+        else:
+            user_json["pp_raw"] = "0.00"
 
         user_embed.set_thumbnail(url=f"https://a.ppy.sh/{user_json['user_id']}")
         user_embed.add_field(name="Performance", value=f"{user_json['pp_raw']}pp")
-        user_embed.add_field(name="Rank global", value=f'#{user_json["pp_rank"]}')
+        if type(user_json["pp_rank"]) is not None or type(user_json["pp_country_rank"]) is not None:
+            user_embed.add_field(name="Rank global", value=f'#{user_json["pp_rank"]}')
+            user_embed.add_field(name="Rank local", value=user_json["pp_country_rank"])
         user_embed.add_field(name="Precisão", value=f'{user_json["accuracy"]}%')
         user_embed.add_field(name="Level", value=user_json["level"])
-        user_embed.add_field(name="Rank local", value=user_json["pp_country_rank"])
 
         await ctx.reply(content=f"<@{ctx.author.id}>", embed=user_embed)
 
     @commands.command(aliases=["osuset"])
     async def osu_set(self, ctx, user=None):
         try:
-            user_json = api.get_user({"u": user})[0]
+            user_json_ = api.get_user({"u": user})[0]
             DATABASE.child("OSU_USERS").child(ctx.author.id).set({"user": user})
         except (IndexError, ValueError):
             if user is None:
@@ -82,7 +81,7 @@ class OsuGame(commands.Cog):
             return
 
         await ctx.reply(f"O seu usuário foi setado para: {user}")
-        return user_json
+        return user_json_
 
 
 def setup(bot):
