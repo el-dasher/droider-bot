@@ -33,7 +33,8 @@ class OsuGame(commands.Cog):
                     user_json = api.get_user({"u": DATABASE.child("OSU_USERS").get().val()[user]["user"]})
                     print(user_json)
                 except KeyError:
-                    user_json = api.get_user({"u": user})
+                    user_json = api.get_user({"u": user})[0]
+                    print(user_json)
                     if not user_json:
                         await ctx.reply("Não foi possivel encontrar o usuário!")
 
