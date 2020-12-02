@@ -33,10 +33,12 @@ class OsuGame(commands.Cog):
                     user_json = api.get_user({"u": DATABASE.child("OSU_USERS").get().val()[user]["user"]})
                     print(user_json)
                 except KeyError:
-                    await ctx.reply("O usuário mencionado não cadastrou uma conta do osu!")
+                    try:
+                        user_json = api.get_user({"u": user})
+                    except Exception as e:
+                        await ctx.reply(f"O usuário mencionado não cadastrou uma conta do osu! {e}")
+                        return
                 print("AQUI")
-            else:
-                print("DENTRO")
             print("FORA")
         print("MUITO FORA")
 
