@@ -58,7 +58,7 @@ class OsuGame(commands.Cog):
         user_embed.set_thumbnail(url=f"https://a.ppy.sh/{user_json['user_id']}")
         user_json["pp_raw"] = 0.00 if user_json["pp_raw"] is None else user_json["pp_raw"]
 
-        user_embed.add_field(name="Performance", value=f"{user_json['pp_raw']}pp")
+        user_embed.add_field(name="Performance", value=f"{float(user_json['pp_raw']):.2f}pp")
 
         if user_json["pp_rank"] is not None or user_json["pp_country_rank"] is not None:
             user_embed.add_field(name="Rank global", value=f'#{user_json["pp_rank"]}')
