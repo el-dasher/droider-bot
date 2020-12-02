@@ -34,6 +34,10 @@ class OsuGame(commands.Cog):
                 except KeyError:
                     await ctx.reply("O usuário mencionado não cadastrou uma conta do osu!")
                     return
+            else:
+                print("DENTRO")
+            print("FORA")
+        print("MUITO FORA")
 
         try:
             user_json = user_json[0]
