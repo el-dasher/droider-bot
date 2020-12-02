@@ -51,10 +51,6 @@ class OsuGame(commands.Cog):
             user_json["accuracy"] = f"{float(user_json['accuracy']):.2f}"
         except TypeError:
             user_json["accuracy"] = "0.00"
-        if type(user_json) == float:
-            user_json["pp_raw"] = f"{float(user_json['pp_raw']):.2f}"
-        else:
-            user_json["pp_raw"] = "0.00"
 
         user_embed.set_thumbnail(url=f"https://a.ppy.sh/{user_json['user_id']}")
         user_embed.add_field(name="Performance", value=f"{user_json['pp_raw']}pp")
