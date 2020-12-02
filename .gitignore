@@ -246,3 +246,4 @@ fabric.properties
 # My database
 # /src/lib/db/data/db/database.db
 .env
+/.idea/workspace.xml
