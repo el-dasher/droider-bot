@@ -20,7 +20,11 @@ class OsuGame(commands.Cog):
     async def osuplayer(self, ctx: commands.Context, user=None):
         # user_json = api.get_user({"u": user})[0]
 
-        user_json = api.get_user({"u": DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"]})[0]
+        try:
+            user_json = api.get_user({"u": DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"]})[0]
+        except TypeError:
+            await ctx.reply("Você não possui uma conta cadastrada, use `osu!set <user>`")
+            return
 
         if user:
             if "" in user:
@@ -37,6 +41,7 @@ class OsuGame(commands.Cog):
 
                     if user_json == []:
                         await ctx.reply("Não foi possivel encontrar o usuário!")
+                        return
 
         try:
             user_json = user_json[0]
