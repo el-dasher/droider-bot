@@ -7,6 +7,7 @@ from src.settings import DATABASE
 from dateutil.parser import parse
 from datetime import datetime
 from src.lib.utils.droid_data_getter import get_droid_data
+from operator import itemgetter
 
 osu_api = ossapi(getenv("OSU_API"))
 
@@ -172,9 +173,15 @@ class OsuGame(commands.Cog):
     @commands.command()
     async def droidrecent(self, ctx, uid):
         try:
-            await ctx.reply(f"Sua play mais recente: {get_droid_data(uid)['rs_0']}")
+            await ctx.reply(f"Sua play mais recente: {get_droid_data(uid)['beatmap_data']['rs_1']}")
         except KeyError:
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
+
+    @commands.command(name="ppcheck")
+    async def pp_check(self, ctx, uid):
+        top_plays = get_droid_data(uid)["pp_data"][:5]
+        # print(top_plays)
+        await ctx.reply(top_plays)
 
     @commands.command()
     async def droidpfme(self, ctx, uid):
@@ -182,6 +189,7 @@ class OsuGame(commands.Cog):
             await ctx.reply(get_droid_data(uid)["user_data"])
         except KeyError:
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
+
 
 def setup(bot):
     bot.add_cog(OsuGame(bot))
