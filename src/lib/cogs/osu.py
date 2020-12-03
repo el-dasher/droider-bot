@@ -51,7 +51,7 @@ class OsuGame(commands.Cog):
         print(user_json)
 
         user_embed = discord.Embed(
-            title=f"Perfil do {user_json['username']}",
+            title=f"<:osulogo:783846581371273246> Perfil do osu!standard do(a) {user_json['username']}",
             description=f"[Link do perfil](https://osu.ppy.sh/users/{user_json['user_id']})",
         )
 
@@ -79,7 +79,7 @@ class OsuGame(commands.Cog):
     @commands.command(aliases=["osuset"])
     async def osu_set(self, ctx, user=None):
         try:
-            user_json_ = api.get_user({"u": user})[0]
+            set_user_json = api.get_user({"u": user})[0]
             DATABASE.child("OSU_USERS").child(ctx.author.id).set({"user": user})
         except (IndexError, ValueError):
             if user is None:
@@ -90,8 +90,13 @@ class OsuGame(commands.Cog):
 
             return
 
-        await ctx.reply(f"O seu usuário foi setado para: {user}")
-        return user_json_
+        osuset_embed = discord.Embed(
+            title=f"Você cadastrou seu usuário! {user}"
+        )
+
+        osuset_embed.set_image(url=f"https://a.ppy.sh/{set_user_json['user_id']}")
+
+        await ctx.reply(f"<@{ctx.author.id}>", embed=osuset_embed)
 
 
 def setup(bot):
