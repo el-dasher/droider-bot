@@ -17,7 +17,7 @@ class OsuGame(commands.Cog):
         ready_up_cog(self.bot, __name__)
 
     @commands.command(aliases=["osu"])
-    async def osuplayer(self, ctx: commands.Context, user=None):
+    async def osuplayer(self, ctx: commands.Context, *user):
         # user_json = api.get_user({"u": user})[0]
 
         try:
@@ -27,6 +27,7 @@ class OsuGame(commands.Cog):
             return
 
         if user:
+            user = "".join(user).replace(" ", "_")
             if "" in user:
                 if "<@!" in user:
                     user = user.replace("<@!", "").replace(">", "")
