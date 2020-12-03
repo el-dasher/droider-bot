@@ -80,16 +80,18 @@ class OsuGame(commands.Cog):
         await ctx.reply(content=f"<@{ctx.author.id}>", embed=user_embed)
 
     @commands.command(aliases=["osuset"])
-    async def osu_set(self, ctx, user=None):
+    async def osu_set(self, ctx, *user):
+        if user:
+            user = "".join(user).replace(" ", "_")
+        else:
+            await ctx.reply("Você esqueceu de por para qual usuário(a) você quer setar!")
+            return
+
         try:
             set_user_json = api.get_user({"u": user})[0]
             DATABASE.child("OSU_USERS").child(ctx.author.id).set({"user": user})
         except (IndexError, ValueError):
-            if user is None:
-                await ctx.reply("Você esqueceu de por para qual usuário(a) você quer setar!")
-            else:
-                print(user)
-                await ctx.reply(f"Não foi possivel encontrar um(a) usuário(a) chamado(a): {user}")
+            await ctx.reply(f"Não foi possivel encontrar um(a) usuário(a) chamado(a): {user}")
 
             return
 
