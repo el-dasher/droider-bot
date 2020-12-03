@@ -61,7 +61,9 @@ class OsuGame(commands.Cog):
             user_json["accuracy"] = "0.00"
 
         user_embed.set_thumbnail(url=f"https://a.ppy.sh/{user_json['user_id']}")
-        user_json["pp_raw"] = 0.00 if user_json["pp_raw"] is None else user_json["pp_raw"]
+
+        if user_json["pp_raw"] is None:
+            user_json["pp_raw"] = 0.00
 
         user_embed.add_field(name="Performance", value=f"{float(user_json['pp_raw']):.2f}pp")
 
