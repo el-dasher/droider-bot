@@ -71,7 +71,7 @@ class OsuGame(commands.Cog):
         user_embed.add_field(name="Precisão", value=f'{user_json["accuracy"]}%')
 
         user_embed.add_field(name="Level", value=f"{float(user_json['level']):.2f}") if type(user_json["level"]) \
-            is float \
+            is str \
             else user_embed.add_field(name="Level", value=f"0.00")
 
         await ctx.reply(content=f"<@{ctx.author.id}>", embed=user_embed)
