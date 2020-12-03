@@ -72,7 +72,8 @@ class OsuGame(commands.Cog):
 
         if type(user_json["level"]) is None:
             user_json["level"] = 0.00
-
+            print(user_json["level"])
+        print(user_json["level"])
         user_embed.add_field(name="Level", value=f"{float(user_json['level']):.2f}")
         await ctx.reply(content=f"<@{ctx.author.id}>", embed=user_embed)
 
