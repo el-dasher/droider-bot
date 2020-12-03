@@ -91,7 +91,7 @@ class OsuGame(commands.Cog):
             return
 
         osuset_embed = discord.Embed(
-            title=f"Você cadastrou seu usuário! {user}"
+            title=f"Você cadastrou seu usuário! {set_user_json['username']}"
         )
 
         osuset_embed.set_image(url=f"https://a.ppy.sh/{set_user_json['user_id']}")
