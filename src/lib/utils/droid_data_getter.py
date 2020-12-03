@@ -52,7 +52,7 @@ def get_droid_data(user_id):
         def handle_data(self, pp_html_data):
             if "{" not in pp_html_data or "}" not in pp_html_data:
                 total_pp.append(pp_html_data)
-                print(total_pp)
+
     pp_parser = PPBoardParser()
     pp_parser.feed(str(pp_data_soup))
 
