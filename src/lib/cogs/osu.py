@@ -70,7 +70,7 @@ class OsuGame(commands.Cog):
             user_embed.add_field(name="Rank local", value=f"#{user_json['pp_country_rank']}")
         user_embed.add_field(name="Precisão", value=f'{user_json["accuracy"]}%')
 
-        if type(user["level"]) is None:
+        if type(user_json["level"]) is None:
             user_json["level"] = 0.00
 
         user_embed.add_field(name="Level", value=f"{float(user_json['level']):.2f}")
