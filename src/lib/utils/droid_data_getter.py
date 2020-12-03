@@ -2,7 +2,10 @@ from abc import ABC
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from html.parser import HTMLParser
+import threading
 from datetime import datetime
+
+print(f"HEROKU TEM {threading.active_count()} THREADS")
 
 
 def get_droid_data(user_id):
