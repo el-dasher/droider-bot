@@ -147,11 +147,11 @@ class OsuGame(commands.Cog):
 
             recentplay['date'] = recentplay['date'].replace("-", ".")
             recent_embed = discord.Embed(
-                description=f"**[{played_map['title']}](https://osu.ppy.sh/beatmapsets/{played_map['beatmapset_id']})**"
+                description=f"**[{played_map['title']}](https://osu.ppy.sh/beatmapsets/{played_map['beatmapset_id']})"
                             f" ({(played_map['difficultyrating']):.2f}★)\n"
                             f"Dificuldade: {played_map['version']}\n"
                             f"Score: {recentplay['score']} •"
-                            f" {recentplay['maxcombo']}/{played_map['max_combo']}",
+                            f" {recentplay['maxcombo']}/{played_map['max_combo']}**",
                 timestamp=parse(recentplay['date'])
             )
 
