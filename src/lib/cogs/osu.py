@@ -6,6 +6,7 @@ from src.lib.utils.basic_utils import ready_up_cog
 from src.settings import DATABASE
 from dateutil.parser import parse
 from datetime import datetime
+from src.lib.utils.droid_data_getter import get_droid_data
 
 osu_api = ossapi(getenv("OSU_API"))
 
@@ -103,7 +104,7 @@ class OsuGame(commands.Cog):
     @commands.command(aliases=["osuset"])
     async def osu_set(self, ctx, *user):
         if user:
-            self.get_user(user)
+            user = self.get_user(user)
         else:
             return await ctx.reply("Você esqueceu de por para qual usuário(a) você quer setar!")
 
@@ -168,6 +169,19 @@ class OsuGame(commands.Cog):
 
             await ctx.reply(embed=recent_embed)
 
+    @commands.command()
+    async def droidrecent(self, ctx, uid):
+        try:
+            await ctx.reply(f"Sua play mais recente: {get_droid_data(uid)['rs_0']}")
+        except KeyError:
+            await ctx.reply(f"Não existe uma user id chamada: {uid}")
+
+    @commands.command()
+    async def droidpfme(self, ctx, uid):
+        try:
+            await ctx.reply(get_droid_data(uid)["user_data"])
+        except KeyError:
+            await ctx.reply(f"Não existe uma user id chamada: {uid}")
 
 def setup(bot):
     bot.add_cog(OsuGame(bot))
