@@ -5,6 +5,7 @@ import discord
 from src.lib.utils.basic_utils import ready_up_cog
 from src.settings import DATABASE
 from dateutil.parser import parse
+from datetime import datetime
 
 osu_api = ossapi(getenv("OSU_API"))
 
@@ -24,7 +25,6 @@ class OsuGame(commands.Cog):
     @commands.command(aliases=["osu"])
     async def osuplayer(self, ctx: commands.Context, *user):
         # user_json = osu_api.get_user({"u": user})[0]
-
         try:
             user_json = osu_api.get_user({"u": DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"]})[0]
         except TypeError:
@@ -53,34 +53,51 @@ class OsuGame(commands.Cog):
         except (IndexError, KeyError):
             user_json = user_json
 
-        print(user_json)
+        def is_not_none(item):
+            if item is None:
+                item = 0.00
+            return float(item)
+
+        profile_acc = is_not_none(user_json["accuracy"])
+        profile_pp = is_not_none(user_json["pp_raw"])
+        profile_level = is_not_none(user_json['level'])
 
         user_embed = discord.Embed(
-            title=f"<:osulogo:783846581371273246> Perfil do osu!standard do(a) {user_json['username']}",
-            description=f"[Link do perfil](https://osu.ppy.sh/users/{user_json['user_id']})",
+            title=(
+                f"<:osulogo:783846581371273246> Perfil do osu!standard"
+                f" do(a) {(profile_username := user_json['username'])}"
+            ),
+            description=(
+                f"**[Link do perfil do(a) {profile_username}](https://osu.ppy.sh/users/{user_json['user_id']})**\n"
+            ), timestamp=datetime.utcnow()
         )
 
-        try:
-            user_json["accuracy"] = f"{float(user_json['accuracy']):.2f}"
-        except TypeError:
-            user_json["accuracy"] = "0.00"
+        user_embed.add_field(name="__Performance__", value=(
+                "**"
+                f"Accuracy: `{profile_acc :.2f}`\nPP: `{profile_pp:.2f}`\n"
+                f"Rank PP: `#{user_json['pp_rank']}`\n"
+                f"RANK {(country := user_json['country'])}(:flag_{country.lower()}:): `#{user_json['pp_country_rank']}`"
+                "**"
+            )
+        )
 
+        profile_best_play = osu_api.get_user_best({"u": user_json['user_id']})[0]
+        played_beatmap_profile = osu_api.get_beatmaps({"b": profile_best_play["beatmap_id"]})[0]
+
+        user_embed.add_field(name="__Melhor play__", value=(
+            "**"
+            f"PP: `{profile_best_play['pp']}`\n"
+            f"[{played_beatmap_profile['title']}](https://osu.ppy.sh/beatmapsets/{profile_best_play['beatmap_id']})\n"
+            f"Rank: `{profile_best_play['rank']}`"
+            "**"
+        ))
+
+        print(profile_best_play)
+
+        user_embed.set_footer(text=f"Level: {profile_level:.2f}")
         user_embed.set_thumbnail(url=f"https://a.ppy.sh/{user_json['user_id']}")
 
-        if user_json["pp_raw"] is None:
-            user_json["pp_raw"] = 0.00
-
-        user_embed.add_field(name="Performance", value=f"{float(user_json['pp_raw']):.2f}pp")
-
-        if user_json["pp_rank"] is not None or user_json["pp_country_rank"] is not None:
-            user_embed.add_field(name="Rank global", value=f'#{user_json["pp_rank"]}')
-            user_embed.add_field(name="Rank local", value=f"#{user_json['pp_country_rank']}")
-        user_embed.add_field(name="Precisão", value=f'{user_json["accuracy"]}%')
-
-        if user_json["level"] is None:
-            user_json["level"] = 0.00
-
-        user_embed.add_field(name="Level", value=f"{float(user_json['level']):.2f}")
+        await ctx.reply(content=f":flag_{user_json['country'].lower()}:")
         await ctx.reply(content=f"<@{ctx.author.id}>", embed=user_embed)
 
     @commands.command(aliases=["osuset"])
@@ -148,6 +165,7 @@ class OsuGame(commands.Cog):
 
             print(played_map)
             print(recentplay)
+
             await ctx.reply(embed=recent_embed)
 
 
