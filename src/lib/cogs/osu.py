@@ -83,10 +83,10 @@ class OsuGame(commands.Cog):
             DATABASE.child("OSU_USERS").child(ctx.author.id).set({"user": user})
         except (IndexError, ValueError):
             if user is None:
-                await ctx.reply("Você esqueceu de por para qual usuário você quer setar!")
+                await ctx.reply("Você esqueceu de por para qual usuário(a) você quer setar!")
             else:
                 print(user)
-                await ctx.reply(f"Não foi possivel encontrar um usuário chamado: {user}")
+                await ctx.reply(f"Não foi possivel encontrar um(a) usuário(a) chamado(a): {user}")
 
             return
 

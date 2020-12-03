@@ -26,7 +26,7 @@ class Avatar(commands.Cog):
         member_name: str = get_member_name(member)
 
         avatar_embed: discord.Embed = discord.Embed(
-            title=f"Avatar do {member_name}",
+            title=f"Avatar do(a) {member_name}",
             description=f"{ava_desc} [Link]({member.avatar_url})",
             timestamp=datetime.utcnow()
         )
@@ -34,7 +34,7 @@ class Avatar(commands.Cog):
         avatar_embed.set_image(url=member.avatar_url)
         avatar_embed.set_footer(text=get_member_name(self.bot.user), icon_url=self.bot.user.avatar_url)
 
-        await ctx.reply(embed=avatar_embed)
+        await ctx.reply(f"<@{ctx.author.id}>", embed=avatar_embed)
 
 
 def setup(bot):
