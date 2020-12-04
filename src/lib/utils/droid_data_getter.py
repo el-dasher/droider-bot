@@ -143,7 +143,10 @@ def get_droid_data(user_id):
         except NameError:
             data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": [{"s": "OFFLINE"}]}
         if pp_data != "offline":
-            DATABASE.child("DROID_UID_DATA").child(user_id).set(user_data)
+            await save_to_db(user_id, user_data)
         data_dicts.update(data_dict)
 
     return data_dicts
+
+async def save_to_db(child, data: dict)
+    DATABASE.child("DROID_UID_DATA").child(user_id).set(data)
