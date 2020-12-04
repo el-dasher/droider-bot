@@ -98,7 +98,7 @@ def get_droid_data(user_id):
     for i, data in enumerate(beatmap_data):
         beatmap_dicts[f"rs_{i}"] = {
             "username": old_data[26][0],
-            "beatmap": data[4],
+            "beatmap": data[5],
             "date": data[0],
             "score": int(data[1].replace(",", "")),
             "mods": data[2],
