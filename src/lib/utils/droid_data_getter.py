@@ -4,12 +4,17 @@ from bs4 import BeautifulSoup
 from html.parser import HTMLParser
 from datetime import datetime
 from src.settings import DATABASE
+from apscheduler.schedulers import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
+from random import randint
 
 ppcheck_data = []
 
 
 def get_droid_data(user_id):
     # noinspection PyGlobalUndefined
+    
+    droid_scheduler = AsyncIOScheduler
     global ppcheck_data
     old_data = []
     beatmap_data = []
@@ -104,7 +109,7 @@ def get_droid_data(user_id):
     	    pp_data = "OFFLINE"
     else:
         pp_data = float(pp_data[8][9:].strip())
-   
+   print(DATABASE.child("DROID_UID_DATA").child(user_id).get().val()))
     for i, data in enumerate(beatmap_data):
         beatmap_dicts[f"rs_{i}"] = {
             "username": old_data[26][0],
@@ -143,10 +148,13 @@ def get_droid_data(user_id):
         except NameError:
             data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": [{"s": "OFFLINE"}]}
         if pp_data != "offline":
-            await save_to_db(user_id, user_data)
+            trigger = CronTrigger(hour=1, minute=randint(0, 59))
+            
+            updated_user_data = droid_scheduler.addjob(get_droid_data(user_id), trigger)
+            droid_scheduler.addjob(lambda: DATABASE.child("DROID_UID_DATA").child(user_id).set(updated_user_data), trigger)
+            
         data_dicts.update(data_dict)
 
     return data_dicts
 
-async def save_to_db(child, data: dict):
-    DATABASE.child("DROID_UID_DATA").child(user_id).set(data)
+async def save_to_db(data:)
