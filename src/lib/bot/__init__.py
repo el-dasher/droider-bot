@@ -101,7 +101,7 @@ class DroiderBR(commands.Bot):
             if msg.channel.id not in self.sent_channels:
                 self.sent_channels.append(msg.channel.id)
                 await msg.channel.send("Não respondo a mensagens diretas, kthx ;)")
-                await asyncio.sleep(60)
+                await asyncio.sleep(86400)
                 self.sent_channels.remove(msg.channel.id)
 
                 return
