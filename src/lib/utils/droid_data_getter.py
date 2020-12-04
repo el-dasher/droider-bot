@@ -148,10 +148,7 @@ def get_droid_data(user_id):
     except NameError:
         data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": [{"s": "OFFLINE"}]}
     if pp_data != "offline":
-        trigger = CronTrigger(hour=1)
-            
-        updated_user_data = droid_scheduler.add_job(get_droid_data(user_id)["user_data"]["pp_raw"], trigger)
-        droid_scheduler.add_job(lambda: DATABASE.child("DROID_UID_DATA").child(user_id).set(updated_user_data) if updated_user_data != "OFFLINE" else print(), trigger)
+        DATABASE.child("DROID_UID_DATA").child(user_id).set(user_data)
     
     # return data_dicts
     return data_dict
