@@ -148,5 +148,5 @@ def get_droid_data(user_id):
 
     return data_dicts
 
-async def save_to_db(child, data: dict)
+async def save_to_db(child, data: dict):
     DATABASE.child("DROID_UID_DATA").child(user_id).set(data)
