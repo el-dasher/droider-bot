@@ -184,7 +184,7 @@ class OsuDroid(commands.Cog):
                 print(e)
                 return await ctx.reply(self.missing_uid_msg)
         try:
-            await ctx.reply(f"Sua play mais recente: {get_droid_data(uid)['beatmap_data']['rs_0']}")
+            await ctx.reply(f"Sua play mais recente: {await get_droid_data(uid)['beatmap_data']['rs_0']}")
         except KeyError:
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
 
@@ -196,7 +196,7 @@ class OsuDroid(commands.Cog):
             except Exception as e:
                 print(e)
                 return await ctx.reply(self.missing_uid_msg)
-        top_plays = get_droid_data(uid)["pp_data"][:5]
+        top_plays = await get_droid_data(uid)["pp_data"][:5]
 
         await ctx.reply(top_plays)
 
@@ -209,7 +209,7 @@ class OsuDroid(commands.Cog):
                 print(e)
                 return await ctx.reply(self.missing_uid_msg)
         try:
-            profile_data = get_droid_data(uid)["user_data"]
+            profile_data = await get_droid_data(uid)["user_data"]
             profile_embed = discord.Embed()
 
             profile_embed.set_thumbnail(url=profile_data['avatar_url'])
@@ -233,7 +233,7 @@ class OsuDroid(commands.Cog):
         if not uid:
             return await ctx.reply("Você esqueceu de por para qual usuário(a) você quer setar!")
 
-        user_data = get_droid_data(uid)["user_data"]
+        user_data = await get_droid_data(uid)["user_data"]
 
         DATABASE.child("DROID_USERS").child(ctx.author.id).set({"user": user_data})
 
