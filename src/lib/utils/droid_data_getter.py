@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from html.parser import HTMLParser
 from datetime import datetime
 from src.settings import DATABASE
-from apscheduler.schedulers import AsyncIOScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from random import randint
 
@@ -97,7 +97,7 @@ def get_droid_data(user_id):
 
     droid_parser = DroidParser()
     droid_parser.feed(str(droid_data_soup))
-    data_dicts = {}
+    # data_dicts = {}
 
     beatmap_dicts = {}
     
@@ -148,12 +148,12 @@ def get_droid_data(user_id):
     except NameError:
         data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": [{"s": "OFFLINE"}]}
     
-    data_dicts.update(data_dict)
     if pp_data != "offline":
         trigger = CronTrigger(hour=1, minute=randint(0, 59))
             
         updated_user_data = droid_scheduler.addjob(get_droid_data(user_id)["user_data"]["pp_raw"], trigger)
         droid_scheduler.addjob(lambda: DATABASE.child("DROID_UID_DATA").child(user_id).set(updated_user_data) if updated_user_data != "OFFLINE" else print(), trigger)
             
-    return data_dicts
+    # return data_dicts
+    return data_dict
 
