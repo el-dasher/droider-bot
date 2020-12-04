@@ -103,7 +103,7 @@ def get_droid_data(user_id):
             "score": int(data[1].replace(",", "")),
             "mods": data[2],
             "combo": int(data[3][:-2]),
-            "accuracy": data[4][:-1]
+            "accuracy": float(data[4][:-1])
         }
 
         try:
