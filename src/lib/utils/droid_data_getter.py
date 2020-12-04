@@ -95,7 +95,7 @@ def get_droid_data(user_id):
     data_dicts = {}
 
     beatmap_dicts = {}
-    backup_pp_data = DATABASE.child("DROID_UID_DATA").child(uid).child("raw_pp").get().val()
+    backup_pp_data = DATABASE.child("DROID_UID_DATA").child(user_id).child("raw_pp").get().val()
     
     if pp_data == "OFFLINE":
     	if backup_pp_data != []:
@@ -139,7 +139,7 @@ def get_droid_data(user_id):
         except NameError:
             data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": [{"s": "OFFLINE"}]}
         
-        DATABASE.child("DROID_UID_DATA").child(uid).set(user_data)
+        DATABASE.child("DROID_UID_DATA").child(user_id).set(user_data)
         data_dicts.update(data_dict)
 
     return data_dicts
