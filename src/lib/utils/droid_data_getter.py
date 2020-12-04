@@ -109,7 +109,7 @@ def get_droid_data(user_id):
     	    pp_data = "OFFLINE"
     else:
         pp_data = float(pp_data[8][9:].strip())
-   print(DATABASE.child("DROID_UID_DATA").child(user_id).get().val()))
+    print(DATABASE.child("DROID_UID_DATA").child(user_id).get().val()))
     for i, data in enumerate(beatmap_data):
         beatmap_dicts[f"rs_{i}"] = {
             "username": old_data[26][0],
