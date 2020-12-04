@@ -153,5 +153,5 @@ async def get_droid_data(user_id):
     return data_dict
 
 async def save_droid_uid_data(uid):
-    DATABASE.child("DROID_UID_DATA").child(user_id).set(updated_user_data)da(), trigger)
+    DATABASE.child("DROID_UID_DATA").child(user_id).set(updated_user_data)
     
