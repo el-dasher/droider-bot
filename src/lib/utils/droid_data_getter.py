@@ -84,7 +84,7 @@ def get_droid_data(user_id):
             except IndexError:
                 pass
 
-        ppcheck_data = [{"s": "ONLINE"}]
+        ppcheck_data = []
 
         for x, y in zip(completed_pp_data[::2], completed_pp_data[1::2]):
             ppcheck_data.append({"beatmap-mod": x, "pp_raw": y})
