@@ -94,7 +94,7 @@ class OsuGame(commands.Cog):
         ))
 
         
-       user_embed.set_thumbnail(url=f"https://a.ppy.sh/{user_json['user_id']}")
+        user_embed.set_thumbnail(url=f"https://a.ppy.sh/{user_json['user_id']}")
         user_embed.set_footer(text=f"Level: {profile_level:.2f}")
        
         await ctx.reply(content=f"<@{ctx.author.id}>", embed=user_embed)
