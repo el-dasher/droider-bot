@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup
 from html.parser import HTMLParser
 from datetime import datetime
 
+ppcheck_data = []
+
 
 def get_droid_data(user_id):
 
@@ -75,7 +77,7 @@ def get_droid_data(user_id):
         for _ in range(9):
             completed_pp_data.pop(0)
 
-        ppcheck_data = []
+        ppcheck_data = [{"s": "ONLINE"}]
 
         for x, y in zip(completed_pp_data[::2], completed_pp_data[1::2]):
             ppcheck_data.append({"beatmap-mod": x, "pp_raw": y})
@@ -87,7 +89,7 @@ def get_droid_data(user_id):
     beatmap_dicts = {}
 
     for i, data in enumerate(beatmap_data):
-        beatmap_dicts[f"rs_{i}"] = ({
+        beatmap_dicts[f"rs_{i}"] = {
                 "username": old_data[26][0],
                 "beatmap": data[5],
                 "date": data[0],
@@ -95,15 +97,19 @@ def get_droid_data(user_id):
                 "mods": data[2],
                 "combo": int(data[3][:-2]),
                 "accuracy": data[4][:-1]
-            })
+            }
+        user_data = {
+                "username": old_data[26][0],
+                "raw_pp": float(pp_data[8][9:].strip()) if pp_data != "OFFLINE" else pp_data,
+                "total_score": int(old_data[-13][0].replace(",", "")),
+                "overall_acc": old_data[-11][0][:-1],
+                "playcount": old_data[-9][0]
+            }
 
-        data_dict = {"user_data": {
-            "username": old_data[26][0],
-            "raw_pp": float(pp_data[8][9:].strip()) if pp_data != "OFFLINE" else pp_data,
-            "total_score": int(old_data[-13][0].replace(",", "")),
-            "overall_acc": old_data[-11][0][:-1],
-            "playcount": old_data[-9][0]
-        }, "beatmap_data": beatmap_dicts, "pp_data": ppcheck_data}
+        try:
+            data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": ppcheck_data}
+        except NameError:
+            data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": [{"s": "OFFLINE"}]}
 
         data_dicts.update(data_dict)
 

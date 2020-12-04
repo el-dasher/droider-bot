@@ -7,7 +7,6 @@ from src.settings import DATABASE
 from dateutil.parser import parse
 from datetime import datetime
 from src.lib.utils.droid_data_getter import get_droid_data
-from operator import itemgetter
 
 osu_api = ossapi(getenv("OSU_API"))
 
@@ -75,13 +74,13 @@ class OsuGame(commands.Cog):
         )
 
         user_embed.add_field(name="__Performance__", value=(
-                "**"
-                f"Accuracy: `{profile_acc :.2f}`\nPP: `{profile_pp:.2f}`\n"
-                f"Rank PP: `#{user_json['pp_rank']}`\n"
-                f"RANK {(country := user_json['country'])}(:flag_{country.lower()}:): `#{user_json['pp_country_rank']}`"
-                "**"
-            )
+            "**"
+            f"Accuracy: `{profile_acc :.2f}`\nPP: `{profile_pp:.2f}`\n"
+            f"Rank PP: `#{user_json['pp_rank']}`\n"
+            f"RANK {(country := user_json['country'])}(:flag_{country.lower()}:): `#{user_json['pp_country_rank']}`"
+            "**"
         )
+                             )
 
         profile_best_play = osu_api.get_user_best({"u": user_json['user_id']})[0]
         played_beatmap_profile = osu_api.get_beatmaps({"b": profile_best_play["beatmap_id"]})[0]
@@ -180,7 +179,9 @@ class OsuGame(commands.Cog):
     @commands.command(name="ppcheck")
     async def pp_check(self, ctx, uid):
         top_plays = get_droid_data(uid)["pp_data"][:5]
-        # print(top_plays)
+        if await self.is_pp_board_on(ctx, top_plays) is False:
+            return
+
         await ctx.reply(top_plays)
 
     @commands.command()
@@ -189,6 +190,14 @@ class OsuGame(commands.Cog):
             await ctx.reply(get_droid_data(uid)["user_data"])
         except KeyError:
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
+
+    @commands.command()
+    async def is_pp_board_on(self, ctx: discord.ext.commands.Context, list_array: list):
+        if list_array == []:
+            await ctx.reply("O usuário que você citou talvez não tenha plays, ou a pp_board do rian3337 está offline!")
+            return False
+        else:
+            return True
 
 
 def setup(bot):
