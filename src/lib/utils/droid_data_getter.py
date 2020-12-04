@@ -142,7 +142,7 @@ def get_droid_data(user_id):
             data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": ppcheck_data}
         except NameError:
             data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": [{"s": "OFFLINE"}]}
-        if pp_data != offline:
+        if pp_data != "offline":
             DATABASE.child("DROID_UID_DATA").child(user_id).set(user_data)
         data_dicts.update(data_dict)
 
