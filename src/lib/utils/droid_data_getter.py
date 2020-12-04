@@ -11,7 +11,7 @@ from random import randint
 ppcheck_data = []
 
 
-def get_droid_data(user_id):
+async def get_droid_data(user_id):
     # noinspection PyGlobalUndefined
     
     droid_scheduler = AsyncIOScheduler
