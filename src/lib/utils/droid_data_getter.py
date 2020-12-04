@@ -150,8 +150,8 @@ def get_droid_data(user_id):
         if pp_data != "offline":
             trigger = CronTrigger(hour=1, minute=randint(0, 59))
             
-            updated_user_data = droid_scheduler.addjob(get_droid_data(user_id), trigger)
-            droid_scheduler.addjob(lambda: DATABASE.child("DROID_UID_DATA").child(user_id).set(updated_user_data), trigger)
+            updated_user_data = droid_scheduler.addjob(get_droid_data(user_id)["user_data"]["pp_raw"], trigger)
+            droid_scheduler.addjob(lambda: DATABASE.child("DROID_UID_DATA").child(user_id).set(updated_user_data) if updated_user_data != "OFFLINE" else print(), trigger)
             
         data_dicts.update(data_dict)
 
