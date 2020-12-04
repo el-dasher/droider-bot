@@ -100,7 +100,7 @@ def get_droid_data(user_id):
             "username": old_data[26][0],
             "beatmap": data[5],
             "date": data[0],
-            "score": int(data[1].replace(",", "")),
+            "score": data[1],
             "mods": data[2],
             "combo": int(data[3][:-2]),
             "accuracy": float(data[4][:-1])
