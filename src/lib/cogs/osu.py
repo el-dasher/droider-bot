@@ -168,41 +168,84 @@ class OsuGame(commands.Cog):
 
 
 class OsuDroid(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self.missing_uid_msg = "Você esqueceu de por a `<uid>` do usuário!"
+        self.missing_uid_msg = "Você esqueceu de por a `<uid>` do usuário!" \
+                               " você também pode setar seu usuário com `ms!droidset <user>`"
 
     @commands.Cog.listener()
     async def on_ready(self):
         ready_up_cog(self.bot, __name__)
 
-    @commands.command()
+    @commands.command(name="d/rs", aliases=["d/recentme"])
     async def droidrecent(self, ctx, uid=None):
         if uid is None:
-            return await ctx.reply(self.missing_uid_msg)
+            try:
+                uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
+            except Exception as e:
+                print(e)
+                return await ctx.reply(self.missing_uid_msg)
         try:
             await ctx.reply(f"Sua play mais recente: {get_droid_data(uid)['beatmap_data']['rs_1']}")
         except KeyError:
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
 
-    @commands.command(name="ppcheck")
+    @commands.command(name="d/ppcheck")
     async def pp_check(self, ctx, uid=None):
         if uid is None:
-            return await ctx.reply(self.missing_uid_msg)
+            try:
+                uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
+            except Exception as e:
+                print(e)
+                return await ctx.reply(self.missing_uid_msg)
         top_plays = get_droid_data(uid)["pp_data"][:5]
-        if await self.is_pp_board_on(ctx, top_plays) is False:
-            return
 
         await ctx.reply(top_plays)
 
-    @commands.command()
-    async def droidpfme(self, ctx, uid=None):
+    @commands.command(aliases=["d/pfme"])
+    async def droid_pfme(self, ctx, uid=None):
         if uid is None:
-            return await ctx.reply(self.missing_uid_msg)
+            try:
+                uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
+            except Exception as e:
+                print(e)
+                return await ctx.reply(self.missing_uid_msg)
         try:
-            await ctx.reply(get_droid_data(uid)["user_data"])
+            profile_data = get_droid_data(uid)["user_data"]
+            profile_embed = discord.Embed()
+
+            profile_embed.set_thumbnail(url=profile_data['avatar_url'])
+            profile_embed.set_author(url=f"http://ops.dgsrz.com/profile.php?uid={uid}",
+                                     name=f"Perfil do(a) {profile_data['username']}")
+
+            profile_embed.add_field(name="---Performance", value="**"
+                                                                 f"Total score: `{profile_data['total_score']}`\n"
+                                                                 f"Performance: `{profile_data['raw_pp']}dpp`\n"
+                                                                 f"Overall acc: `{profile_data['overall_acc']}`\n"
+                                                                 f"Playcount: `{profile_data['playcount']}`"
+                                                                 f"**")
+
+            await ctx.reply(content=f"<@{ctx.author.id}>", embed=profile_embed)
         except KeyError:
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
+
+    @commands.command(name="droidset")
+    async def droid_set(self, ctx, uid=None):
+
+        if not uid:
+            return await ctx.reply("Você esqueceu de por para qual usuário(a) você quer setar!")
+
+        user_data = get_droid_data(uid)["user_data"]
+
+        DATABASE.child("DROID_USERS").child(ctx.author.id).set({"user": user_data})
+
+        droidset_embed = discord.Embed(
+            title=f"Você cadastrou seu usuário! {user_data['username']}"
+        )
+
+        droidset_embed.set_image(url=user_data["avatar_url"])
+
+        await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
     @commands.command()
     async def is_pp_board_on(self, ctx: discord.ext.commands.Context, list_array: list):

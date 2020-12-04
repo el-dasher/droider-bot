@@ -12,6 +12,7 @@ def get_droid_data(user_id):
     global ppcheck_data
     old_data = []
     beatmap_data = []
+    html_imgs = []
 
     user_url = f"http://ops.dgsrz.com/profile.php?uid={user_id}"
     droid_html = urlopen(user_url).read()
@@ -41,6 +42,10 @@ def get_droid_data(user_id):
 
                 except Exception:
                     pass
+
+        def handle_starttag(self, tag, attrs):
+            if tag == "img":
+                html_imgs.append(attrs)
 
     pp_user_url = f"https://ppboard.herokuapp.com/profile?uid={user_id}"
 
@@ -104,19 +109,20 @@ def get_droid_data(user_id):
         try:
             user_data = {
                 "username": old_data[26][0],
+                "avatar_url": html_imgs[3][0][1],
+                "user_id": user_id,
                 "raw_pp": float(pp_data[8][9:].strip()) if pp_data != "OFFLINE" else pp_data,
-                "total_score": int(old_data[-13][0].replace(",", "")),
-                "overall_acc": old_data[-11][0][:-1],
-                "playcount": old_data[-9][0]
+                "total_score": old_data[-13][0],
+                "overall_acc": float(old_data[-11][0][:-1]),
+                "playcount": int(old_data[-9][0])
             }
         except ValueError:
             user_data = {
                 "username": old_data[26][0],
                 "raw_pp": float(pp_data[8][9:].strip()) if pp_data != "OFFLINE" else pp_data,
-                "total_score": int(old_data[-12][0].replace(",", "")),
-                "overall_acc": old_data[-10][0][:-1],
+                "total_score": old_data[-12][0],
+                "overall_acc": float(old_data[-10][0][:-1])
             }
-
         try:
             data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": ppcheck_data}
         except NameError:
