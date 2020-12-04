@@ -96,9 +96,7 @@ class OsuGame(commands.Cog):
         print(profile_best_play)
 
         user_embed.set_footer(text=f"Level: {profile_level:.2f}")
-        user_embed.set_thumbnail(url=f"https://a.ppy.sh/{user_json['user_id']}")
-
-        await ctx.reply(content=f":flag_{user_json['country'].lower()}:")
+       
         await ctx.reply(content=f"<@{ctx.author.id}>", embed=user_embed)
 
     @commands.command(aliases=["osuset"])
