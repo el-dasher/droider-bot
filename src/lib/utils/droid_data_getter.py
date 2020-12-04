@@ -54,7 +54,7 @@ def get_droid_data(user_id):
     try:
         pp_html = urlopen(pp_user_url).read()
     except Exception:
-        pp_data = "OFFLINE"
+        pp_board_state = "OFFLINE"
         completed_pp_data = None
     else:
         pp_data_soup = BeautifulSoup(pp_html, features="html.parser")
@@ -95,11 +95,15 @@ def get_droid_data(user_id):
     data_dicts = {}
 
     beatmap_dicts = {}
-    backup_pp_data = DATABASE.child("DROID_UID_DATA").child(user_id).child("raw_pp").get().val()
+    backup_pp_data = DATABASE.child("DROID_UID_DATA").child(user_id).get().val()["raw_pp"]
     
     if pp_data == "OFFLINE":
     	if backup_pp_data != []:
     		pp_data = backup_pp_data
+    	else:
+    	    pp_data = "OFFLINE"
+    else:
+        pp_data = float(pp_data[8][9:].strip())
    
     for i, data in enumerate(beatmap_data):
         beatmap_dicts[f"rs_{i}"] = {
@@ -118,7 +122,7 @@ def get_droid_data(user_id):
                 "avatar_url": html_imgs[3][0][1],
                 "user_id": user_id,
                 "country": old_data[27][0],
-                "raw_pp": float(pp_data[8][9:].strip()) if pp_data != "OFFLINE" else pp_data,
+                "raw_pp": pp_data,
                 "total_score": old_data[-13][0],
                 "overall_acc": float(old_data[-11][0][:-1]),
                 "playcount": int(old_data[-9][0])
@@ -129,7 +133,7 @@ def get_droid_data(user_id):
                 "avatar_url": html_imgs[3][0][1],
                 "user_id": user_id,
                 "country": old_data[27][0],
-                "raw_pp": float(pp_data[8][9:].strip()) if pp_data != "OFFLINE" else pp_data,
+                "raw_pp": pp_data,
                 "total_score": old_data[-12][0],
                 "overall_acc": float(old_data[-10][0][:-1]),
                 "playcount": "Erro!"
