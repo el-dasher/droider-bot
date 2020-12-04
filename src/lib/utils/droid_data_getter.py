@@ -8,7 +8,6 @@ ppcheck_data = []
 
 
 def get_droid_data(user_id):
-
     # noinspection PyGlobalUndefined
     global ppcheck_data
     old_data = []
@@ -75,7 +74,10 @@ def get_droid_data(user_id):
         pp_parser.feed(str(pp_data_soup))
 
         for _ in range(9):
-            completed_pp_data.pop(0)
+            try:
+                completed_pp_data.pop(0)
+            except IndexError:
+                pass
 
         ppcheck_data = [{"s": "ONLINE"}]
 
@@ -90,20 +92,29 @@ def get_droid_data(user_id):
 
     for i, data in enumerate(beatmap_data):
         beatmap_dicts[f"rs_{i}"] = {
-                "username": old_data[26][0],
-                "beatmap": data[5],
-                "date": data[0],
-                "score": int(data[1].replace(",", "")),
-                "mods": data[2],
-                "combo": int(data[3][:-2]),
-                "accuracy": data[4][:-1]
-            }
-        user_data = {
+            "username": old_data[26][0],
+            "beatmap": data[5],
+            "date": data[0],
+            "score": int(data[1].replace(",", "")),
+            "mods": data[2],
+            "combo": int(data[3][:-2]),
+            "accuracy": data[4][:-1]
+        }
+
+        try:
+            user_data = {
                 "username": old_data[26][0],
                 "raw_pp": float(pp_data[8][9:].strip()) if pp_data != "OFFLINE" else pp_data,
                 "total_score": int(old_data[-13][0].replace(",", "")),
                 "overall_acc": old_data[-11][0][:-1],
                 "playcount": old_data[-9][0]
+            }
+        except ValueError:
+            user_data = {
+                "username": old_data[26][0],
+                "raw_pp": float(pp_data[8][9:].strip()) if pp_data != "OFFLINE" else pp_data,
+                "total_score": int(old_data[-12][0].replace(",", "")),
+                "overall_acc": old_data[-10][0][:-1],
             }
 
         try:

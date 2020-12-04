@@ -164,20 +164,31 @@ class OsuGame(commands.Cog):
             recent_embed.set_author(icon_url=f"https://a.ppy.sh/{rs_user_json['user_id']}",
                                     name=f"Play recente do(a) {username}")
 
-            print(played_map)
-            print(recentplay)
-
             await ctx.reply(embed=recent_embed)
 
+
+class OsuDroid(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        self.missing_uid_msg = "Você esqueceu de por a `<uid>` do usuário!"
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        ready_up_cog(self.bot, __name__)
+
     @commands.command()
-    async def droidrecent(self, ctx, uid):
+    async def droidrecent(self, ctx, uid=None):
+        if uid is None:
+            return await ctx.reply(self.missing_uid_msg)
         try:
             await ctx.reply(f"Sua play mais recente: {get_droid_data(uid)['beatmap_data']['rs_1']}")
         except KeyError:
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
 
     @commands.command(name="ppcheck")
-    async def pp_check(self, ctx, uid):
+    async def pp_check(self, ctx, uid=None):
+        if uid is None:
+            return await ctx.reply(self.missing_uid_msg)
         top_plays = get_droid_data(uid)["pp_data"][:5]
         if await self.is_pp_board_on(ctx, top_plays) is False:
             return
@@ -185,7 +196,9 @@ class OsuGame(commands.Cog):
         await ctx.reply(top_plays)
 
     @commands.command()
-    async def droidpfme(self, ctx, uid):
+    async def droidpfme(self, ctx, uid=None):
+        if uid is None:
+            return await ctx.reply(self.missing_uid_msg)
         try:
             await ctx.reply(get_droid_data(uid)["user_data"])
         except KeyError:
@@ -202,3 +215,4 @@ class OsuGame(commands.Cog):
 
 def setup(bot):
     bot.add_cog(OsuGame(bot))
+    bot.add_cog(OsuDroid(bot))
