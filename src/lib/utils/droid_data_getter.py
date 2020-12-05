@@ -149,7 +149,7 @@ async def get_droid_data(user_id):
         data_dict = dict({"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": [{"s": "OFFLINE"}]})
     
     if pp_data != "offline":
-        await save_droid_uid_data(user_id, data_dict)
+        await save_droid_uid_data(user_id, user_data)
     # return data_dicts
     return data_dict
 
