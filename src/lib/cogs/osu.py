@@ -132,7 +132,7 @@ class OsuGame(commands.Cog):
                 return "index_error"
         if user:
             print(mention_to_uid(user))
-            user = self.get_user(DATABASE.child("OSU_USERS").child(mention_to_uid(user)).get().val()["user"])
+            user = self.get_user(DATABASE.child("OSU_USERS").child(mention_to_uid(user)[0]).get().val()["user"])
         else:
             try:
                 user = self.get_user(DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"])
