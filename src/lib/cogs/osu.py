@@ -242,8 +242,6 @@ class OsuDroid(commands.Cog):
                                                             f"Feito em: `{rs_data['date']}`\n"
                                                             "**")
                                                             
-                
-        
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=rs_embed)
     """
     @commands.command(name="ppcheck")
