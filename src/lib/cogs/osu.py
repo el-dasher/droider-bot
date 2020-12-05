@@ -125,18 +125,22 @@ class OsuGame(commands.Cog):
 
     @commands.command(name="osu-rs")
     async def recent(self, ctx, *user):
-        if user:
-            user = self.get_user(user)
+        def get_username(user_):
             try:
-                username = osu_api.get_user({'u': user})[0]['username']
+                return osu_api.get_user({'u': user_})[0]['username']
             except IndexError:
                 return await ctx.reply(f"Não foi possivel encontrar o usuário: {user}")
+    
+        if user:
+            user = self.get_user(user)
         else:
-            user = osu_api.get_user({"u": DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"]})[0]
-            await ctx.reply(
+            user = self.get_user(DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"])
+            print(user)
+            await ctx.reply()
                 "Você não tem uma conta cadastrada, utilize `ms!osuset <user>`"
                 "ou informe qual usuario você quer pegar a play recente `ms!rs <user>`"
             )
+        username = get_username(user)
 
         try:
             recentplay = osu_api.get_user_recent({"u": user})[0]
