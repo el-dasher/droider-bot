@@ -38,7 +38,7 @@ class OsuGame(commands.Cog):
         try:
             user_json = osu_api.get_user({"u": DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"]})[0]
         except TypeError:
-            await ctx.reply("Você não possui uma conta cadastrada, use `osu!set <user>`")
+            await ctx.reply("Você não possui uma conta cadastrada, use `ms!osuset <user>`")
             return
 
         if user:
@@ -133,7 +133,6 @@ class OsuGame(commands.Cog):
             except IndexError:
                 return "index_error"
         if user:
-            print(mention_to_uid(user))
             user = DATABASE.child("OSU_USERS").child(mention_to_uid(user)).get().val()["user"]
         else:
             try:
@@ -175,9 +174,8 @@ class OsuGame(commands.Cog):
             recent_embed.set_author(icon_url=f"https://a.ppy.sh/{rs_user_json['user_id']}",
                                     name=f"Play recente do(a) {username}")
 
-            await ctx.reply(embed=recent_embed)
-
-
+            await ctx.reply(content=f"<@{ctx.author.id}>", embed=recent_embed)
+    
 class OsuDroid(commands.Cog):
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
