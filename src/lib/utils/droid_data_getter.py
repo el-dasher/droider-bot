@@ -143,7 +143,7 @@ async def get_droid_data(user_id):
         }
         
     try:
-        data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": ppcheck_data}
+        data_dict = dict({"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": ppcheck_data})
     except NameError:
         data_dict = dict({"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": [{"s": "OFFLINE"}]})
     
