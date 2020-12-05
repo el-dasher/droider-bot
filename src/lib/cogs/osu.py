@@ -136,7 +136,7 @@ class OsuGame(commands.Cog):
         else:
             user = self.get_user(DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"])
             print(user)
-            await ctx.reply()
+            await ctx.reply(
                 "Você não tem uma conta cadastrada, utilize `ms!osuset <user>`"
                 "ou informe qual usuario você quer pegar a play recente `ms!rs <user>`"
             )
