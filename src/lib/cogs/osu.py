@@ -262,9 +262,10 @@ class OsuDroid(commands.Cog):
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
     @commands.command(hidden=True)
-    async def is_pp_board_on(self, ctx: discord.ext.commands.Context, list_array: list):
+    async def is_pp_board_on(self, ctx: discord.ext.commands.Context = None, list_array: list):
         if list_array == []:
-            await ctx.reply("O usuário que você citou talvez não tenha plays, ou a pp_board do rian3337 está offline!")
+            if ctx is not None:
+                await ctx.reply("O usuário que você citou talvez não tenha plays, ou a pp_board do rian3337 está offline!")
             return False
         else:
             return True
