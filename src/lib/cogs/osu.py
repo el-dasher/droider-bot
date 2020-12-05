@@ -272,9 +272,12 @@ class OsuDroid(commands.Cog):
         elif len(uid) >= 9:
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
         try:
-            profile_data = (await get_droid_data(uid))["user_data"]
-            if profile_data["username"] == "153460":
+            try:
+                profile_data = (await get_droid_data(uid))["user_data"]
+            except IndexError:
                 return await ctx.reply(f"Não existe uma uid chamada: {uid}")
+            # if profile_data["username"] == "153460":
+            #    return await ctx.reply(f"Não existe uma uid chamada: {uid}")
             profile_embed = discord.Embed()
 
             profile_embed.set_thumbnail(url=profile_data['avatar_url'])
