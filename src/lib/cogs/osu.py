@@ -262,6 +262,8 @@ class OsuDroid(commands.Cog):
         Veja seu lindo perfil do osu!droid,
         ou o perfil de outra pessoa, e por favor rian não me mata.
         """
+        
+        uid_original = uid
     
         if uid is None:
             try:
@@ -275,7 +277,7 @@ class OsuDroid(commands.Cog):
             try:
                 profile_data = (await get_droid_data(uid))["user_data"]
             except IndexError:
-                return await ctx.reply(f"Não existe uma uid chamada: {uid}")
+                return await ctx.reply(f"Não existe uma uid chamada: {uid_original}")
             # if profile_data["username"] == "153460":
             #    return await ctx.reply(f"Não existe uma uid chamada: {uid}")
             profile_embed = discord.Embed()
