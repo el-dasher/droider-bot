@@ -23,7 +23,7 @@ class OsuGame(commands.Cog):
     async def on_ready(self):
         ready_up_cog(self.bot, __name__)
 
-    @commands.command(aliases=["osu"])
+    @commands.command(name="osu -pf", aliases=["osu", "osu -pfme"])
     async def osuplayer(self, ctx: commands.Context, *user):
         # user_json = osu_api.get_user({"u": user})[0]
         try:
@@ -99,7 +99,7 @@ class OsuGame(commands.Cog):
        
         await ctx.reply(content=f"<@{ctx.author.id}>", embed=user_embed)
 
-    @commands.command(aliases=["osuset"])
+    @commands.command(name="osu -set", aliases=["osuset"])
     async def osu_set(self, ctx, *user):
         if user:
             user = self.get_user(user)
@@ -120,7 +120,7 @@ class OsuGame(commands.Cog):
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=osuset_embed)
 
-    @commands.command()
+    @commands.command(name="osu -rs")
     async def recent(self, ctx, *user):
         if user:
             user = self.get_user(user)
@@ -175,7 +175,7 @@ class OsuDroid(commands.Cog):
     async def on_ready(self):
         ready_up_cog(self.bot, __name__)
 
-    @commands.command(name="d/rs", aliases=["d/recentme"])
+    @commands.command(name="rs", aliases=["recentme"])
     async def droidrecent(self, ctx, uid=None):
         if uid is None:
             try:
@@ -188,8 +188,11 @@ class OsuDroid(commands.Cog):
         except KeyError:
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
 
-    @commands.command(name="d/ppcheck")
+    @commands.command(name="ppcheck")
     async def pp_check(self, ctx, uid=None):
+        """
+        TEXTO
+        """
         if uid is None:
             try:
                 uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
@@ -200,7 +203,7 @@ class OsuDroid(commands.Cog):
 
         await ctx.reply(top_plays)
 
-    @commands.command(aliases=["d/pfme"])
+    @commands.command(name="pfme" aliases=["pf"])
     async def droid_pfme(self, ctx, uid=None):
         
         if uid is None:
