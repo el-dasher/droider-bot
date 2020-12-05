@@ -104,7 +104,7 @@ async def get_droid_data(user_id):
     print(DATABASE.child("DROID_UID_DATA").child(user_id).get().val())
     if pp_data == "OFFLINE":
     	if (backup_pp_data := DATABASE.child("DROID_UID_DATA").child(user_id).get().val()) is not None:
-    		pp_data = backup_pp_data["pp_raw"]
+    		pp_data = backup_pp_data["raw_pp"]
     else:
         pp_data = float(pp_data[8][9:].strip())
 
