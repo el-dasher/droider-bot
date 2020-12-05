@@ -90,7 +90,7 @@ class OsuGame(commands.Cog):
 
         user_embed.add_field(name="__Melhor play__", value=(
             "**"
-            f"PP: `{int(profile_best_play['pp'])}pp`\n"
+            f"PP: `{int(float(profile_best_play['pp']))}pp`\n"
             f"Beatmap: [{played_beatmap_profile['title']}](https://osu.ppy.sh/beatmapsets/{profile_best_play['beatmap_id']})\n"
             f"Rank: `{profile_best_play['rank']}`"
             "**"
