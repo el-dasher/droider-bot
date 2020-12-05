@@ -11,9 +11,9 @@ from src.lib.utils.droid_data_getter import get_droid_data
 osu_api = ossapi(getenv("OSU_API"))
 
 def mention_to_uid(msg):
-    if "<@!" in user:
+    if "<@!" in msg:
         return msg.replace("<@!", "").replace(">", "")
-    elif "<@" in user:
+    elif "<@" in msg:
         return msg.replace("<@", "").replace(">", "")
     else:
         return msg
@@ -226,7 +226,7 @@ class OsuDroid(commands.Cog):
                                                             
                 
         
-            await ctx.reply(content=ctx.author.id, embed=rs_embed)
+            await ctx.reply(content=f"<@{ctx.author.id}>", embed=rs_embed)
     """
     @commands.command(name="ppcheck")
     async def pp_check(self, ctx, uid=None):
