@@ -32,7 +32,7 @@ class OsuGame(commands.Cog):
     async def on_ready(self):
         ready_up_cog(self.bot, __name__)
 
-    @commands.command(name="osu -pf", aliases=["osu", "osu -pfme"])
+    @commands.command(name="osu-pf", aliases=["osu", "osu -pfme"])
     async def osuplayer(self, ctx: commands.Context, *user):
         # user_json = osu_api.get_user({"u": user})[0]
         try:
@@ -103,7 +103,7 @@ class OsuGame(commands.Cog):
        
         await ctx.reply(content=f"<@{ctx.author.id}>", embed=user_embed)
 
-    @commands.command(name="osu -set", aliases=["osuset"])
+    @commands.command(name="osu-set", aliases=["osuset"])
     async def osu_set(self, ctx, *user):
         if user:
             user = self.get_user(user)
