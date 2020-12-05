@@ -203,6 +203,7 @@ class OsuDroid(commands.Cog):
     @commands.command(aliases=["d/pfme"])
     async def droid_pfme(self, ctx, uid=None):
         if uid is None:
+            print(get_droid_data(uid))
             try:
                 uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
             except Exception as e:
