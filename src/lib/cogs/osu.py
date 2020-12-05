@@ -10,7 +10,15 @@ from src.lib.utils.droid_data_getter import get_droid_data
 
 osu_api = ossapi(getenv("OSU_API"))
 
+def mention_to_uid(msg):
+    if "<@!" in user:
+        return msg.replace("<@!", "").replace(">", "")
+    elif "<@" in user:
+        return msg.replace("<@", "").replace(">", "")
+    else:
+        return msg
 
+    
 class OsuGame(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -35,14 +43,9 @@ class OsuGame(commands.Cog):
         if user:
             user = self.get_user(user)
             if "" in user:
-                if "<@!" in user:
-                    user = user.replace("<@!", "").replace(">", "")
-                elif "<@" in user:
-                    user = user.replace("<@", "").replace(">", "")
-
+                mention_to_uid(user)
                 try:
                     user_json = osu_api.get_user({"u": DATABASE.child("OSU_USERS").get().val()[user]["user"]})
-
                 except KeyError:
                     user_json = osu_api.get_user({"u": user})
 
