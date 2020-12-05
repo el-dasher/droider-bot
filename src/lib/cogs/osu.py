@@ -181,16 +181,44 @@ class OsuDroid(commands.Cog):
         Veja sua play mais recente do osu!droid, ou a de outro jogador
         se você passar o paramêtro de <uid>, ms!rs <uid>
         """
+        
         if uid is None:
             try:
                 uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
             except Exception as e:
                 print(e)
                 return await ctx.reply(self.missing_uid_msg)
+        _droid_data = await get_droid_data(uid)
         try:
-            await ctx.reply(f"Sua play mais recente: {(await get_droid_data(uid))['beatmap_data']['rs_0']}")
+            rs_data = rs_data["beatmap_data"]["rs_0"]
         except KeyError:
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
+        else:
+            rs_embed = discord.embed()
+            rs_embed.set_author(f"Play recente do(a) {rs_data['username']}")
+            
+            mod_dict = {
+                "None": "NM",
+                "Hidden": "HD",
+                "DoubleTime": "DT",
+                "HardRock": "HR",
+                "Precise": "PR"
+            }
+            
+            await ctx.reply(rs_embed.add_field(
+                name="Dados da play", value=(
+                            f"**"
+                            f"Beatmap: `{rs_data['beatmap']}`\n"
+                            f"Acurácia: {rs_data['accuracy']}%\n"
+                            f"Score: `{rs_data['score']}`\n"
+                            f"Combo: `{rs_data['combo']}x`\n"
+                            f"Mods: `{mod_dict[str(rs_data['mods'])]}`"
+                            f"Feito em: `{rs_data['date']}`\n"
+                            "**"
+                        )
+                    )
+                )
+                
     
     """
     @commands.command(name="ppcheck")
