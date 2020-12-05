@@ -190,7 +190,7 @@ class OsuDroid(commands.Cog):
                 return await ctx.reply(self.missing_uid_msg)
         _droid_data = await get_droid_data(uid)
         try:
-            rs_data = rs_data["beatmap_data"]["rs_0"]
+            rs_data = _droid_data["beatmap_data"]["rs_0"]
         except KeyError:
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
         else:
