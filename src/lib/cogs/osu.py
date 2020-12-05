@@ -218,7 +218,7 @@ class OsuDroid(commands.Cog):
                                      name=f"Perfil do(a) {profile_data['username']}")
 
             profile_embed.add_field(name="---Performance", value="**"
-                                                                 f"Ele é do(a) {(user_country := profile_data['country'])}(:{user_country.lower()}_flag:)"
+                                                                 f"Ele é do(a) {(user_country := profile_data['country'])}(:{user_country.lower()}_flag:)\n"
                                                                  f"Total score: `{profile_data['total_score']}`\n"
                                                                  f"Performance: `{int(profile_data['raw_pp']) if profile_data['raw_pp'] != 'OFFLINE' else profile_data['raw_pp']}dpp`\n"
                                                                  f"Overall acc: `{profile_data['overall_acc']}%`\n"
