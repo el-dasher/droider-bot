@@ -209,6 +209,9 @@ class OsuDroid(commands.Cog):
                 "Precise": "PR"
             }
             
+            mods = ""
+            mods.join(mod) for mod in mod_dict[rs_data["mods"].strip().split(,)
+            
             await ctx.reply(rs_embed.add_field(
                 name="Dados da play", value=(
                             f"**"
@@ -216,7 +219,7 @@ class OsuDroid(commands.Cog):
                             f"Acurácia: {rs_data['accuracy']}%\n"
                             f"Score: `{rs_data['score']}`\n"
                             f"Combo: `{rs_data['combo']}x`\n"
-                            f"Mods: `{str(mod_dict[rs_data['mods']])}`"
+                            f"Mods: `{mods}`"
                             f"Feito em: `{rs_data['date']}`\n"
                             "**"
                         )
