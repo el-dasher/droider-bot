@@ -193,6 +193,8 @@ class OsuDroid(commands.Cog):
         se você passar o paramêtro de <uid>, ms!rs <uid>
         """
         
+        uid_original = uid
+        
         if uid is None:
             try:
                 uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
@@ -204,7 +206,7 @@ class OsuDroid(commands.Cog):
         try:
             _droid_data = await get_droid_data(uid)
         except IndexError:
-            return await ctx.reply(f"Não existe uma uid chamada: {uid}")
+            return await ctx.reply(f"Não existe uma uid chamada: {uid_original}")
         try:
             rs_data = _droid_data["beatmap_data"]["rs_0"]
         except KeyError:
