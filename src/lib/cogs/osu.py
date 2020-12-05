@@ -130,7 +130,7 @@ class OsuGame(commands.Cog):
             try:
                 return osu_api.get_user({'u': user_})[0]['username']
             except IndexError:
-                return index_error = True
+                index_error = True
     
         if user:
             user = self.get_user(user)
