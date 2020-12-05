@@ -163,9 +163,10 @@ class OsuGame(commands.Cog):
             recent_embed = discord.Embed(
                 description=f"**[{played_map['title']}](https://osu.ppy.sh/beatmapsets/{played_map['beatmapset_id']})"
                             f" ({(played_map['difficultyrating']):.2f}★)\n"
-                            f"Dificuldade: {played_map['version']}\n"
-                            f"Score: {recentplay['score']} •"
-                            f" {recentplay['maxcombo']}/{played_map['max_combo']}**",
+                            f"Dificuldade: `{played_map['version']}`\n"
+                            f"Score: `{recentplay['score']} •"
+                            f" {recentplay['maxcombo']}/{played_map['max_combo']}`**\n"
+                            f"Rank {recentplay['rank']} • [{recentplay['count300']} - {recentplay['count100']} - {recentplay['count50']} - {recentplay['countmiss']}]",
                 timestamp=parse(recentplay['date'])
             )
 
