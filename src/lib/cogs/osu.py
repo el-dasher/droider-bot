@@ -37,9 +37,8 @@ class OsuGame(commands.Cog):
         # user_json = osu_api.get_user({"u": user})[0]
         
         if user:
-            user = self.get_user(user)
+            user = self.get_user(mention_to_uid(user))
             if "" in user:
-                mention_to_uid(user)
                 try:
                     user_json = osu_api.get_user({"u": DATABASE.child("OSU_USERS").get().val()[user]["user"]})
                 except KeyError:
