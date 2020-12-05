@@ -195,7 +195,12 @@ class OsuDroid(commands.Cog):
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
         else:
             rs_embed = discord.Embed()
-            rs_embed.set_author(f"Play recente do(a) {rs_data['username']}")
+            rs_embed.set_author(
+                name=f"Play recente do(a) {rs_data['username']}",
+                icon_url=_droid_data["user_data"]["avatar_url"],
+                url=f"http://ops.dgsrz.com/profile.php?uid={uid}"
+            )
+    
             
             mod_dict = {
                 "None": "NM",
