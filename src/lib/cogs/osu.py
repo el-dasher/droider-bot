@@ -177,6 +177,10 @@ class OsuDroid(commands.Cog):
 
     @commands.command(name="rs", aliases=["recentme"])
     async def droidrecent(self, ctx, uid=None):
+        """
+        Veja sua play mais recente do osu!droid, ou a de outro jogador
+        se você passar o paramêtro de <uid>, ms!rs <uid>
+        """
         if uid is None:
             try:
                 uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
@@ -191,7 +195,9 @@ class OsuDroid(commands.Cog):
     @commands.command(name="ppcheck")
     async def pp_check(self, ctx, uid=None):
         """
-        TEXTO
+        Veja seus lindos pps do osu!droid :), ms!ppcheck <uid>,
+        Lembrando que você pode cadastrar seu usuário com ms!droidset <uid>!
+        Ai você não precisará passar o parâmetro de uid para ver seu usuário.
         """
         if uid is None:
             try:
@@ -203,8 +209,12 @@ class OsuDroid(commands.Cog):
 
         await ctx.reply(top_plays)
 
-    @commands.command(name="pfme", aliases=["pf"])
+    @commands.command(name="pf", aliases=["pfme"])
     async def droid_pfme(self, ctx, uid=None):
+        """
+        Veja seu lindo perfil do osu!droid,
+        ou o perfil de outra pessoa, e por favor rian não me mata.
+        """
         
         if uid is None:
             try:
