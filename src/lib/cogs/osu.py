@@ -212,6 +212,7 @@ class OsuDroid(commands.Cog):
             mods = ""
             for mod in rs_data["mods"].strip().split(","):
                 mods.join(mod_dict[mod.strip()])
+                print(mod, mods)
             print(mods)
             
             rs_embed.add_field(name="Dados da play", value="**"
