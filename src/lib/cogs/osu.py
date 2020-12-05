@@ -210,7 +210,7 @@ class OsuDroid(commands.Cog):
             }
             
             mod_list = [mod_dict[mod.strip()] for mod in rs_data["mods"].split(",")]
-            mods = "".join(Mods)
+            mods = "".join(mod_list)
             
             rs_embed.add_field(name="Dados da play", value="**"
                                                             f"Beatmap: `{rs_data['beatmap']}`\n"
