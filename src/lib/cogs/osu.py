@@ -213,14 +213,15 @@ class OsuDroid(commands.Cog):
             for mod in mod_dict[rs_data["mods"]].strip().split(","):
                 mods.join(mod)
             
-            rs_embed.add_field(name="Dados da play", value="**")
+            rs_embed.add_field(name="Dados da play", value="**"
                                                             f"Beatmap: `{rs_data['beatmap']}`\n"
                                                             f"Acurácia: `{rs_data['accuracy']}%`\n"
                                                             f"Score: `{rs_data['score']}`\n"
                                                             f"Combo: `{rs_data['combo']}x`\n"
                                                             f"Mods: `{mods}`"
                                                             f"Feito em: `{rs_data['date']}`\n"
-                                                            "**"
+                                                            "**")
+                                                            
                 
         
             await ctx.reply(embed=rs_embed)
