@@ -32,7 +32,7 @@ class OsuGame(commands.Cog):
     async def on_ready(self):
         ready_up_cog(self.bot, __name__)
 
-    @commands.command(name="osu-pf", aliases=["osu", "osu -pfme"])
+    @commands.command(name="osu", aliases=["osu", "osu -pfme"])
     async def osuplayer(self, ctx: commands.Context, *user):
         # user_json = osu_api.get_user({"u": user})[0]
         
