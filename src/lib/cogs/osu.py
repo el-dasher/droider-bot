@@ -213,7 +213,7 @@ class OsuDroid(commands.Cog):
             for mod in mod_dict[rs_data["mods"].strip().split(","):
                 mods.join(mod)
             
-            await ctx.reply(rs_embed.add_field(
+            rs_embed.add_field(
                 name="Dados da play", value=(
                             f"**"
                             f"Beatmap: `{rs_data['beatmap']}`\n"
@@ -225,7 +225,8 @@ class OsuDroid(commands.Cog):
                             "**"
                         )
                     )
-                )
+        
+            await ctx.reply(embed=rs_embed)
     """
     @commands.command(name="ppcheck")
     async def pp_check(self, ctx, uid=None):
