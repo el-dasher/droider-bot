@@ -202,6 +202,7 @@ class OsuDroid(commands.Cog):
 
     @commands.command(aliases=["d/pfme"])
     async def droid_pfme(self, ctx, uid=None):
+        print("AQUI")
         print(dict(await get_droid_data(uid)))
         if uid is None:
             try:
