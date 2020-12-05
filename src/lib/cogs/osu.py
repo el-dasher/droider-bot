@@ -126,12 +126,11 @@ class OsuGame(commands.Cog):
     @commands.command(name="osu-rs")
     async def recent(self, ctx, *user):
         async def get_username(user_):
-            index_error = False
             try:
                 return osu_api.get_user({'u': user_})[0]['username']
             except IndexError:
-                print()
-    
+                return "index_error"
+        
         if user:
             user = self.get_user(user)
         else:
@@ -142,8 +141,8 @@ class OsuGame(commands.Cog):
                 "ou informe qual usuario você quer pegar a play recente `ms!rs <user>`"
             )
         username = await get_username(user)
-        if index_error:
-            return ctx.reply("Erro de index")
+        if username == "index_error":
+            return await ctx.reply("Erro de index")
         try:
             recentplay = osu_api.get_user_recent({"u": user})[0]
         except IndexError:
