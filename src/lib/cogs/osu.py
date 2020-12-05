@@ -202,10 +202,7 @@ class OsuDroid(commands.Cog):
 
     @commands.command(aliases=["d/pfme"])
     async def droid_pfme(self, ctx, uid=None):
-        print("AQUI")
-        print(dict(await get_droid_data(uid)))
-        print("aqueeeee")
-        print(await get_droid_data(uid))
+        
         if uid is None:
             try:
                 uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
@@ -222,7 +219,7 @@ class OsuDroid(commands.Cog):
 
             profile_embed.add_field(name="---Performance", value="**"
                                                                  f"Total score: `{profile_data['total_score']}`\n"
-                                                                 f"Performance: `{int(profile_data['raw_pp']) if profile_data['raw_pp'] != 'OFFLINE' else profile_data['pp_raw']}dpp`\n"
+                                                                 f"Performance: `{int(profile_data['pp_raw']) if profile_data['pp_raw'] != 'OFFLINE' else profile_data['pp_raw']}dpp`\n"
                                                                  f"Overall acc: `{profile_data['overall_acc']}%`\n"
                                                                  f"Playcount: `{profile_data['playcount']}`"
                                                                  f"**")
