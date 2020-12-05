@@ -218,7 +218,7 @@ class OsuDroid(commands.Cog):
                                                             f"Acurácia: `{rs_data['accuracy']}%`\n"
                                                             f"Score: `{rs_data['score']}`\n"
                                                             f"Combo: `{rs_data['combo']}x`\n"
-                                                            f"Mods: `{mods}`"
+                                                            f"Mods: `{mods}`\n"
                                                             f"Feito em: `{rs_data['date']}`\n"
                                                             "**")
                                                             
