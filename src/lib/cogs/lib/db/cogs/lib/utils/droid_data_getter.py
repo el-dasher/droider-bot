@@ -154,5 +154,4 @@ async def get_droid_data(user_id):
     return dict(data_dict)
 
 async def save_droid_uid_data(uid, profile_data):
-    print(profile_data)
     DATABASE.child("DROID_UID_DATA").child(uid).set(profile_data)
