@@ -59,7 +59,7 @@ async def get_droid_data(user_id):
     try:
         pp_html = urlopen(pp_user_url).read()
     except Exception:
-        pp_board_state = "OFFLINE"
+        pp_data = "OFFLINE"
         completed_pp_data = None
     else:
         pp_data_soup = BeautifulSoup(pp_html, features="html.parser")
@@ -105,8 +105,6 @@ async def get_droid_data(user_id):
     if pp_data == "OFFLINE":
     	if (backup_pp_data := DATABASE.child("DROID_UID_DATA").child(user_id).get().val()) is not None:
     		pp_data = backup_pp_data["pp_raw"]
-    	else:
-    	    pp_data = "OFFLINE"
     else:
         pp_data = float(pp_data[8][9:].strip())
     print(DATABASE.child("DROID_UID_DATA").child(user_id).get().val())
