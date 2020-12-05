@@ -191,14 +191,15 @@ class OsuDroid(commands.Cog):
             await ctx.reply(f"Sua play mais recente: {(await get_droid_data(uid))['beatmap_data']['rs_0']}")
         except KeyError:
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
-
+    
+    """
     @commands.command(name="ppcheck")
     async def pp_check(self, ctx, uid=None):
-        """
+        
         Veja seus lindos pps do osu!droid :), ms!ppcheck <uid>,
         Lembrando que você pode cadastrar seu usuário com ms!droidset <uid>!
         Ai você não precisará passar o parâmetro de uid para ver seu usuário.
-        """
+        
         if uid is None:
             try:
                 uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
@@ -208,6 +209,7 @@ class OsuDroid(commands.Cog):
         top_plays = (await get_droid_data(uid))["pp_data"][:5]
 
         await ctx.reply(top_plays)
+    """
 
     @commands.command(name="pf", aliases=["pfme"])
     async def droid_pfme(self, ctx, uid=None):
@@ -233,14 +235,14 @@ class OsuDroid(commands.Cog):
             profile_embed.add_field(name="---Performance", value="**"
                                                                  f"Ele é do(a) {(user_country := profile_data['country'])}(:flag_{user_country.lower()}:)\n"
                                                                  f"Total score: `{profile_data['total_score']}`\n"
-                                                                 f"Performance: `{int(profile_data['raw_pp']) if profile_data['raw_pp'] != 'OFFLINE' else profile_data['raw_pp']}dpp`\n"
+                                                                 # f"Performance: `{int(profile_data['raw_pp']) if profile_data['raw_pp'] != 'OFFLINE' else profile_data['raw_pp']}dpp`\n"
                                                                  f"Overall acc: `{profile_data['overall_acc']}%`\n"
                                                                  f"Playcount: `{profile_data['playcount']}`"
                                                                  f"**")
 
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=profile_embed)
-            if profile_data["raw_pp"] != "OFFLINE":
-                _save_droid_uid_data(uid, profile_data)
+            # if profile_data["raw_pp"] != "OFFLINE":
+            #    _save_droid_uid_data(uid, profile_data)
             
         except KeyError as e:
             print(e)
@@ -264,8 +266,8 @@ class OsuDroid(commands.Cog):
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
-    def _save_droid_uid_data(uid, profile_data):
-            DATABASE.child("DROID_UID_DATA").child(uid).set(profile_data)
+    # def _save_droid_uid_data(uid, profile_data):
+    #        DATABASE.child("DROID_UID_DATA").child(uid).set(profile_data)
 
 def setup(bot):
     bot.add_cog(OsuGame(bot))
