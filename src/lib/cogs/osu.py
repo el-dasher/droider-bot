@@ -204,6 +204,8 @@ class OsuDroid(commands.Cog):
     async def droid_pfme(self, ctx, uid=None):
         print("AQUI")
         print(dict(await get_droid_data(uid)))
+        print("aqueeeee")
+        print(await get_droid_data(uid))
         if uid is None:
             try:
                 uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
