@@ -126,6 +126,7 @@ class OsuGame(commands.Cog):
 
     @commands.command(name="osu-rs")
     async def recent(self, ctx, *user):
+        user = self.get_user(user)
         async def get_username(user_):
             try:
                 return osu_api.get_user({'u': user_})[0]['username']
@@ -133,7 +134,7 @@ class OsuGame(commands.Cog):
                 return "index_error"
         if user:
             print(mention_to_uid(user))
-            user = self.get_user(DATABASE.child("OSU_USERS").child(mention_to_uid(user)[0]).get().val()["user"])
+            user = DATABASE.child("OSU_USERS").child(mention_to_uid(user)).get().val()["user"]
         else:
             try:
                 user = self.get_user(DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"])
