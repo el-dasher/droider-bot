@@ -130,7 +130,7 @@ class OsuGame(commands.Cog):
             try:
                 return osu_api.get_user({'u': user_})[0]['username']
             except IndexError:
-                index_error = True
+                print()
     
         if user:
             user = self.get_user(user)
@@ -144,8 +144,6 @@ class OsuGame(commands.Cog):
         username = await get_username(user)
         if index_error:
             return ctx.reply("Erro de index")
-            
-
         try:
             recentplay = osu_api.get_user_recent({"u": user})[0]
         except IndexError:
