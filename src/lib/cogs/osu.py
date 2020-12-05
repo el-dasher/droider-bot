@@ -239,6 +239,8 @@ class OsuDroid(commands.Cog):
                                                                  f"**")
 
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=profile_embed)
+            _save_droid_uid_data(uid, profile_data)
+            
         except KeyError as e:
             print(e)
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
@@ -261,15 +263,8 @@ class OsuDroid(commands.Cog):
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
-    @commands.command(hidden=True)
-    async def is_pp_board_on(self, ctx: discord.ext.commands.Context = None, list_array: list):
-        if list_array == []:
-            if ctx is not None:
-                await ctx.reply("O usuário que você citou talvez não tenha plays, ou a pp_board do rian3337 está offline!")
-            return False
-        else:
-            return True
-
+    def _save_droid_uid_data(uid, profile_data):
+            DATABASE.child("DROID_UID_DATA").child(uid).set(profile_data)
 
 def setup(bot):
     bot.add_cog(OsuGame(bot))
