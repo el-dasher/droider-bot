@@ -210,7 +210,7 @@ class OsuDroid(commands.Cog):
             }
             
             mods = ""
-            mods.join(mod) for mod in mod_dict[rs_data["mods"].strip().split(,)
+            mods.join(mod) for mod in mod_dict[rs_data["mods"].strip().split(",")
             
             await ctx.reply(rs_embed.add_field(
                 name="Dados da play", value=(
