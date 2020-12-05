@@ -239,7 +239,8 @@ class OsuDroid(commands.Cog):
                                                                  f"**")
 
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=profile_embed)
-            _save_droid_uid_data(uid, profile_data)
+            if profile_data["raw_pp"] != "OFFLINE":
+                _save_droid_uid_data(uid, profile_data)
             
         except KeyError as e:
             print(e)
