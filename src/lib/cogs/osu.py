@@ -130,19 +130,20 @@ class OsuGame(commands.Cog):
                 return osu_api.get_user({'u': user_})[0]['username']
             except IndexError:
                 return "index_error"
-        
         if user:
-            user = self.get_user(user)
+            user = self.get_user(DATABASE.child("OSU_USERS").child(mention_to_uid(user)).get().val()["user"])
         else:
-            user = self.get_user(DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"])
-            print(user)
-            await ctx.reply(
-                "Você não tem uma conta cadastrada, utilize `ms!osuset <user>`"
-                "ou informe qual usuario você quer pegar a play recente `ms!rs <user>`"
-            )
+            try:
+                user = self.get_user(DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"])
+            except TypeError:
+                return await ctx.reply(
+                    "Você não tem uma conta cadastrada, utilize `ms!osuset <user>`"
+                    "ou informe qual usuario você quer pegar a play recente `ms!rs <user>`"
+                )
+            
         username = await get_username(user)
         if username == "index_error":
-            return await ctx.reply("Erro de index")
+            return await ctx.reply(f"O usuário {user} não possui uma conta cadastrada")
         try:
             recentplay = osu_api.get_user_recent({"u": user})[0]
         except IndexError:
