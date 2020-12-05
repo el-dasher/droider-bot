@@ -35,12 +35,7 @@ class OsuGame(commands.Cog):
     @commands.command(name="osu-pf", aliases=["osu", "osu -pfme"])
     async def osuplayer(self, ctx: commands.Context, *user):
         # user_json = osu_api.get_user({"u": user})[0]
-        try:
-            user_json = osu_api.get_user({"u": DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"]})[0]
-        except TypeError:
-            await ctx.reply("Você não possui uma conta cadastrada, use `ms!osuset <user>`")
-            return
-
+        
         if user:
             user = self.get_user(user)
             if "" in user:
@@ -52,7 +47,11 @@ class OsuGame(commands.Cog):
 
                     if user_json == []:
                         return await ctx.reply("Não foi possivel encontrar o usuário!")
-
+        else:
+            try:
+                user_json = osu_api.get_user({"u": DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"]})[0]
+            except TypeError:
+                return await ctx.reply("Você não possui uma conta cadastrada, use `ms!osuset <user>`")
         try:
             user_json = user_json[0]
         except (IndexError, KeyError):
