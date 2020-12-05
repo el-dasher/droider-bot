@@ -228,7 +228,8 @@ class OsuDroid(commands.Cog):
                                                                  f"**")
 
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=profile_embed)
-        except KeyError:
+        except KeyError as e:
+            print(e)
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
 
     @commands.command(name="droidset")
