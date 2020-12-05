@@ -206,7 +206,7 @@ class OsuDroid(commands.Cog):
         try:
             _droid_data = await get_droid_data(uid)
         except IndexError:
-            return await ctx.reply(f"Não existe uma uid chamada: {uid_original}")
+            return await ctx.reply(f"Não existe essa uid ou o usuário não se cadastrou: {mention_to_uid(uid_original)}")
         try:
             rs_data = _droid_data["beatmap_data"]["rs_0"]
         except KeyError:
@@ -282,7 +282,7 @@ class OsuDroid(commands.Cog):
             try:
                 profile_data = (await get_droid_data(uid))["user_data"]
             except IndexError:
-                return await ctx.reply(f"Não existe uma uid chamada: {uid_original}")
+                return await ctx.reply(f"Não existe uma uid ou o usuário não se cadastrou: {mention_to_uid(uid_original)}")
             # if profile_data["username"] == "153460":
             #    return await ctx.reply(f"Não existe uma uid chamada: {uid}")
             profile_embed = discord.Embed()
