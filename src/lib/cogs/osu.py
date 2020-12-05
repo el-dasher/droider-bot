@@ -123,7 +123,7 @@ class OsuGame(commands.Cog):
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=osuset_embed)
 
-    @commands.command(name="osu -rs")
+    @commands.command(name="osu-rs")
     async def recent(self, ctx, *user):
         if user:
             user = self.get_user(user)
