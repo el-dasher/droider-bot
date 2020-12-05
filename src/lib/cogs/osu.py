@@ -219,7 +219,7 @@ class OsuDroid(commands.Cog):
 
             profile_embed.add_field(name="---Performance", value="**"
                                                                  f"Total score: `{profile_data['total_score']}`\n"
-                                                                 f"Performance: `{int((pp_value := profile_data['raw_pp'])) if pp_value != 'OFFLINE' else pp_value}dpp`\n"
+                                                                 f"Performance: `{int(profile_data['raw_pp']) if profile_data['raw_pp'] != 'OFFLINE' else pp_value}dpp`\n"
                                                                  f"Overall acc: `{profile_data['overall_acc']}%`\n"
                                                                  f"Playcount: `{profile_data['playcount']}`"
                                                                  f"**")
