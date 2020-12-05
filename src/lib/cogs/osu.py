@@ -200,7 +200,6 @@ class OsuDroid(commands.Cog):
                 icon_url=_droid_data["user_data"]["avatar_url"],
                 url=f"http://ops.dgsrz.com/profile.php?uid={uid}"
             )
-    
             
             mod_dict = {
                 "None": "NM",
@@ -217,14 +216,12 @@ class OsuDroid(commands.Cog):
                             f"Acurácia: {rs_data['accuracy']}%\n"
                             f"Score: `{rs_data['score']}`\n"
                             f"Combo: `{rs_data['combo']}x`\n"
-                            f"Mods: `{mod_dict[str(rs_data['mods'])]}`"
+                            f"Mods: `{str(mod_dict[rs_data['mods']])}`"
                             f"Feito em: `{rs_data['date']}`\n"
                             "**"
                         )
                     )
                 )
-                
-    
     """
     @commands.command(name="ppcheck")
     async def pp_check(self, ctx, uid=None):
