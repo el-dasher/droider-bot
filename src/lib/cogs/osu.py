@@ -194,7 +194,7 @@ class OsuDroid(commands.Cog):
         except KeyError:
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
         else:
-            rs_embed = discord.embed()
+            rs_embed = discord.Embed()
             rs_embed.set_author(f"Play recente do(a) {rs_data['username']}")
             
             mod_dict = {
