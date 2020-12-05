@@ -16,6 +16,7 @@ def mention_to_uid(msg):
     elif "<@" in msg:
         return msg.replace("<@", "").replace(">", "")
     else:
+        print("NAO SEI PORQUE")
         return msg
 
     
