@@ -158,7 +158,7 @@ class OsuGame(commands.Cog):
             recent_embed.set_thumbnail(
                 url=f"https://b.ppy.sh/thumb/{played_map['beatmapset_id']}l.jpg"
             )
-            recent_embed.set_footer(text=f"Acurácia: {accuracy}%")
+            recent_embed.set_footer(text=f"Precisão: {accuracy}%")
             recent_embed.set_author(icon_url=f"https://a.ppy.sh/{rs_user_json['user_id']}",
                                     name=f"Play recente do(a) {username}")
 
@@ -214,7 +214,7 @@ class OsuDroid(commands.Cog):
             
             rs_embed.add_field(name="Dados da play", value="**"
                                                             f"Beatmap: `{rs_data['beatmap']}`\n"
-                                                            f"Acurácia: `{rs_data['accuracy']}%`\n"
+                                                            f"Precisão: `{rs_data['accuracy']}%`\n"
                                                             f"Score: `{rs_data['score']}`\n"
                                                             f"Combo: `{rs_data['combo']}x`\n"
                                                             f"Mods: `{mods}`\n"
