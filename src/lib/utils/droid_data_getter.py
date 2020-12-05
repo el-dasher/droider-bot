@@ -141,6 +141,7 @@ async def get_droid_data(user_id):
             "overall_acc": float(old_data[-10][0][:-1]),
             "playcount": "Erro!"
         }
+        
     try:
         data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": ppcheck_data}
     except NameError:
@@ -149,9 +150,9 @@ async def get_droid_data(user_id):
     if pp_data != "offline":
         await save_droid_uid_data(user_id, user_data)
     # return data_dicts
+    print(data_dict)
     return data_dict
 
 async def save_droid_uid_data(uid, profile_data):
     print(profile_data)
     DATABASE.child("DROID_UID_DATA").child(uid).set(profile_data)
-    
