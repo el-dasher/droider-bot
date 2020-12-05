@@ -201,11 +201,14 @@ class OsuDroid(commands.Cog):
                 return await ctx.reply(self.missing_uid_msg)
         elif len(uid) >= 9:
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
-        _droid_data = await get_droid_data(uid)
+        try:
+            _droid_data = await get_droid_data(uid)
+        except IndexError:
+            return await ctx.reply(f"Não existe uma uid chamada: {uid}")
         try:
             rs_data = _droid_data["beatmap_data"]["rs_0"]
         except KeyError:
-            await ctx.reply(f"Não existe uma user id chamada: {uid}")
+            await ctx.reply(f"O usuário infelizmente não possui nenhuma play, ghost de...")
         else:
             rs_embed = discord.Embed()
             rs_embed.set_author(
