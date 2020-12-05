@@ -223,7 +223,7 @@ class OsuDroid(commands.Cog):
                                                             
                 
         
-            await ctx.reply(embed=rs_embed)
+            await ctx.reply(content=ctx.author.id, embed=rs_embed)
     """
     @commands.command(name="ppcheck")
     async def pp_check(self, ctx, uid=None):
