@@ -101,13 +101,13 @@ async def get_droid_data(user_id):
 
     beatmap_dicts = {}
     
-    
+    print(DATABASE.child("DROID_UID_DATA").child(user_id).get().val())
     if pp_data == "OFFLINE":
     	if (backup_pp_data := DATABASE.child("DROID_UID_DATA").child(user_id).get().val()) is not None:
     		pp_data = backup_pp_data["pp_raw"]
     else:
         pp_data = float(pp_data[8][9:].strip())
-    print(DATABASE.child("DROID_UID_DATA").child(user_id).get().val())
+
     for i, data in enumerate(beatmap_data):
         beatmap_dicts[f"rs_{i}"] = {
             "username": old_data[26][0],
@@ -150,7 +150,7 @@ async def get_droid_data(user_id):
     if pp_data != "offline":
         await save_droid_uid_data(user_id, user_data)
     # return data_dicts
-    print(data_dict)
+    
     return data_dict
 
 async def save_droid_uid_data(uid, profile_data):
