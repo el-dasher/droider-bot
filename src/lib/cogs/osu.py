@@ -286,7 +286,7 @@ class OsuDroid(commands.Cog):
         if not uid:
             return await ctx.reply("Você esqueceu de por para qual usuário(a) você quer setar!")
 
-        user_data = await (get_droid_data(uid))["user_data"]
+        user_data = (await get_droid_data(uid))["user_data"]
 
         DATABASE.child("DROID_USERS").child(ctx.author.id).set({"user": user_data})
 
