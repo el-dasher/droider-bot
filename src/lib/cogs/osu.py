@@ -203,7 +203,7 @@ class OsuDroid(commands.Cog):
 
         await ctx.reply(top_plays)
 
-    @commands.command(name="pfme" aliases=["pf"])
+    @commands.command(name="pfme", aliases=["pf"])
     async def droid_pfme(self, ctx, uid=None):
         
         if uid is None:
