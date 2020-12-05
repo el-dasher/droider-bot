@@ -132,7 +132,8 @@ class OsuGame(commands.Cog):
             except IndexError:
                 return await ctx.reply(f"Não foi possivel encontrar o usuário: {user}")
         else:
-            return await ctx.reply(
+            user = osu_api.get_user({"u": DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"]}[0])
+            await ctx.reply(
                 "Você não tem uma conta cadastrada, utilize `ms!osuset <user>`"
                 "ou informe qual usuario você quer pegar a play recente `ms!rs <user>`"
             )
