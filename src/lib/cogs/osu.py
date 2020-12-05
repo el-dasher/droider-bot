@@ -268,6 +268,7 @@ class OsuDroid(commands.Cog):
                 print(e)
                 return await ctx.reply(self.missing_uid_msg)
         elif len(uid) <= 9:
+            print(uid)
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
         try:
             profile_data = (await get_droid_data(uid))["user_data"]
