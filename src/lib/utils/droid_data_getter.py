@@ -4,17 +4,11 @@ from bs4 import BeautifulSoup
 from html.parser import HTMLParser
 from datetime import datetime
 from src.settings import DATABASE
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger
-from random import randint
-
-ppcheck_data = []
 
 
 async def get_droid_data(user_id):
     # noinspection PyGlobalUndefined
-    
-    droid_scheduler = AsyncIOScheduler
+
     global ppcheck_data
     old_data = []
     beatmap_data = []
@@ -52,7 +46,7 @@ async def get_droid_data(user_id):
         def handle_starttag(self, tag, attrs):
             if tag == "img":
                 html_imgs.append(attrs)
-
+    """
     pp_user_url = f"https://ppboard.herokuapp.com/profile?uid={user_id}"
 
     # noinspection PyBroadException
@@ -94,19 +88,22 @@ async def get_droid_data(user_id):
 
         for x, y in zip(completed_pp_data[::2], completed_pp_data[1::2]):
             ppcheck_data.append({"beatmap-mod": x, "pp_raw": y})
+        """
 
     droid_parser = DroidParser()
     droid_parser.feed(str(droid_data_soup))
     # data_dicts = {}
 
     beatmap_dicts = {}
-    
+
     print(DATABASE.child("DROID_UID_DATA").child(user_id).get().val())
+    """
     if pp_data == "OFFLINE":
-    	if (backup_pp_data := DATABASE.child("DROID_UID_DATA").child(user_id).get().val()) is not None:
-    		pp_data = backup_pp_data["raw_pp"]
+        if (backup_pp_data := DATABASE.child("DROID_UID_DATA").child(user_id).get().val()) is not None:
+            pp_data = backup_pp_data["raw_pp"]
     else:
         pp_data = float(pp_data[8][9:].strip())
+    """
 
     for i, data in enumerate(beatmap_data):
         beatmap_dicts[f"rs_{i}"] = {
@@ -125,7 +122,7 @@ async def get_droid_data(user_id):
             "avatar_url": html_imgs[3][0][1],
             "user_id": user_id,
             "country": old_data[27][0],
-            "raw_pp": pp_data,
+            # "raw_pp": pp_data,
             "total_score": old_data[-13][0],
             "overall_acc": float(old_data[-11][0][:-1]),
             "playcount": int(old_data[-9][0])
@@ -136,23 +133,25 @@ async def get_droid_data(user_id):
             "avatar_url": html_imgs[3][0][1],
             "user_id": user_id,
             "country": old_data[27][0],
-            "raw_pp": pp_data,
+            # "raw_pp": pp_data,
             "total_score": old_data[-12][0],
             "overall_acc": float(old_data[-10][0][:-1]),
             "playcount": "Erro!"
         }
-        
+
     try:
         data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": ppcheck_data}
     except NameError:
         data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": [{"s": "OFFLINE"}]}
-    
+
+    """
     if pp_data != "offline":
         await save_droid_uid_data(user_id, user_data)
+    """
     # return data_dicts
-    
+
     return dict(data_dict)
 
+
 async def save_droid_uid_data(uid, profile_data):
-    print(profile_data)
     DATABASE.child("DROID_UID_DATA").child(uid).set(profile_data)

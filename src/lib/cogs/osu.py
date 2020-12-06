@@ -10,6 +10,7 @@ from src.lib.utils.droid_data_getter import get_droid_data
 
 osu_api = ossapi(getenv("OSU_API"))
 
+
 def mention_to_uid(msg):
     if "<@!" in msg:
         return msg.replace("<@!", "").replace(">", "")
@@ -19,7 +20,7 @@ def mention_to_uid(msg):
         print("NAO SEI PORQUE")
         return msg
 
-    
+
 class OsuGame(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -35,20 +36,20 @@ class OsuGame(commands.Cog):
     @commands.command(name="osu")
     async def osuplayer(self, ctx: commands.Context, *user):
         # user_json = osu_api.get_user({"u": user})[0]
-        
+
         if user:
             user = self.get_user(mention_to_uid(user))
-            if "" in user:
-                try:
-                    user_json = osu_api.get_user({"u": DATABASE.child("OSU_USERS").get().val()[user]["user"]})
-                except KeyError:
-                    user_json = osu_api.get_user({"u": user})
+            try:
+                user_json = osu_api.get_user({"u": DATABASE.child("OSU_USERS").get().val()[user]["user"]})
+            except KeyError:
+                user_json = osu_api.get_user({"u": user})
 
-                    if user_json == []:
-                        return await ctx.reply("Não foi possivel encontrar o usuário!")
+                if user_json == []:
+                    return await ctx.reply("Não foi possivel encontrar o usuário!")
         else:
             try:
-                user_json = osu_api.get_user({"u": DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"]})[0]
+                user_json = \
+                    osu_api.get_user({"u": DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"]})[0]
             except TypeError:
                 return await ctx.reply("Você não possui uma conta cadastrada, use `ms!osuset <user>`")
         try:
@@ -90,15 +91,15 @@ class OsuGame(commands.Cog):
         user_embed.add_field(name="__Melhor play__", value=(
             "**"
             f"PP: `{int(float(profile_best_play['pp']))}pp`\n"
-            f"Beatmap: [{played_beatmap_profile['title']}](https://osu.ppy.sh/beatmapsets/{profile_best_play['beatmap_id']})\n"
+            f"Beatmap: [{played_beatmap_profile['title']}]"
+            f"(https://osu.ppy.sh/beatmapsets/{profile_best_play['beatmap_id']})\n"
             f"Rank: `{profile_best_play['rank']}`"
             "**"
         ))
 
-        
         user_embed.set_thumbnail(url=f"https://a.ppy.sh/{user_json['user_id']}")
         user_embed.set_footer(text=f"Level: {profile_level:.2f}")
-       
+
         await ctx.reply(content=f"<@{ctx.author.id}>", embed=user_embed)
 
     @commands.command(name="osu-set", aliases=["osuset"])
@@ -125,11 +126,13 @@ class OsuGame(commands.Cog):
     @commands.command(name="osu-rs")
     async def recent(self, ctx, *user):
         user = self.get_user(user)
+
         async def get_username(user_):
             try:
                 return osu_api.get_user({'u': user_})[0]['username']
             except IndexError:
                 return "index_error"
+
         if user:
             try:
                 user = DATABASE.child("OSU_USERS").child(mention_to_uid(user)).get().val()["user"]
@@ -143,7 +146,7 @@ class OsuGame(commands.Cog):
                     "Você não tem uma conta cadastrada, utilize `ms!osuset <user>`"
                     "ou informe qual usuario você quer pegar a play recente `ms!rs <user>`"
                 )
-            
+
         username = await get_username(user)
         if username == "index_error":
             return await ctx.reply(f"O usuário {user} não possui uma conta cadastrada")
@@ -164,7 +167,8 @@ class OsuGame(commands.Cog):
                             f"Dificuldade: `{played_map['version']}`\n"
                             f"Score: `{recentplay['score']} •"
                             f" {recentplay['maxcombo']}/{played_map['max_combo']}`\n"
-                            f"Rank: `{recentplay['rank']} • [{recentplay['count300']} - {recentplay['count100']} - {recentplay['count50']} - {recentplay['countmiss']}]`**",
+                            f"Rank: `{recentplay['rank']} • [{recentplay['count300']} - {recentplay['count100']} -"
+                            f" {recentplay['count50']} - {recentplay['countmiss']}]`**",
                 timestamp=parse(recentplay['date'])
             )
 
@@ -177,7 +181,8 @@ class OsuGame(commands.Cog):
                                     name=f"Play recente do(a) {username}")
 
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=recent_embed)
-    
+
+
 class OsuDroid(commands.Cog):
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
@@ -194,9 +199,9 @@ class OsuDroid(commands.Cog):
         Veja sua play mais recente do osu!droid, ou a de outro jogador
         se você passar o paramêtro de <uid>, ms!rs <uid>
         """
-        
+
         uid_original = uid
-        
+
         if uid is None:
             try:
                 uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
@@ -220,7 +225,7 @@ class OsuDroid(commands.Cog):
                 icon_url=_droid_data["user_data"]["avatar_url"],
                 url=f"http://ops.dgsrz.com/profile.php?uid={uid}"
             )
-            
+
             mod_dict = {
                 "None": "NM",
                 "Hidden": "HD",
@@ -228,20 +233,21 @@ class OsuDroid(commands.Cog):
                 "HardRock": "HR",
                 "Precise": "PR"
             }
-            
+
             mod_list = [mod_dict[mod.strip()] for mod in rs_data["mods"].split(",")]
             mods = "".join(mod_list)
-            
+
             rs_embed.add_field(name="Dados da play", value="**"
-                                                            f"Beatmap: `{rs_data['beatmap']}`\n"
-                                                            f"Precisão: `{rs_data['accuracy']}%`\n"
-                                                            f"Score: `{rs_data['score']}`\n"
-                                                            f"Combo: `{rs_data['combo']}x`\n"
-                                                            f"Mods: `{mods}`\n"
-                                                            f"Feito em: `{rs_data['date']}`\n"
-                                                            "**")
-                                                            
+                                                           f"Beatmap: `{rs_data['beatmap']}`\n"
+                                                           f"Precisão: `{rs_data['accuracy']}%`\n"
+                                                           f"Score: `{rs_data['score']}`\n"
+                                                           f"Combo: `{rs_data['combo']}x`\n"
+                                                           f"Mods: `{mods}`\n"
+                                                           f"Feito em: `{rs_data['date']}`\n"
+                                                           "**")
+
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=rs_embed)
+
     """
     @commands.command(name="ppcheck")
     async def pp_check(self, ctx, uid=None):
@@ -267,9 +273,9 @@ class OsuDroid(commands.Cog):
         Veja seu lindo perfil do osu!droid,
         ou o perfil de outra pessoa, e por favor rian não me mata.
         """
-        
+
         uid_original = uid
-    
+
         if uid is None:
             try:
                 uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
@@ -282,7 +288,8 @@ class OsuDroid(commands.Cog):
             try:
                 profile_data = (await get_droid_data(uid))["user_data"]
             except IndexError:
-                return await ctx.reply(f"Não existe uma uid ou o usuário não se cadastrou: {mention_to_uid(uid_original)}")
+                return await ctx.reply(
+                    f"Não existe uma uid ou o usuário não se cadastrou: {mention_to_uid(uid_original)}")
             # if profile_data["username"] == "153460":
             #    return await ctx.reply(f"Não existe uma uid chamada: {uid}")
             profile_embed = discord.Embed()
@@ -292,9 +299,13 @@ class OsuDroid(commands.Cog):
                                      name=f"Perfil do(a) {profile_data['username']}")
 
             profile_embed.add_field(name="---Performance", value="**"
-                                                                 f"Ele é do(a) {(user_country := profile_data['country'])}(:flag_{user_country.lower()}:)\n"
+                                                                 f"Ele é do(a)"
+                                                                 f" {(user_country := profile_data['country'])}"
+                                                                 f"(:flag_{user_country.lower()}:)\n"
                                                                  f"Total score: `{profile_data['total_score']}`\n"
-                                                                 # f"Performance: `{int(profile_data['raw_pp']) if profile_data['raw_pp'] != 'OFFLINE' else profile_data['raw_pp']}dpp`\n"
+                                                                 # f"Performance: `{int(profile_data['raw_pp']) if
+                                                                 # profile_data['raw_pp'] != 'OFFLINE' else
+                                                                 # profile_data['raw_pp']}dpp`\n "
                                                                  f"Overall acc: `{profile_data['overall_acc']}%`\n"
                                                                  f"Playcount: `{profile_data['playcount']}`"
                                                                  "**")
@@ -302,7 +313,7 @@ class OsuDroid(commands.Cog):
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=profile_embed)
             # if profile_data["raw_pp"] != "OFFLINE":
             #    _save_droid_uid_data(uid, profile_data)
-            
+
         except KeyError as e:
             print(e)
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
@@ -314,7 +325,7 @@ class OsuDroid(commands.Cog):
             return await ctx.reply("Você esqueceu de por para qual usuário(a) você quer setar!")
 
         user_data = (await get_droid_data(uid))["user_data"]
-        
+
         if user_data["username"] != "153456":
             DATABASE.child("DROID_USERS").child(ctx.author.id).set({"user": user_data})
         else:
@@ -330,6 +341,7 @@ class OsuDroid(commands.Cog):
 
     # def _save_droid_uid_data(uid, profile_data):
     #        DATABASE.child("DROID_UID_DATA").child(uid).set(profile_data)
+
 
 def setup(bot):
     bot.add_cog(OsuGame(bot))
