@@ -10,6 +10,7 @@ async def get_droid_data(user_id):
     # noinspection PyGlobalUndefined
 
     global ppcheck_data
+
     old_data = []
     beatmap_data = []
     html_imgs = []
@@ -46,6 +47,7 @@ async def get_droid_data(user_id):
         def handle_starttag(self, tag, attrs):
             if tag == "img":
                 html_imgs.append(attrs)
+
     """
     pp_user_url = f"https://ppboard.herokuapp.com/profile?uid={user_id}"
 
@@ -96,7 +98,6 @@ async def get_droid_data(user_id):
 
     beatmap_dicts = {}
 
-    print(DATABASE.child("DROID_UID_DATA").child(user_id).get().val())
     """
     if pp_data == "OFFLINE":
         if (backup_pp_data := DATABASE.child("DROID_UID_DATA").child(user_id).get().val()) is not None:

@@ -7,6 +7,7 @@ from src.settings import DATABASE
 from dateutil.parser import parse
 from datetime import datetime
 from src.lib.utils.droid_data_getter import get_droid_data
+from pytz import timezone
 
 osu_api = ossapi(getenv("OSU_API"))
 
@@ -219,12 +220,14 @@ class OsuDroid(commands.Cog):
         except KeyError:
             await ctx.reply(f"O usuário infelizmente não possui nenhuma play, ghost de...")
         else:
-            rs_embed = discord.Embed()
+            rs_embed = discord.Embed(timestamp=rs_data["date"].replace(tzinfo=timezone("Africa/Algiers")))
             rs_embed.set_author(
                 name=f"Play recente do(a) {rs_data['username']}",
                 icon_url=_droid_data["user_data"]["avatar_url"],
                 url=f"http://ops.dgsrz.com/profile.php?uid={uid}"
             )
+
+            rs_embed.set_footer(text="Play feita")
 
             mod_dict = {
                 "None": "NM",
@@ -243,7 +246,6 @@ class OsuDroid(commands.Cog):
                                                            f"Score: `{rs_data['score']}`\n"
                                                            f"Combo: `{rs_data['combo']}x`\n"
                                                            f"Mods: `{mods}`\n"
-                                                           f"Feito em: `{rs_data['date']}`\n"
                                                            "**")
 
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=rs_embed)
