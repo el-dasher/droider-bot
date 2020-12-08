@@ -301,7 +301,7 @@ class OsuDroid(commands.Cog):
                                      name=f"Perfil do(a) {profile_data['username']}")
 
             profile_embed.add_field(name="---Performance", value="**"
-                                                                 f"Ele é do(a)"
+                                                                 f"Elu é do(a)"
                                                                  f" {(user_country := profile_data['country'])}"
                                                                  f"(:flag_{user_country.lower()}:)\n"
                                                                  f"Total score: `{profile_data['total_score']}`\n"
