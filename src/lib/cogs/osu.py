@@ -296,7 +296,7 @@ class OsuDroid(commands.Cog):
             #    return await ctx.reply(f"Não existe uma uid chamada: {uid}")
             profile_embed = discord.Embed()
 
-            if profile_data["username"] == "154570":
+            if profile_data["username"].startswith("154"):
                 return await ctx.reply(
                     "Infelizmente você ou o usuário não possuem sua id cadastrada,"
                     " cadastre agora mesmo usando: `ms!droidset <uid>`"

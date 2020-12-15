@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-debug = False  # debug = True SE VOCÊ FOR RODAR O PROJETO LOCALMENTE!!!
+debug = True # debug = True SE VOCÊ FOR RODAR O PROJETO LOCALMENTE!!!
 
 if debug:
     print("O BOT ESTÁ RODANDO LOCALMENTE")
