@@ -296,6 +296,12 @@ class OsuDroid(commands.Cog):
             #    return await ctx.reply(f"Não existe uma uid chamada: {uid}")
             profile_embed = discord.Embed()
 
+            if profile_data["username"] == "154570":
+                return await ctx.reply(
+                    "Infelizmente você ou o usuário não possuem sua id cadastrada,"
+                    " cadastre agora mesmo usando: `ms!droidset <uid>`"
+                )
+
             profile_embed.set_thumbnail(url=profile_data['avatar_url'])
             profile_embed.set_author(url=f"http://ops.dgsrz.com/profile.php?uid={uid}",
                                      name=f"Perfil do(a) {profile_data['username']}")
@@ -311,7 +317,6 @@ class OsuDroid(commands.Cog):
                                                                  f"Overall acc: `{profile_data['overall_acc']}%`\n"
                                                                  f"Playcount: `{profile_data['playcount']}`"
                                                                  "**")
-
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=profile_embed)
             # if profile_data["raw_pp"] != "OFFLINE":
             #    _save_droid_uid_data(uid, profile_data)
