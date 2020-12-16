@@ -2,19 +2,19 @@
 
 from pathlib import Path
 
-debug = True # debug = True SE VOCÊ FOR RODAR O PROJETO LOCALMENTE!!!
+debug = False # debug = True SE VOCÊ FOR RODAR O PROJETO LOCALMENTE!!!
 
 if debug:
-    print("O BOT ESTÁ RODANDO LOCALMENTE")
+print("O BOT ESTÁ RODANDO LOCALMENTE")
 
-    COGS_PATH = Path('./lib/cogs')
+COGS_PATH = Path('./lib/cogs')
 
-    LUCKY_PATH = Path("./lib/db/data/json/lucky_responses.json")
-    MONTHS_PATH = Path("./lib/db/data/json/months.json")
-else:
-    print('O BOT ESTÁ RODANDO EM "PRODUÇÃO')
+LUCKY_PATH = Path("./lib/db/data/json/lucky_responses.json")
+MONTHS_PATH = Path("./lib/db/data/json/months.json")
+else :
+print('O BOT ESTÁ RODANDO EM "PRODUÇÃO')
 
-    COGS_PATH = Path('./src/lib/cogs')
+COGS_PATH = Path('./src/lib/cogs')
 
-    LUCKY_PATH = Path("./src/lib/db/data/json/lucky_responses.json")
-    MONTHS_PATH = Path("./src/lib/db/data/json/months.json")
+LUCKY_PATH = Path("./src/lib/db/data/json/lucky_responses.json")
+MONTHS_PATH = Path("./src/lib/db/data/json/months.json")
