@@ -8,8 +8,9 @@ from dateutil.parser import parse
 from datetime import datetime
 from src.lib.utils.droid_data_getter import get_droid_data
 from pytz import timezone
+import requests
 
-osu_api = ossapi(getenv("OSU_API"))
+osu_api = ossapi((OSU_API := getenv("OSU_API")))
 
 
 def mention_to_uid(msg):
@@ -257,7 +258,9 @@ class OsuDroid(commands.Cog):
         Ai você não precisará passar o parâmetro de uid para ver seu usuário.
         """
 
+        default_value_string = None
         uid_original = uid
+
         if uid is None:
             try:
                 uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
@@ -271,13 +274,20 @@ class OsuDroid(commands.Cog):
                 profile_data = (await get_droid_data(uid))["user_data"]
             except IndexError:
                 return await ctx.reply(
-                    f"Não existe uma uid ou o usuário não se cadastrou: {mention_to_uid(uid_original)}")
+                    f"Não existe uma uid ou o usuário não se cadastrou: {mention_to_uid(uid_original)}"
+                )
+            else:
+                if profile_data == "OFFLINE":
+                    return await ctx.reply(
+                        "A ppboard do rian8337 está offline, logo não foi possivel obter os dados :("
+                    )
 
             if profile_data["username"].startswith("154"):
                 return await ctx.reply(
                     "Infelizmente você ou o usuário não possuem sua id cadastrada,"
                     " cadastre agora mesmo usando: `ms!droidset <uid>`"
                 )
+
         except KeyError as e:
             print(e)
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
@@ -290,13 +300,58 @@ class OsuDroid(commands.Cog):
             url=(default_author_url := f"http://droidppboard.herokuapp.com/profile?uid={uid}")
         )
 
+        async def _get_beatmap_data(hash_):
+            return requests.get(f"https://osu.ppy.sh/api/get_beatmaps?k={OSU_API}&h={hash_}").json()
+
+        def _is_nomod(mods):
+            if mods == "":
+                mods = "NM"
+                return mods
+            else:
+                return mods
+
         for _, play in enumerate(user_data["pp_data"][:5]):
-            if play["mods"] == "":
-                play["mods"] = "NM"
+            try:
+                play["beatmap_data"] = \
+                    (await _get_beatmap_data(play["hash"]))[0]
+            except IndexError:
+                play["beatmap_data"] = {
+                    "max_combo": "0",
+                    "diff_aim": "0",
+                    "diff_speed": "0",
+                    "bpm": "0",
+                    "difficultyrating": "0",
+
+                    "beatmap_id": "0",
+                    "beatmapset_id": "0",
+                    "title": "?"
+                }
+            user_data["pp_data"][_]['beatmap_data'] = play["beatmap_data"]
+            play["mods"] = _is_nomod(play["mods"])
             ppcheck_embed.add_field(
                 name=f"{_ + 1}.{play['title']} +{play['mods']}",
-                value=f"{play['combo']}x | {play['accuracy']} | {play['miss']} miss | {int(float(play['pp']))}dpp",
+                value=(
+                    (
+                        f"```"
+                        f"{play['combo']}x/{play['beatmap_data']['max_combo']}x |"
+                        f" {play['accuracy']}%"
+                        f" | {play['miss']} miss\n{int(float(play['pp']))}dpp |"
+                        f" (aim: {float(play['beatmap_data']['diff_aim']):.2f},"
+                        f" speed: {float(play['beatmap_data']['diff_speed']):.2f})"
+                        f" |\nbpm: {play['beatmap_data']['bpm']}"
+                        f" | diff: {float(play['beatmap_data']['difficultyrating']):.2f}★\n"
+                        f"```"
+                        f"\n**[Link do(a) {play['beatmap_data']['title']}](https://osu.ppy.sh"
+                        f"/beatmapsets/"
+                        f"{play['beatmap_data']['beatmapset_id']}#osu/"
+                        f"{play['beatmap_data']['beatmap_id']})**"
+                    )
+                ),
             )
+
+        ppcheck_embed.set_thumbnail(
+            url=f"https://b.ppy.sh/thumb/{user_data['pp_data'][0]['beatmap_data']['beatmapset_id']}l.jpg"
+        )
 
         message = await ctx.reply(content=f"<@{ctx.author.id}>", embed=ppcheck_embed)
         # if profile_data["raw_pp"] != "OFFLINE":
@@ -332,22 +387,57 @@ class OsuDroid(commands.Cog):
                     index = start
                     for _, play in enumerate(user_data["pp_data"][start:end]):
                         index += 1
-                        if play["mods"] == "":
-                            play["mods"] = "NM"
+                        play["mods"] = _is_nomod(play["mods"])
+                        try:
+                            play["beatmap_data"] = \
+                                (await _get_beatmap_data(play["hash"]))[0]
+                        except IndexError:
+                            play["beatmap_data"] = {
+                                "max_combo": "0",
+                                "diff_aim": "0",
+                                "diff_speed": "0",
+                                "bpm": "0",
+                                "difficultyrating": "0",
+
+                                "beatmap_id": "0",
+                                "beatmapset_id": "0",
+                                "title": "?"
+                            }
+                        user_data["pp_data"][_]['beatmap_data'] = play["beatmap_data"]
+
                         next_ppcheck_embed.add_field(
                             name=f"{index}. {play['title']} +{play['mods']}",
-                            value=f"{play['combo']}x | {play['accuracy']} | "
-                                  f"{play['miss']} miss | {int(float(play['pp']))}dpp",
+                            value=(
+                                (
+                                    f"```"
+                                    f"{play['combo']}x/{play['beatmap_data']['max_combo']}x |"
+                                    f" {play['accuracy']}%"
+                                    f" | {play['miss']} miss\n{int(float(play['pp']))}dpp |"
+                                    f" (aim: {float(play['beatmap_data']['diff_aim']):.2f},"
+                                    f" speed: {float(play['beatmap_data']['diff_speed']):.2f})"
+                                    f" |\nbpm: {play['beatmap_data']['bpm']}"
+                                    f" | diff: {float(play['beatmap_data']['difficultyrating']):.2f}★\n"
+                                    f"```"
+                                    f"\n**[Link do(a) {play['beatmap_data']['title']}](https://osu.ppy.sh"
+                                    f"/beatmapsets/"
+                                    f"{play['beatmap_data']['beatmapset_id']}#osu/"
+                                    f"{play['beatmap_data']['beatmap_id']})**"
+                                )
+                            ),
                         )
-                except (IndexError, KeyError):
-                    pass
-                else:
-                    title = default_author_name
-                    link = default_author_url
+                    next_ppcheck_embed.set_thumbnail(
+                        url=f"https://b.ppy.sh/thumb/"
+                        f"{user_data['pp_data'][index-5]['beatmap_data']['beatmapset_id']}l.jpg"
+                        )
+                except (IndexError, KeyError) as e:
+                    print(e)
 
-                    next_ppcheck_embed.set_author(name=title, url=link)
+                title = default_author_name
+                link = default_author_url
 
-                    await message.edit(embed=next_ppcheck_embed)
+                next_ppcheck_embed.set_author(name=title, url=link)
+
+                await message.edit(embed=next_ppcheck_embed)
 
     @commands.command(name="pf", aliases=["pfme"])
     async def droid_pfme(self, ctx, uid=None):
@@ -382,7 +472,10 @@ class OsuDroid(commands.Cog):
                     " cadastre agora mesmo usando: `ms!droidset <uid>`"
                 )
 
-            raw_pp = int(profile_data["raw_pp"])
+            try:
+                raw_pp = int(profile_data["raw_pp"])
+            except ValueError:
+                raw_pp = "OFFLINE"
 
             profile_embed.set_thumbnail(url=profile_data['avatar_url'])
             profile_embed.set_author(url=f"http://ops.dgsrz.com/profile.php?uid={uid}",
@@ -393,15 +486,11 @@ class OsuDroid(commands.Cog):
                                                                  f" {(user_country := profile_data['country'])}"
                                                                  f"(:flag_{user_country.lower()}:)\n"
                                                                  f"Total score: `{profile_data['total_score']}`\n"
-                                                                 # f"Performance: `{int(profile_data['raw_pp']) if
-                                                                 f"Total dpp: `{raw_pp}dpp`\n "
+                                                                 f"Total dpp: `{raw_pp}`\n"
                                                                  f"Overall acc: `{profile_data['overall_acc']}%`\n"
                                                                  f"Playcount: `{profile_data['playcount']}`"
                                                                  "**")
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=profile_embed)
-
-
-
 
         except KeyError as e:
             print(e)

@@ -108,7 +108,7 @@ class DroiderBR(commands.Bot):
 
                 return
 
-        print(f"{msg.author}: {msg}")
+        # print(f"{msg.author}: {msg}")
         await self.process_commands(msg)
 
 
