@@ -41,7 +41,7 @@ class GoogleSearch(commands.Cog):
 
         if query[-1] != "+":
             results = results[:1]
-
+        query.pop(-1)
         for result in results:
             description = "Não especificada."
             try:
@@ -85,7 +85,7 @@ class GoogleSearch(commands.Cog):
         im_embed.set_author(name=title, url=link)
         im_embed.set_image(url=image_url)
 
-        message: discord.Message = await ctx.reply(content=f"<@{ctx.author.id}>", embed=im_embed)
+        message: discord.Message = await ctx.reply(content=f"<@{ctx.author.id}>]", embed=im_embed)
 
         await message.add_reaction("⬅")
         await message.add_reaction("➡")
