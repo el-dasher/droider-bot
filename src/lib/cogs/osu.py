@@ -257,19 +257,37 @@ class OsuDroid(commands.Cog):
         Ai você não precisará passar o parâmetro de uid para ver seu usuário.
         """
 
+        uid_original = uid
         if uid is None:
             try:
                 uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
             except Exception as e:
                 print(e)
                 return await ctx.reply(self.missing_uid_msg)
+        elif len(uid) >= 9:
+            uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
+        try:
+            try:
+                profile_data = (await get_droid_data(uid))["user_data"]
+            except IndexError:
+                return await ctx.reply(
+                    f"Não existe uma uid ou o usuário não se cadastrou: {mention_to_uid(uid_original)}")
+
+            if profile_data["username"].startswith("154"):
+                return await ctx.reply(
+                    "Infelizmente você ou o usuário não possuem sua id cadastrada,"
+                    " cadastre agora mesmo usando: `ms!droidset <uid>`"
+                )
+        except KeyError as e:
+            print(e)
+            await ctx.reply(f"Não existe uma user id chamada: {uid}")
 
         user_data = (await get_droid_data(uid))["user_data"]
         ppcheck_embed = discord.Embed()
 
         ppcheck_embed.set_author(
-            name=f"TOP PLAYS DO(A) {user_data['username'].upper()}",
-            url=f"http://droidppboard.herokuapp.com/profile?uid={uid}"
+            name=(default_author_name := f"TOP PLAYS DO(A) {user_data['username'].upper()}"),
+            url=(default_author_url := f"http://droidppboard.herokuapp.com/profile?uid={uid}")
         )
 
         for _, play in enumerate(user_data["pp_data"][:5]):
@@ -280,7 +298,56 @@ class OsuDroid(commands.Cog):
                 value=f"{play['combo']}x | {play['accuracy']} | {play['miss']} miss | {int(float(play['pp']))}dpp",
             )
 
-        await ctx.reply(content=f"<@{ctx.author.id}>", embed=ppcheck_embed)
+        message = await ctx.reply(content=f"<@{ctx.author.id}>", embed=ppcheck_embed)
+        # if profile_data["raw_pp"] != "OFFLINE":
+        #    _save_droid_uid_data(uid, profile_data)
+
+        await message.add_reaction("⬅")
+        await message.add_reaction("➡")
+
+        start = 0
+        end = 5
+        while True:
+
+            valid_reaction: tuple = await self.bot.wait_for(
+                "reaction_add",
+                check=lambda reaction, user: user == ctx.author and str(reaction.emoji) in ("⬅", "➡")
+            )
+
+            if valid_reaction:
+                if valid_reaction[0].emoji == "➡":
+                    start += 5
+                    end += 5
+                else:
+                    start -= 5
+                    end -= 5
+                if end == 0:
+                    start = 70
+                    end = 75
+                elif end == 80:
+                    start = 0
+                    end = 5
+                next_ppcheck_embed = discord.Embed()
+                try:
+                    index = start
+                    for _, play in enumerate(user_data["pp_data"][start:end]):
+                        index += 1
+                        if play["mods"] == "":
+                            play["mods"] = "NM"
+                        next_ppcheck_embed.add_field(
+                            name=f"{index}. {play['title']} +{play['mods']}",
+                            value=f"{play['combo']}x | {play['accuracy']} | "
+                                  f"{play['miss']} miss | {int(float(play['pp']))}dpp",
+                        )
+                except (IndexError, KeyError):
+                    pass
+                else:
+                    title = default_author_name
+                    link = default_author_url
+
+                    next_ppcheck_embed.set_author(name=title, url=link)
+
+                    await message.edit(embed=next_ppcheck_embed)
 
     @commands.command(name="pf", aliases=["pfme"])
     async def droid_pfme(self, ctx, uid=None):
@@ -332,8 +399,9 @@ class OsuDroid(commands.Cog):
                                                                  f"Playcount: `{profile_data['playcount']}`"
                                                                  "**")
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=profile_embed)
-            # if profile_data["raw_pp"] != "OFFLINE":
-            #    _save_droid_uid_data(uid, profile_data)
+
+
+
 
         except KeyError as e:
             print(e)
