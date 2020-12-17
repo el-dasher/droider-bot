@@ -1,5 +1,5 @@
 # mscoy-bot
-Repositório do bot oficial da osu droid brasil, que bot lindo né mano?
+Repositório do droider bot, que bot lindo né mano?
 # NÃO RECOMENDO SELF-HOSTING
 PORÉM, qualquer tipo de contribuição está bem vinda.
 # COMO CONFIGURAR
