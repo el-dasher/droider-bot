@@ -277,7 +277,7 @@ class OsuDroid(commands.Cog):
                 play["mods"] = "NM"
             ppcheck_embed.add_field(
                 name=f"{_ + 1}.{play['title']} +{play['mods']}",
-                value=f"{play['combo']}x | {play['accuracy']} | {play['miss']} miss | {play['pp']}dpp"
+                value=f"{play['combo']}x | {play['accuracy']} | {play['miss']} miss | {int(float(play['pp']))}dpp",
             )
 
         await ctx.reply(content=f"<@{ctx.author.id}>", embed=ppcheck_embed)
