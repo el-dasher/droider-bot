@@ -273,12 +273,14 @@ class OsuDroid(commands.Cog):
         )
 
         for _, play in enumerate(user_data["pp_data"][:5]):
+            if play["mods"] == "":
+                play["mods"] = "NM"
             ppcheck_embed.add_field(
                 name=f"{_ + 1}.{play['title']} +{play['mods']}",
                 value=f"{play['combo']}x | {play['accuracy']} | {play['miss']} miss | {play['pp']}dpp"
             )
 
-        await ctx.reply(embed=ppcheck_embed)
+        await ctx.reply(content=f"<@{ctx.author.id}>", embed=ppcheck_embed)
 
     @commands.command(name="pf", aliases=["pfme"])
     async def droid_pfme(self, ctx, uid=None):

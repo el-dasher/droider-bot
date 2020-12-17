@@ -139,7 +139,8 @@ async def get_droid_data(user_id):
             "avatar_url": html_imgs[3][0][1],
             "user_id": user_id,
             "country": old_data[27][0],
-            # "raw_pp": pp_data,
+            "raw_pp": dpp_user_data["data"]["pp"]["total"],
+            "pp_data": dpp_user_data["data"]["pp"]["list"],
             "total_score": old_data[-12][0],
             "overall_acc": float(old_data[-10][0][:-1]),
             "playcount": "Erro!"
