@@ -22,6 +22,7 @@ GELBOORU_API: Gelbooru = Gelbooru(getenv("GELBOORU_API"), "693051")
 DASHERGIT: Github = Github(getenv("ACCESS_TOKEN"))
 BOT_TOKEN: str = getenv("BOT_TOKEN")
 PREFIX: str = getenv("PREFIX")
+DPPBOARD_API = getenv("DPP_BOARD_API")
 
 GOOGLE_USEFULS: dict = {
     "id": getenv("SEARCH_ENGINE_ID"),

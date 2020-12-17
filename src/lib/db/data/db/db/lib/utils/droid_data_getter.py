@@ -3,7 +3,7 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from html.parser import HTMLParser
 from datetime import datetime
-from src.settings import DATABASE
+from src.setup import DATABASE
 
 ppcheck_data = []
 

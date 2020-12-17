@@ -7,7 +7,7 @@ from random import choice
 import json
 from discord.ext import commands
 from src.paths import MONTHS_PATH
-from src.settings import DATABASE
+from src.setup import DATABASE
 
 month_data = json.load(open(MONTHS_PATH, encoding="utf-8"))
 

@@ -1,5 +1,5 @@
 from discord.ext import commands
-import src.settings as settings
+import src.setup as settings
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import discord
 import asyncio

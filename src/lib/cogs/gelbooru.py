@@ -1,4 +1,4 @@
-from src.settings import GELBOORU_API as GELBOORU
+from src.setup import GELBOORU_API as GELBOORU
 from discord.ext import commands
 from src.lib.utils.basic_utils import ready_up_cog
 import discord

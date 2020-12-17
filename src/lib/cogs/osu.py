@@ -3,7 +3,7 @@ from os import getenv
 from discord.ext import commands
 import discord
 from src.lib.utils.basic_utils import ready_up_cog
-from src.settings import DATABASE
+from src.setup import DATABASE
 from dateutil.parser import parse
 from datetime import datetime
 from src.lib.utils.droid_data_getter import get_droid_data
@@ -249,24 +249,36 @@ class OsuDroid(commands.Cog):
 
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=rs_embed)
 
-    """
     @commands.command(name="ppcheck")
     async def pp_check(self, ctx, uid=None):
-        
+        """
         Veja seus lindos pps do osu!droid :), ms!ppcheck <uid>,
         Lembrando que você pode cadastrar seu usuário com ms!droidset <uid>!
         Ai você não precisará passar o parâmetro de uid para ver seu usuário.
-        
+        """
+
         if uid is None:
             try:
                 uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
             except Exception as e:
                 print(e)
                 return await ctx.reply(self.missing_uid_msg)
-        top_plays = (await get_droid_data(uid))["pp_data"][:5]
 
-        await ctx.reply(top_plays)
-    """
+        user_data = (await get_droid_data(uid))["user_data"]
+        ppcheck_embed = discord.Embed()
+
+        ppcheck_embed.set_author(
+            name=f"TOP PLAYS DO(A) {user_data['username'].upper()}",
+            url=f"http://droidppboard.herokuapp.com/profile?uid={uid}"
+        )
+
+        for _, play in enumerate(user_data["pp_data"][:5]):
+            ppcheck_embed.add_field(
+                name=f"{_ + 1}.{play['title']} +{play['mods']}",
+                value=f"{play['combo']}x | {play['accuracy']} | {play['miss']} miss | {play['pp']}dpp"
+            )
+
+        await ctx.reply(embed=ppcheck_embed)
 
     @commands.command(name="pf", aliases=["pfme"])
     async def droid_pfme(self, ctx, uid=None):
@@ -301,6 +313,8 @@ class OsuDroid(commands.Cog):
                     " cadastre agora mesmo usando: `ms!droidset <uid>`"
                 )
 
+            raw_pp = int(profile_data["raw_pp"])
+
             profile_embed.set_thumbnail(url=profile_data['avatar_url'])
             profile_embed.set_author(url=f"http://ops.dgsrz.com/profile.php?uid={uid}",
                                      name=f"Perfil do(a) {profile_data['username']}")
@@ -311,8 +325,7 @@ class OsuDroid(commands.Cog):
                                                                  f"(:flag_{user_country.lower()}:)\n"
                                                                  f"Total score: `{profile_data['total_score']}`\n"
                                                                  # f"Performance: `{int(profile_data['raw_pp']) if
-                                                                 # profile_data['raw_pp'] != 'OFFLINE' else
-                                                                 # profile_data['raw_pp']}dpp`\n "
+                                                                 f"Total dpp: `{raw_pp}dpp`\n "
                                                                  f"Overall acc: `{profile_data['overall_acc']}%`\n"
                                                                  f"Playcount: `{profile_data['playcount']}`"
                                                                  "**")
