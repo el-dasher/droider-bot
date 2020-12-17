@@ -85,14 +85,16 @@ class DroiderBR(commands.Bot):
 
             self.ready = True
             print("O BOT ESTÁ PRONTO")
-
-            await self.stdout.send("O droider está online!")
-
         else:
             print("O bot se reconectou")
-            await self.stdout.send("Eu tô online denovo!")
+        try:
+            await self.stdout.send("O droider está online!")
+        except AttributeError:
+            print("O canal default não está configurado! faça o mesmo.")
 
-    async def on_message(self, msg: discord.Message, already_timed=False, counter=0):
+    async def on_message(self, msg: discord.Message):
+        already_timed = False
+        counter = 0
 
         if msg.author.id == self.user.id:
             return

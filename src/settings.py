@@ -6,6 +6,7 @@ from github import Github
 from src.paths import COGS_PATH
 from src.lib.db.data.db.firebase_db import database as firebase
 from pyrebase.pyrebase import Database
+from pygelbooru import Gelbooru
 
 env_path: any = Path('..') / '.env'
 load_dotenv(dotenv_path=env_path)
@@ -17,6 +18,7 @@ for path in COGS_PATH.glob('*.py'):
 
 DATABASE: Database = firebase
 
+GELBOORU_API: Gelbooru = Gelbooru(getenv("GELBOORU_API"), "693051")
 DASHERGIT: Github = Github(getenv("ACCESS_TOKEN"))
 BOT_TOKEN: str = getenv("BOT_TOKEN")
 PREFIX: str = getenv("PREFIX")

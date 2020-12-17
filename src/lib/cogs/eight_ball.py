@@ -4,13 +4,11 @@ import json
 from random import choice
 from src.paths import LUCKY_PATH
 
-json_path = LUCKY_PATH
-
 
 class EightBall(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.f = json.load(open(json_path, encoding="utf-8"))
+        self.f = json.load(open(LUCKY_PATH, encoding="utf-8"))
 
     @commands.Cog.listener()
     async def on_ready(self):
