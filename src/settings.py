@@ -23,5 +23,9 @@ DASHERGIT: Github = Github(getenv("ACCESS_TOKEN"))
 BOT_TOKEN: str = getenv("BOT_TOKEN")
 PREFIX: str = getenv("PREFIX")
 
+GOOGLE_USEFULS: dict = {
+    "id": getenv("SEARCH_ENGINE_ID"),
+    "api_key": getenv("SEARCH_ENGINE_API_KEY")
+}
 
 logging.basicConfig(level=logging.INFO)

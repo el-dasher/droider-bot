@@ -21,3 +21,4 @@ bs4~=0.0.1
 beautifulsoup4~=4.9.3
 pytz~=2020.4
 pygelbooru~=0.3.1
+requests~=2.25.1
