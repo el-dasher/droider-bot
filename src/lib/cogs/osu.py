@@ -350,7 +350,7 @@ class OsuDroid(commands.Cog):
                         f"{play['beatmap_data']['beatmapset_id']}#osu/"
                         f"{play['beatmap_data']['beatmap_id']})**"
                     )
-                ),
+                ), inline=False
             )
 
         ppcheck_embed.set_thumbnail(
@@ -433,7 +433,7 @@ class OsuDroid(commands.Cog):
                                     f"{play['beatmap_data']['beatmapset_id']}#osu/"
                                     f"{play['beatmap_data']['beatmap_id']})**"
                                 )
-                            ),
+                            ), inline=False
                         )
                     next_ppcheck_embed.set_thumbnail(
                         url=f"https://b.ppy.sh/thumb/"
