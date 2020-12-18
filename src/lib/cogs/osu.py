@@ -534,7 +534,7 @@ class OsuDroid(commands.Cog):
     @tasks.loop(minutes=10, seconds=0)
     async def _brdpp_rank(self) -> discord.Message:
 
-        channel = self.bot.get_channel(789578289055662160)
+        channel = self.bot.get_channel(789613566684430346)
         updated_data = discord.Embed(title="RANK DPP BR", timestamp=datetime.utcnow())
         fetched_data = []
 
