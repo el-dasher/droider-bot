@@ -9,6 +9,7 @@ from datetime import datetime
 from src.lib.utils.droid_data_getter import get_droid_data
 from pytz import timezone
 import requests
+from src.lib.utils.basic_utils import timed_out
 
 osu_api = ossapi((OSU_API := getenv("OSU_API")))
 
@@ -294,6 +295,8 @@ class OsuDroid(commands.Cog):
         user_data = (await get_droid_data(uid))["user_data"]
         ppcheck_embed = discord.Embed()
 
+        message = await ctx.reply("Adiquirindo dados...")
+
         ppcheck_embed.set_author(
             name=(default_author_name := f"TOP PLAYS DO(A) {user_data['username'].upper()}"),
             url=(default_author_url := f"http://droidppboard.herokuapp.com/profile?uid={uid}"),
@@ -312,8 +315,9 @@ class OsuDroid(commands.Cog):
 
         for _, play in enumerate(user_data["pp_data"][:5]):
             try:
-                play["beatmap_data"] = \
-                    (await _get_beatmap_data(play["hash"]))[0]
+                play["beatmap_data"] = (await _get_beatmap_data(play["hash"]))[0]
+                if "DT" in play["mods"] or "NC" in play["mods"]:
+                    play["beatmap_data"]["bpm"] = int(play["beatmap_data"]["bpm"]) * 1.50
             except IndexError:
                 play["beatmap_data"] = {
                     "max_combo": "0",
@@ -353,7 +357,8 @@ class OsuDroid(commands.Cog):
             url=f"https://b.ppy.sh/thumb/{user_data['pp_data'][0]['beatmap_data']['beatmapset_id']}l.jpg"
         )
 
-        message = await ctx.reply(content=f"<@{ctx.author.id}>", embed=ppcheck_embed)
+        await message.edit(content=f"<@{ctx.author.id}>", embed=ppcheck_embed)
+
         # if profile_data["raw_pp"] != "OFFLINE":
         #    _save_droid_uid_data(uid, profile_data)
 
@@ -362,8 +367,11 @@ class OsuDroid(commands.Cog):
 
         start = 0
         end = 5
-        while True:
 
+        timer = await timed_out()
+        while True:
+            if timer:
+                return None
             valid_reaction: tuple = await self.bot.wait_for(
                 "reaction_add",
                 check=lambda reaction, user: user == ctx.author and str(reaction.emoji) in ("⬅", "➡")
@@ -391,6 +399,8 @@ class OsuDroid(commands.Cog):
                         try:
                             play["beatmap_data"] = \
                                 (await _get_beatmap_data(play["hash"]))[0]
+                            if "DT" in play["mods"] or "NC" in play["mods"]:
+                                play["beatmap_data"]["bpm"] = int(play["beatmap_data"]["bpm"]) * 1.50
                         except IndexError:
                             play["beatmap_data"] = {
                                 "max_combo": "0",
