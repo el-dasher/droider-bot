@@ -1,9 +1,12 @@
-from discord.ext import commands
-import src.setup as settings
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-import discord
 import asyncio
 from typing import Union
+
+import discord
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from discord.ext import commands
+
+import src.setup as settings
+
 
 # from apscheduler.triggers.cron import CronTrigger
 
@@ -93,9 +96,6 @@ class DroiderBR(commands.Bot):
             print("O canal default não está configurado! faça o mesmo.")
 
     async def on_message(self, msg: discord.Message):
-        already_timed = False
-        counter = 0
-
         if msg.author.id == self.user.id:
             return
 

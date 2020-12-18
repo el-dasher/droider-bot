@@ -14,4 +14,3 @@ def hug_gifs():
     gif_listener(filelist)
 
     return filelist
-

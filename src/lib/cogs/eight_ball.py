@@ -1,7 +1,9 @@
-from src.lib.utils.basic_utils import ready_up_cog
-from discord.ext import commands
 import json
 from random import choice
+
+from discord.ext import commands
+
+from src.lib.utils.basic_utils import ready_up_cog
 from src.paths import LUCKY_PATH
 
 

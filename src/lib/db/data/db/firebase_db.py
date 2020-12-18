@@ -1,7 +1,8 @@
-from pyrebase import pyrebase
 import json
-from github import Github
 from os import getenv
+
+from github import Github
+from pyrebase import pyrebase
 
 firebase_config = json.loads(Github(
     getenv("ACCESS_TOKEN")

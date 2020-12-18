@@ -1,15 +1,17 @@
-from ossapi import ossapi
-from os import getenv
-from discord.ext import commands
-import discord
-from src.lib.utils.basic_utils import ready_up_cog
-from src.setup import DATABASE
-from dateutil.parser import parse
-from datetime import datetime
-from src.lib.utils.droid_data_getter import get_droid_data
-from pytz import timezone
-import requests
 import time
+from datetime import datetime
+from os import getenv
+
+import discord
+import requests
+from dateutil.parser import parse
+from discord.ext import commands
+from ossapi import ossapi
+from pytz import timezone
+
+from src.lib.utils.basic_utils import ready_up_cog
+from src.lib.utils.droid_data_getter import get_droid_data
+from src.setup import DATABASE
 
 osu_api = ossapi((OSU_API := getenv("OSU_API")))
 
@@ -368,7 +370,7 @@ class OsuDroid(commands.Cog):
         start = 0
         end = 5
 
-        timeout = time.time() + 30
+        timeout = time.time() + 60
         while time.time() < timeout:
             valid_reaction: tuple = await self.bot.wait_for(
                 "reaction_add",
@@ -435,8 +437,8 @@ class OsuDroid(commands.Cog):
                         )
                     next_ppcheck_embed.set_thumbnail(
                         url=f"https://b.ppy.sh/thumb/"
-                        f"{user_data['pp_data'][index-5]['beatmap_data']['beatmapset_id']}l.jpg"
-                        )
+                            f"{user_data['pp_data'][index - 5]['beatmap_data']['beatmapset_id']}l.jpg"
+                    )
                 except (IndexError, KeyError) as e:
                     print(e)
 

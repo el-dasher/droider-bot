@@ -1,11 +1,13 @@
-from src.setup import GELBOORU_API as GELBOORU
-from discord.ext import commands
-from src.lib.utils.basic_utils import ready_up_cog
-import discord
-from typing import Union
-from random import choice
 import json
+from random import choice
+from typing import Union
+
+import discord
+from discord.ext import commands
+
+from src.lib.utils.basic_utils import ready_up_cog
 from src.paths import WEIRD_TAGS_RESPONSE_PATH
+from src.setup import GELBOORU_API as GELBOORU
 
 
 class Gelbooru(commands.Cog):

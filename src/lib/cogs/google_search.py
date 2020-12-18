@@ -1,10 +1,12 @@
-from discord.ext import commands
-from src.lib.utils.basic_utils import ready_up_cog
+import time
+
 import discord
 import requests
-from src.setup import GOOGLE_USEFULS
 from bs4 import BeautifulSoup
-import time
+from discord.ext import commands
+
+from src.lib.utils.basic_utils import ready_up_cog
+from src.setup import GOOGLE_USEFULS
 
 GOOGLE_SEARCH_ID = GOOGLE_USEFULS["id"]
 GOOGLE_API = GOOGLE_USEFULS["api_key"]
@@ -92,7 +94,7 @@ class GoogleSearch(commands.Cog):
         await message.add_reaction("➡")
 
         counter = 0
-        timeout = time.time() + 30
+        timeout = time.time() + 60
         while time.time() < timeout:
             valid_reaction: tuple = await self.bot.wait_for(
                 "reaction_add",

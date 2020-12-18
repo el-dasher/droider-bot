@@ -1,8 +1,10 @@
 from abc import ABC
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
-from html.parser import HTMLParser
 from datetime import datetime
+from html.parser import HTMLParser
+from urllib.request import urlopen
+
+from bs4 import BeautifulSoup
+
 from src.setup import DATABASE
 
 ppcheck_data = []
@@ -96,11 +98,11 @@ def get_droid_data(user_id):
 
     beatmap_dicts = {}
     backup_pp_data = DATABASE.child("DROID_UID_DATA").child(user_id).child("raw_pp").get().val()
-    
+
     if pp_data == "OFFLINE":
-    	if backup_pp_data != []:
-    		pp_data = backup_pp_data
-   
+        if backup_pp_data != []:
+            pp_data = backup_pp_data
+
     for i, data in enumerate(beatmap_data):
         beatmap_dicts[f"rs_{i}"] = {
             "username": old_data[26][0],
@@ -138,7 +140,7 @@ def get_droid_data(user_id):
             data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": ppcheck_data}
         except NameError:
             data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": [{"s": "OFFLINE"}]}
-        
+
         DATABASE.child("DROID_UID_DATA").child(user_id).set(user_data)
         data_dicts.update(data_dict)
 

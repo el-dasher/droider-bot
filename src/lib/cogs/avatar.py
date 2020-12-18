@@ -1,9 +1,11 @@
-from discord.ext import commands
-import discord
-from src.lib.utils.basic_utils import ready_up_cog, get_member_name
-from random import choice
 from datetime import datetime
+from random import choice
 from typing import Union
+
+import discord
+from discord.ext import commands
+
+from src.lib.utils.basic_utils import ready_up_cog, get_member_name
 
 
 class Avatar(commands.Cog):

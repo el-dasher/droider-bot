@@ -1,10 +1,12 @@
 from abc import ABC
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
-from html.parser import HTMLParser
 from datetime import datetime
-from src.setup import DATABASE, DPPBOARD_API
+from html.parser import HTMLParser
+from urllib.request import urlopen
+
 import requests
+from bs4 import BeautifulSoup
+
+from src.setup import DATABASE, DPPBOARD_API
 
 
 # noinspection PyTypeChecker

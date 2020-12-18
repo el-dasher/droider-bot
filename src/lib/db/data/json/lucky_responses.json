@@ -11,7 +11,6 @@
             "Sim, faz! <:blobyes:780574873814171668>"
         ]
     },
-
     "NONE": {
         "MAYBE UNSURE": [
             "Não sei... <:blobvixi:780575480893931520>",
@@ -23,13 +22,12 @@
             "Se eu falasse tu ia ficar com raiva <a:blobcry:780574271398871070>",
             "Não vou falar sobre isso, VOCÊ NÃO MANDA EM MIM <a:blobcry:780574271398871070>"
         ],
-        "WANT_TO":[
+        "WANT_TO": [
             "Eu também queria saber amigo... <a:blobnom:780677934074822658>",
             "Eu não sei mas estou interessado no assunto! <a:blobnom:780677934074822658>",
             "Não é só você que quer saber isso... <a:blobnom:780677934074822658>"
         ]
     },
-
     "FALSE": {
         "BAD": [
             "Não, infelizmente... <:blobnobully:780577284884529182>",
