@@ -110,6 +110,8 @@ async def get_droid_data(user_id):
 
     dpp_board_url = f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPPBOARD_API}&uid={user_id}"
 
+    dpp_user_data = None
+
     # noinspection PyBroadException
     try:
         dpp_user_data = requests.get(dpp_board_url).json()
@@ -119,6 +121,8 @@ async def get_droid_data(user_id):
     else:
         raw_pp = None
         pp_data = None
+
+        # noinspection PyBroadException
         try:
             raw_pp = dpp_user_data["data"]["pp"]["total"]
             pp_data = dpp_user_data["data"]["pp"]["list"]
@@ -156,6 +160,7 @@ async def get_droid_data(user_id):
             "country": old_data[27][0],
             "raw_pp": raw_pp,
             "pp_data": pp_data,
+            "all_pp_data": dpp_user_data,
             "total_score": old_data[-12][0],
             "overall_acc": float(old_data[-10][0][:-1]),
             "playcount": "Erro!"

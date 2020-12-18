@@ -1,3 +1,4 @@
+import asyncio
 import time
 from datetime import datetime
 from os import getenv
@@ -5,10 +6,9 @@ from os import getenv
 import discord
 import requests
 from dateutil.parser import parse
-from discord.ext import commands
+from discord.ext import commands, tasks
 from ossapi import ossapi
 from pytz import timezone
-import asyncio
 
 from src.lib.utils.basic_utils import ready_up_cog
 from src.lib.utils.droid_data_getter import get_droid_data
@@ -197,6 +197,7 @@ class OsuDroid(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         ready_up_cog(self.bot, __name__)
+        self._brdpp_rank.start()
 
     @commands.command(name="rs", aliases=["recentme"])
     async def droidrecent(self, ctx, uid=None):
@@ -456,7 +457,7 @@ class OsuDroid(commands.Cog):
     async def droid_pfme(self, ctx, uid=None):
         """
         Veja seu lindo perfil do osu!droid,
-        ou o perfil de outra pessoa, e por favor rian não me mata.
+        ou o perfil de outra pessoa.
         """
 
         uid_original = uid
@@ -530,11 +531,15 @@ class OsuDroid(commands.Cog):
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
-    @commands.has_permissions(manage_channels=True)
-    @commands.command()
-    async def update_brdpp_rank(self, ctx, channel_id: int) -> discord.Message:
-        channel = self.bot.get_channel(channel_id)
-        updated_data = discord.Embed()
+    @tasks.loop(hours=1, minutes=30, seconds=0)
+    async def _brdpp_rank(self) -> discord.Message:
+
+        channel = self.bot.get_channel(789578289055662160)
+        updated_data = discord.Embed(title="RANK DPP BR", timestamp=datetime.utcnow())
+        fetched_data = []
+
+        updated_data.set_footer(text="Atualizado")
+
         for user in [
             124634,  # Bad
             130095,  # YungLixoBR
@@ -554,9 +559,9 @@ class OsuDroid(commands.Cog):
             250165,  # Guimex
             139403,  # LTG
             107427,  # Brunebas
-            166299,  # Hanatan
+            # 166299,  Hanatan
             123715,  # Ytalo
-            136701,  # Yaalca
+            # 136701,  Yaalca
             122857,  # Casual
             160753,  # Stefanyah
             208293,  # AugustoBR
@@ -566,11 +571,21 @@ class OsuDroid(commands.Cog):
             178023,  # Simple
             177086,  # Hyperchara
         ]:
-            await asyncio.sleep(3)
+            await asyncio.sleep(30)
             user_data = (await get_droid_data(user))["user_data"]
-            updated_data.add_field(name="", value=f"{user_data['username']} - {user_data['raw_pp']}", inline=False)
+            fetched_data.append(user_data)
 
-        await channel.purge(limit=1)
+        fetched_data = fetched_data[:25]
+        fetched_data.sort(key=lambda e: e["raw_pp"], reverse=True)
+
+        for i, data in enumerate(fetched_data):
+            updated_data.add_field(
+                name=f"{i + 1} - {data['username']}",
+                value=f"> `{float(data['raw_pp']):.2f}pp - accuracy: {data['overall_acc']:.2f}%`",
+                inline=False
+            )
+
+        await channel.purge(limit=3)
         return await channel.send(embed=updated_data)
 
 
