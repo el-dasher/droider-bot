@@ -9,7 +9,6 @@ from datetime import datetime
 from src.lib.utils.droid_data_getter import get_droid_data
 from pytz import timezone
 import requests
-from src.lib.utils.basic_utils import timed_out
 import time
 
 osu_api = ossapi((OSU_API := getenv("OSU_API")))

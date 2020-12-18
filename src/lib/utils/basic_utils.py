@@ -1,8 +1,5 @@
 import discord
 from typing import Union
-import asyncio
-import time
-
 
 def ready_up_cog(bot, __name___: __name__):
     if not bot.ready:
