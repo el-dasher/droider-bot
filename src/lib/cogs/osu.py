@@ -258,7 +258,6 @@ class OsuDroid(commands.Cog):
         Ai você não precisará passar o parâmetro de uid para ver seu usuário.
         """
 
-        default_value_string = None
         uid_original = uid
 
         if uid is None:
@@ -297,7 +296,8 @@ class OsuDroid(commands.Cog):
 
         ppcheck_embed.set_author(
             name=(default_author_name := f"TOP PLAYS DO(A) {user_data['username'].upper()}"),
-            url=(default_author_url := f"http://droidppboard.herokuapp.com/profile?uid={uid}")
+            url=(default_author_url := f"http://droidppboard.herokuapp.com/profile?uid={uid}"),
+            icon_url=(default_icon_url := user_data["avatar_url"])
         )
 
         async def _get_beatmap_data(hash_):
@@ -432,10 +432,9 @@ class OsuDroid(commands.Cog):
                 except (IndexError, KeyError) as e:
                     print(e)
 
-                title = default_author_name
-                link = default_author_url
-
-                next_ppcheck_embed.set_author(name=title, url=link)
+                next_ppcheck_embed.set_author(name=default_author_name,
+                                              url=default_author_url,
+                                              icon_url=default_icon_url)
 
                 await message.edit(embed=next_ppcheck_embed)
 
