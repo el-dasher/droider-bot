@@ -531,7 +531,7 @@ class OsuDroid(commands.Cog):
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
-    @tasks.loop(hours=1, minutes=30, seconds=0)
+    @tasks.loop(minutes=10, seconds=0)
     async def _brdpp_rank(self) -> discord.Message:
 
         channel = self.bot.get_channel(789578289055662160)
@@ -571,7 +571,7 @@ class OsuDroid(commands.Cog):
             178023,  # Simple
             177086,  # Hyperchara
         ]:
-            await asyncio.sleep(30)
+            await asyncio.sleep(10)
             user_data = (await get_droid_data(user))["user_data"]
             fetched_data.append(user_data)
 
