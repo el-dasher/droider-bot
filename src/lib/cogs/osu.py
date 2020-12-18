@@ -530,7 +530,7 @@ class OsuDroid(commands.Cog):
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
-    @commands.has_permissions(manage_channels=False)
+    @commands.has_permissions(manage_channels=True)
     @commands.command()
     async def update_brdpp_rank(self, ctx, channel_id: int) -> discord.Message:
         channel = self.bot.get_channel(channel_id)
