@@ -10,6 +10,7 @@ from src.lib.utils.droid_data_getter import get_droid_data
 from pytz import timezone
 import requests
 from src.lib.utils.basic_utils import timed_out
+import time
 
 osu_api = ossapi((OSU_API := getenv("OSU_API")))
 
@@ -368,10 +369,8 @@ class OsuDroid(commands.Cog):
         start = 0
         end = 5
 
-        timer = await timed_out()
-        while True:
-            if timer:
-                return None
+        timeout = time.time() + 30
+        while time.time() < timeout:
             valid_reaction: tuple = await self.bot.wait_for(
                 "reaction_add",
                 check=lambda reaction, user: user == ctx.author and str(reaction.emoji) in ("⬅", "➡")

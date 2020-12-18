@@ -4,7 +4,7 @@ import discord
 import requests
 from src.setup import GOOGLE_USEFULS
 from bs4 import BeautifulSoup
-from src.lib.utils.basic_utils import timed_out
+import time
 
 GOOGLE_SEARCH_ID = GOOGLE_USEFULS["id"]
 GOOGLE_API = GOOGLE_USEFULS["api_key"]
@@ -92,10 +92,8 @@ class GoogleSearch(commands.Cog):
         await message.add_reaction("➡")
 
         counter = 0
-        timer = await timed_out()
-        while True:
-            if timer:
-                return None
+        timeout = time.time() + 30
+        while time.time() < timeout:
             valid_reaction: tuple = await self.bot.wait_for(
                 "reaction_add",
                 check=lambda reaction, user: user == ctx.author and str(reaction.emoji) in ("⬅", "➡")
