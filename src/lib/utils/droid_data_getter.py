@@ -110,17 +110,20 @@ async def get_droid_data(user_id):
 
     dpp_board_url = f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPPBOARD_API}&uid={user_id}"
 
-    raw_pp = None
-    pp_data = None
-
     # noinspection PyBroadException
     try:
         dpp_user_data = requests.get(dpp_board_url).json()
     except Exception:
-        dpp_user_data = "OFFLINE"
+        raw_pp = "OFFLINE"
+        pp_data = "OFFLINE"
     else:
-        raw_pp = dpp_user_data["data"]["pp"]["total"]
-        pp_data = dpp_user_data["data"]["pp"]["list"]
+        raw_pp = None
+        pp_data = None
+        try:
+            raw_pp = dpp_user_data["data"]["pp"]["total"]
+            pp_data = dpp_user_data["data"]["pp"]["list"]
+        except Exception:
+            print(dpp_user_data)
 
     for i, data in enumerate(beatmap_data):
         beatmap_dicts[f"rs_{i}"] = {

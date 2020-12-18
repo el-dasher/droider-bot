@@ -123,6 +123,7 @@ class GoogleSearch(commands.Cog):
                     next_im_embed.set_image(url=current_request)
 
                     await message.edit(embed=next_im_embed)
+        return await message.clear_reactions()
 
 
 def setup(bot):

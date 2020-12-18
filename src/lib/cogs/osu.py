@@ -8,6 +8,7 @@ from dateutil.parser import parse
 from discord.ext import commands
 from ossapi import ossapi
 from pytz import timezone
+import asyncio
 
 from src.lib.utils.basic_utils import ready_up_cog
 from src.lib.utils.droid_data_getter import get_droid_data
@@ -374,7 +375,9 @@ class OsuDroid(commands.Cog):
         while time.time() < timeout:
             valid_reaction: tuple = await self.bot.wait_for(
                 "reaction_add",
-                check=lambda reaction, user: user == ctx.author and str(reaction.emoji) in ("⬅", "➡")
+                check=lambda reaction, user: (
+                        user == ctx.author and str(reaction.emoji) in ("⬅", "➡") and reaction.message == message
+                )
             )
 
             if valid_reaction:
@@ -447,6 +450,7 @@ class OsuDroid(commands.Cog):
                                               icon_url=default_icon_url)
 
                 await message.edit(embed=next_ppcheck_embed)
+        return await message.clear_reactions()
 
     @commands.command(name="pf", aliases=["pfme"])
     async def droid_pfme(self, ctx, uid=None):
@@ -526,8 +530,48 @@ class OsuDroid(commands.Cog):
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
-    # def _save_droid_uid_data(uid, profile_data):
-    #        DATABASE.child("DROID_UID_DATA").child(uid).set(profile_data)
+    @commands.has_permissions(manage_channels=False)
+    @commands.command()
+    async def update_brdpp_rank(self, ctx, channel_id: int) -> discord.Message:
+        channel = self.bot.get_channel(channel_id)
+        updated_data = discord.Embed()
+        for user in [
+            124634,  # Bad
+            130095,  # YungLixoBR
+            195772,  # Kesto
+            199062,  # Flamey
+            127259,  # Aotori
+            152263,  # Lele
+            168978,  # WyvernBR
+            158287,  # Dasher
+            167316,  # Riuzakeh
+            139740,  # Angel
+            133780,  # Alex
+            192859,  # Lordness
+            149922,  # Gomeori
+            217227,  # Nathan
+            180170,  # Poutt
+            250165,  # Guimex
+            139403,  # LTG
+            107427,  # Brunebas
+            166299,  # Hanatan
+            123715,  # Ytalo
+            136701,  # Yaalca
+            122857,  # Casual
+            160753,  # Stefanyah
+            208293,  # AugustoBR
+            188597,  # BiriBiri
+            163011,  # Feikie
+            152355,  # Zalur
+            178023,  # Simple
+            177086,  # Hyperchara
+        ]:
+            await asyncio.sleep(3)
+            user_data = (await get_droid_data(user))["user_data"]
+            updated_data.add_field(name="", value=f"{user_data['username']} - {user_data['raw_pp']}", inline=False)
+
+        await channel.purge(limit=1)
+        return await channel.send(embed=updated_data)
 
 
 def setup(bot):
