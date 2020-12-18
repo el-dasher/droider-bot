@@ -107,11 +107,18 @@ async def get_droid_data(user_id):
     """
 
     dpp_board_url = f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPPBOARD_API}&uid={user_id}"
+
+    raw_pp = None
+    pp_data = None
+
     # noinspection PyBroadException
     try:
         dpp_user_data = requests.get(dpp_board_url).json()
     except Exception:
         dpp_user_data = "OFFLINE"
+    else:
+        raw_pp = dpp_user_data["data"]["pp"]["total"]
+        pp_data = dpp_user_data["data"]["pp"]["list"]
 
     for i, data in enumerate(beatmap_data):
         beatmap_dicts[f"rs_{i}"] = {
@@ -130,8 +137,8 @@ async def get_droid_data(user_id):
             "avatar_url": html_imgs[3][0][1],
             "user_id": user_id,
             "country": old_data[27][0],
-            "raw_pp": dpp_user_data["data"]["pp"]["total"] if dpp_user_data != "OFFLINE" else dpp_user_data,
-            "pp_data": dpp_user_data["data"]["pp"]["list"] if dpp_user_data != "OFFLINE" else dpp_user_data,
+            "raw_pp": raw_pp,
+            "pp_data": pp_data,
             "total_score": old_data[-13][0],
             "overall_acc": float(old_data[-11][0][:-1]),
             "playcount": int(old_data[-9][0])
@@ -142,8 +149,8 @@ async def get_droid_data(user_id):
             "avatar_url": html_imgs[3][0][1],
             "user_id": user_id,
             "country": old_data[27][0],
-            "raw_pp": dpp_user_data["data"]["pp"]["total"],
-            "pp_data": dpp_user_data["data"]["pp"]["list"],
+            "raw_pp": raw_pp,
+            "pp_data": pp_data,
             "total_score": old_data[-12][0],
             "overall_acc": float(old_data[-10][0][:-1]),
             "playcount": "Erro!"
