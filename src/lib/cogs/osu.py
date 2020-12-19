@@ -383,8 +383,7 @@ class OsuDroid(commands.Cog):
                         )
                     ), inline=False
                 )
-            else:
-                all_plays.append(play)
+            all_plays.append(play)
             
         ppcheck_embed.set_thumbnail(
             url=f"https://b.ppy.sh/thumb/{user_data['pp_data'][0]['beatmap_data']['beatmapset_id']}l.jpg"
