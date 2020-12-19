@@ -546,38 +546,9 @@ class OsuDroid(commands.Cog):
 
         fetched_data = []
 
-        for user in [
-            124634,  # Bad
-            130095,  # YungLixoBR
-            195772,  # Kesto
-            199062,  # Flamey
-            127259,  # Aotori
-            152263,  # Lele
-            168978,  # WyvernBR
-            158287,  # Dasher
-            167316,  # Riuzakeh
-            139740,  # Angel
-            133780,  # Alex
-            192859,  # Lordness
-            149922,  # Gomeori
-            217227,  # Nathan
-            180170,  # Poutt
-            250165,  # Guimex
-            139403,  # LTG
-            107427,  # Brunebas
-            166299,  # Hanatan
-            123715,  # Ytalo
-            136701,  # Yaalca
-            122857,  # Casual
-            160753,  # Stefanyah
-            208293,  # AugustoBR
-            188597,  # BiriBiri
-            163011,  # Feikie
-            152355,  # Zalur
-            178023,  # Simple
-            177086,  # Hyperchara
-            200458,  # Felipon
-        ]:
+        uid_list = DATABASE.child("BR_UIDS").get().val()["uids"]
+
+        for user in uid_list:
             await asyncio.sleep(0.5)
             user_data = (await get_droid_data(user))["user_data"]
 
