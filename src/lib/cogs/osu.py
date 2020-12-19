@@ -395,7 +395,7 @@ class OsuDroid(commands.Cog):
         await message.add_reaction("➡")
         
         for _, play in enumerate(plays_beatmap_data):
-                    
+            print(play)
             play["beatmap_data"] = plays_beatmap_data[_]
                 
             if "DT" in play["mods"] or "NC" in play["mods"]:
