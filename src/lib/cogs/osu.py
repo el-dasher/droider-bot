@@ -623,8 +623,8 @@ class OsuDroid(commands.Cog):
             updated_data.add_field(
                 name=f"{i + 1} - {data['username']}",
                 value=(
-                    f"> ```\n> {float(data['raw_pp']):.2f}pp - accuracy: {data['overall_acc']:.2f}%\n"
-                    f"> [speed: {data['speed']:.2f} | aim: {data['aim']:.2f} | reading: AR{data['reading']:.2f}]\n> ```"
+                    f">>> ```\n> {float(data['raw_pp']):.2f}pp - accuracy: {data['overall_acc']:.2f}%\n"
+                    f"[speed: {data['speed']:.2f} | aim: {data['aim']:.2f} | reading: AR{data['reading']:.2f}]\n```"
                 ),
                 inline=False
             )
