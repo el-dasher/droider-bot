@@ -414,6 +414,8 @@ class OsuDroid(commands.Cog):
                     start = 0
                     end = 5
                 next_ppcheck_embed = discord.Embed()
+                
+                print(leb(all_plays))
                 try:
                     index = start
                     for _, play in enumerate(all_plays[start:end]):
