@@ -422,7 +422,9 @@ class OsuDroid(commands.Cog):
                 next_ppcheck_embed = discord.Embed()
                 
                 try:
+                    index = start
                     for _, play in enumerate(user_data["pp_data"][start:end]):
+                        index += 1
                         play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
                      
                         if "DT" in play["mods"] or "NC" in play["mods"]:
@@ -432,7 +434,7 @@ class OsuDroid(commands.Cog):
                         play["mods"] = _is_nomod(play["mods"])
                     
                         next_ppcheck_embed.add_field(
-                            name=f"{start + 1}. {play['title']} +{play['mods']}",
+                            name=f"{index}. {play['title']} +{play['mods']}",
                             value=(
                                 (
                                     f">>> ```\n"
