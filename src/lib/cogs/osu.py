@@ -9,6 +9,7 @@ from dateutil.parser import parse
 from discord.ext import commands, tasks
 from ossapi import ossapi
 from pytz import timezone
+from src.paths import debug
 
 from src.lib.utils.basic_utils import ready_up_cog
 from src.lib.utils.droid_data_getter import get_droid_data
@@ -531,14 +532,19 @@ class OsuDroid(commands.Cog):
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
-    @tasks.loop(minutes=10, seconds=0)
-    async def _brdpp_rank(self) -> discord.Message:
+    @tasks.loop(minutes=1, seconds=0)
+    async def _brdpp_rank(self):
 
-        channel = self.bot.get_channel(789613566684430346)
-        updated_data = discord.Embed(title="RANK DPP BR", timestamp=datetime.utcnow())
+        if debug:
+            return None
+
+        try:
+            br_rank_channel: discord.TextChannel = self.bot.get_channel(789613566684430346)
+            br_rank_message: discord.Message = await br_rank_channel.fetch_message(789681364986232884)
+        except AttributeError:
+            return print("Erro ao atualizar o rank de dpp")
+
         fetched_data = []
-
-        updated_data.set_footer(text="Atualizado")
 
         for user in [
             124634,  # Bad
@@ -559,9 +565,9 @@ class OsuDroid(commands.Cog):
             250165,  # Guimex
             139403,  # LTG
             107427,  # Brunebas
-            # 166299,  Hanatan
+            166299,  # Hanatan
             123715,  # Ytalo
-            # 136701,  Yaalca
+            136701,  # Yaalca
             122857,  # Casual
             160753,  # Stefanyah
             208293,  # AugustoBR
@@ -570,13 +576,19 @@ class OsuDroid(commands.Cog):
             152355,  # Zalur
             178023,  # Simple
             177086,  # Hyperchara
+            200458,  # Felipon
         ]:
-            await asyncio.sleep(10)
+            await asyncio.sleep(0.5)
             user_data = (await get_droid_data(user))["user_data"]
-            fetched_data.append(user_data)
+
+            if user_data["raw_pp"] is not None or user_data["pp_data"] is not None:
+                fetched_data.append(user_data)
 
         fetched_data = fetched_data[:25]
         fetched_data.sort(key=lambda e: e["raw_pp"], reverse=True)
+
+        updated_data = discord.Embed(title="RANK DPP BR", timestamp=datetime.utcnow())
+        updated_data.set_footer(text="Atualizado")
 
         for i, data in enumerate(fetched_data):
             updated_data.add_field(
@@ -584,9 +596,12 @@ class OsuDroid(commands.Cog):
                 value=f"> `{float(data['raw_pp']):.2f}pp - accuracy: {data['overall_acc']:.2f}%`",
                 inline=False
             )
+        # noinspection PyBroadException
 
-        await channel.purge(limit=3)
-        return await channel.send(embed=updated_data)
+        try:
+            return await br_rank_message.edit(content="", embed=updated_data)
+        except Exception:
+            return await br_rank_channel.send("Não foi possivel encontrar a mensagem do rank dpp")
 
 
 def setup(bot):

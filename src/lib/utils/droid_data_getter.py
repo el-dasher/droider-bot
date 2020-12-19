@@ -127,7 +127,7 @@ async def get_droid_data(user_id):
             raw_pp = dpp_user_data["data"]["pp"]["total"]
             pp_data = dpp_user_data["data"]["pp"]["list"]
         except Exception:
-            print(dpp_user_data)
+            pass
 
     for i, data in enumerate(beatmap_data):
         beatmap_dicts[f"rs_{i}"] = {

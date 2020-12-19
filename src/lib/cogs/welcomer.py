@@ -6,6 +6,7 @@ from typing import List, Any
 import discord
 from discord.ext import commands
 from discord.ext.commands import Cog
+from src.paths import debug
 
 from src.lib.utils.basic_utils import ready_up_cog, get_member_name
 from src.paths import MONTHS_PATH
@@ -40,6 +41,8 @@ class Welcomer(Cog):
 
     @Cog.listener()
     async def on_member_join(self, member: discord.Member):
+        if debug:
+            return None
 
         welcome_msg = ("SEJA BEM VIADO", "SEJA BEM VINDO")
 
@@ -69,6 +72,8 @@ class Welcomer(Cog):
 
     @Cog.listener()
     async def on_member_remove(self, member: discord.Member):
+        if debug:
+            return None
         created_month = month_data["MONTHS"][member.created_at.month - 1]
 
         left_embed = discord.Embed(title=f"O(A) {get_member_name(member)} saiu do servidor",
