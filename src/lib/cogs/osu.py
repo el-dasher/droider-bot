@@ -532,7 +532,7 @@ class OsuDroid(commands.Cog):
 
         user_data = (await get_droid_data(uid))["user_data"]
 
-        if user_data["username"] != "153456" or not user_data["username"].startswith("155"):
+        if user_data["username"] != "153456" or user_data["username"].startswith("155") is False:
             DATABASE.child("DROID_USERS").child(ctx.author.id).set({"user": user_data})
         else:
             return await ctx.reply(f"Não existe uma uid chamada: {uid}")
