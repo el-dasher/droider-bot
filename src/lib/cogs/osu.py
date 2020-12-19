@@ -541,7 +541,7 @@ class OsuDroid(commands.Cog):
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
-    @tasks.loop(minutes=1, seconds=0)
+    @tasks.loop(minutes=10, seconds=0)
     async def _brdpp_rank(self):
 
         if debug:
@@ -590,7 +590,7 @@ class OsuDroid(commands.Cog):
                 calculated = []
 
                 res = None
-                
+
                 for calc_list in to_calculate:
                     try:
                         res = sum(calc_list) / len(calc_list)
