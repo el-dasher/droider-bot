@@ -52,7 +52,7 @@ async def get_beatmap_data(hash_):
             beatmap_data = beatmap_data[0]
         except IndexError:
             beatmap_data = default_data
-    print(beatmap_data)
+
     return beatmap_data
 
 
