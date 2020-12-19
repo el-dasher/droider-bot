@@ -549,7 +549,7 @@ class OsuDroid(commands.Cog):
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
-    @tasks.loop(seconds=30)
+    @tasks.loop(minutes=30, seconds=0)
     async def _brdpp_rank(self):
 
         if debug:
