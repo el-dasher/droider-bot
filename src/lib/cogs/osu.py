@@ -349,12 +349,14 @@ class OsuDroid(commands.Cog):
         message = await ctx.reply("Adquirindo dados...")
         all_plays = []
         for _, play in enumerate(user_data["pp_data"]):
+            
+            play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
+                            if "DT" in play["mods"] or "NC" in play["mods"]:
+                                play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
+                            user_data["pp_data"][_]['beatmap_data'] = play["beatmap_data"]
+                            play["mods"] = _is_nomod(play["mods"])
+                            
             if _ <= 4:
-                play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
-                if "DT" in play["mods"] or "NC" in play["mods"]:
-                    play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
-                user_data["pp_data"][_]['beatmap_data'] = play["beatmap_data"]
-                play["mods"] = _is_nomod(play["mods"])
                 
                 ppcheck_embed.add_field(
                     name=f"{_ + 1}.{play['title']} +{play['mods']}",
@@ -377,8 +379,7 @@ class OsuDroid(commands.Cog):
                     ), inline=False
                 )
             all_plays.append(play)
-        
-        print(len(all_plays))
+
         ppcheck_embed.set_thumbnail(
             url=f"https://b.ppy.sh/thumb/{user_data['pp_data'][0]['beatmap_data']['beatmapset_id']}l.jpg"
         )
@@ -422,7 +423,7 @@ class OsuDroid(commands.Cog):
                     index = start
                     for _, play in enumerate(all_plays[start:end]):
                         index += 1
-                        print(play)
+                        
                         next_ppcheck_embed.add_field(
                             name=f"{index}. {play['title']} +{play['mods']}",
                             value=(
