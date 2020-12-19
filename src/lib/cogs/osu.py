@@ -27,25 +27,33 @@ def mention_to_uid(msg):
         return msg
 
 
-async def get_beatmap_data(hash_: str):
-    beatmap_data = requests.get(f"https://osu.ppy.sh/api/get_beatmaps?k={OSU_API}&h={hash_}").json()
+async def get_beatmap_data(hash_):
 
+    default_data = {
+        "max_combo": 0,
+        "diff_approach": 0,
+        "diff_aim": 0,
+        "diff_speed": 0,
+        "bpm": 0,
+        "difficultyrating": 0,
+        "beatmap_id": 0,
+        "beatmapset_id": 0,
+        "title": "?"
+    }
+
+    # noinspection PyBroadException
     try:
-        beatmap_data = beatmap_data[0]
-    except IndexError:
-        beatmap_data = {
-                "max_combo": 0,
-                "diff_approach": 0,
-                "diff_aim": 0,
-                "diff_speed": 0,
-                "bpm": 0,
-                "difficultyrating": 0,
-                "beatmap_id": 0,
-                "beatmapset_id": 0,
-                "title": "?"
-            }
-    finally:
-        return beatmap_data
+        await asyncio.sleep(0.5)
+        beatmap_data = requests.get(f"https://osu.ppy.sh/api/get_beatmaps?k={OSU_API}&h={hash_}").json()
+    except Exception:
+        beatmap_data = default_data
+    else:
+        try:
+            beatmap_data = beatmap_data[0]
+        except IndexError:
+            beatmap_data = default_data
+    print(beatmap_data)
+    return beatmap_data
 
 
 class OsuGame(commands.Cog):
@@ -541,12 +549,12 @@ class OsuDroid(commands.Cog):
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
-    @tasks.loop(minutes=10, seconds=0)
+    @tasks.loop(seconds=30)
     async def _brdpp_rank(self):
 
-        if debug:
+        if not debug:
             return None
-
+        print("STAR")
         try:
             br_rank_channel: discord.TextChannel = self.bot.get_channel(789613566684430346)
             br_rank_message: discord.Message = await br_rank_channel.fetch_message(789691247911632956)
@@ -556,9 +564,9 @@ class OsuDroid(commands.Cog):
         fetched_data = []
 
         uid_list = DATABASE.child("BR_UIDS").get().val()["uids"]
-
+        print("1")
         for user in uid_list:
-
+            print("66")
             diff_aim_list = []
             diff_speed_list = []
             diff_ar_list = []
@@ -615,8 +623,8 @@ class OsuDroid(commands.Cog):
             updated_data.add_field(
                 name=f"{i + 1} - {data['username']}",
                 value=(
-                    f"> `{float(data['raw_pp']):.2f}pp - accuracy: {data['overall_acc']:.2f}% - "
-                    f"[speed: {data['speed']:.2f} | aim: {data['aim']:.2f} | reading: AR{data['reading']:.2f}`"
+                    f"> ```\n{float(data['raw_pp']):.2f}pp - accuracy: {data['overall_acc']:.2f}%\n"
+                    f"> [speed: {data['speed']:.2f} | aim: {data['aim']:.2f} | reading: AR{data['reading']:.2f}]`\n```"
                 ),
                 inline=False
             )
