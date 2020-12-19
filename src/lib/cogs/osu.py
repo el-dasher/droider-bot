@@ -4,6 +4,7 @@ from datetime import datetime
 from os import getenv
 
 import discord
+import traceback
 import requests
 from dateutil.parser import parse
 from discord.ext import commands, tasks
@@ -431,7 +432,7 @@ class OsuDroid(commands.Cog):
                         play["mods"] = _is_nomod(play["mods"])
                     
                         next_ppcheck_embed.add_field(
-                            name=f"{_}. {play['title']} +{play['mods']}",
+                            name=f"{start + 1}. {play['title']} +{play['mods']}",
                             value=(
                                 (
                                     f">>> ```\n"
@@ -455,7 +456,7 @@ class OsuDroid(commands.Cog):
                             f"{user_data['pp_data'][_ - 5]['beatmap_data']['beatmapset_id']}l.jpg"
                     )
                 except (IndexError, KeyError) as e:
-                    print(e)
+                    traceback.print_exc(e)
 
                 next_ppcheck_embed.set_author(name=default_author_name,
                                               url=default_author_url,
