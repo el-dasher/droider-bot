@@ -349,13 +349,11 @@ class OsuDroid(commands.Cog):
         message = await ctx.reply("Adquirindo dados...")
         
         all_plays = []
-        plays_beatmap_data = []
         
         for _, play in enumerate(user_data["pp_data"][:5]):
         
             play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
-            plays_beatmap_data.append(play["beatmap_data"])
-
+         
             if "DT" in play["mods"] or "NC" in play["mods"]:
                 play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
                 
@@ -396,14 +394,6 @@ class OsuDroid(commands.Cog):
 
         await message.add_reaction("⬅")
         await message.add_reaction("➡")
-        
-        for _, play in enumerate(plays_beatmap_data):
-            print(play)
-            play["beatmap_data"] = plays_beatmap_data[_]
-                
-            if "DT" in play["mods"] or "NC" in play["mods"]:
-                play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
-            all_plays.append(play)
                         
         start = 0
         end = 5
