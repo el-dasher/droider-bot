@@ -27,6 +27,26 @@ def mention_to_uid(msg):
         return msg
 
 
+async def get_beatmap_data(hash_: str):
+    beatmap_data = requests.get(f"https://osu.ppy.sh/api/get_beatmaps?k={OSU_API}&h={hash_}").json()
+    try:
+        beatmap_data = beatmap_data[0]
+    except IndexError:
+        beatmap_data = {
+                "max_combo": "0",
+                "diff_aim": "0",
+                "diff_speed": "0",
+                "bpm": "0",
+                "difficultyrating": "0",
+
+                "beatmap_id": "0",
+                "beatmapset_id": "0",
+                "title": "?"
+            }
+    finally:
+        return beatmap_data
+
+
 class OsuGame(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -308,9 +328,6 @@ class OsuDroid(commands.Cog):
             icon_url=(default_icon_url := user_data["avatar_url"])
         )
 
-        async def _get_beatmap_data(hash_):
-            return requests.get(f"https://osu.ppy.sh/api/get_beatmaps?k={OSU_API}&h={hash_}").json()
-
         def _is_nomod(mods):
             if mods == "":
                 mods = "NM"
@@ -319,22 +336,9 @@ class OsuDroid(commands.Cog):
                 return mods
 
         for _, play in enumerate(user_data["pp_data"][:5]):
-            try:
-                play["beatmap_data"] = (await _get_beatmap_data(play["hash"]))[0]
-                if "DT" in play["mods"] or "NC" in play["mods"]:
-                    play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
-            except IndexError:
-                play["beatmap_data"] = {
-                    "max_combo": "0",
-                    "diff_aim": "0",
-                    "diff_speed": "0",
-                    "bpm": "0",
-                    "difficultyrating": "0",
-
-                    "beatmap_id": "0",
-                    "beatmapset_id": "0",
-                    "title": "?"
-                }
+            play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
+            if "DT" in play["mods"] or "NC" in play["mods"]:
+                play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
             user_data["pp_data"][_]['beatmap_data'] = play["beatmap_data"]
             play["mods"] = _is_nomod(play["mods"])
             ppcheck_embed.add_field(
@@ -403,7 +407,7 @@ class OsuDroid(commands.Cog):
                         play["mods"] = _is_nomod(play["mods"])
                         try:
                             play["beatmap_data"] = \
-                                (await _get_beatmap_data(play["hash"]))[0]
+                                (await get_beatmap_data(play["hash"]))
                             if "DT" in play["mods"] or "NC" in play["mods"]:
                                 play["beatmap_data"]["bpm"] = int(play["beatmap_data"]["bpm"]) * 1.50
                         except IndexError:
@@ -535,7 +539,7 @@ class OsuDroid(commands.Cog):
     @tasks.loop(minutes=1, seconds=0)
     async def _brdpp_rank(self):
 
-        if debug:
+        if not debug:
             return None
 
         try:
@@ -549,10 +553,39 @@ class OsuDroid(commands.Cog):
         uid_list = DATABASE.child("BR_UIDS").get().val()["uids"]
 
         for user in uid_list:
+
+            diff_aim_list = []
+            diff_speed_list = []
+            diff_ar_list = []
+
             await asyncio.sleep(0.5)
             user_data = (await get_droid_data(user))["user_data"]
 
             if user_data["raw_pp"] is not None or user_data["pp_data"] is not None:
+
+                for top_play in user_data["pp_data"]:
+                    beatmap_data = await get_beatmap_data(top_play["hash"])
+
+                    diff_ar_list.append(float(beatmap_data["diff_approach"]))
+                    diff_aim_list.append(float(beatmap_data["diff_aim"]))
+                    diff_speed_list.append(float(beatmap_data["diff_speed"]))
+
+                to_calculate = [
+                    diff_ar_list,
+                    diff_speed_list,
+                    diff_aim_list
+                ]
+
+                calculated = []
+
+                for calc_list in to_calculate:
+                    res = sum(calc_list) / len(calc_list)
+                    calculated.append(res)
+
+                user_data["reading"] = calculated[0]
+                user_data["speed"] = calculated[1]
+                user_data["aim"] = calculated[2]
+
                 fetched_data.append(user_data)
 
         fetched_data = fetched_data[:25]
@@ -564,7 +597,10 @@ class OsuDroid(commands.Cog):
         for i, data in enumerate(fetched_data):
             updated_data.add_field(
                 name=f"{i + 1} - {data['username']}",
-                value=f"> `{float(data['raw_pp']):.2f}pp - accuracy: {data['overall_acc']:.2f}%`",
+                value=(
+                    f"> `{float(data['raw_pp']):.2f}pp - accuracy: {data['overall_acc']:.2f}% - "
+                    f"[speed: {data['speed']:.2f} | aim: {data['aim']:.2f} | reading: AR{data['reading']:.2f}`"
+                ),
                 inline=False
             )
         # noinspection PyBroadException
