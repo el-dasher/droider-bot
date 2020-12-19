@@ -418,7 +418,7 @@ class OsuDroid(commands.Cog):
                     for _, play in enumerate(user_data["pp_data"][start:end]):
                         index += 1
                         play["mods"] = _is_nomod(play["mods"])
-                        play["beatmap_data"] = await get_beatmap_data(play["hash"]))
+                        play["beatmap_data"] = await get_beatmap_data(play["hash"])
                         if "DT" in play["mods"] or "NC" in play["mods"]:
                             play["beatmap_data"]["bpm"] = int(play["beatmap_data"]["bpm"]) * 1.50
                         
