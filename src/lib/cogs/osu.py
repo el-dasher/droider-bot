@@ -350,7 +350,7 @@ class OsuDroid(commands.Cog):
         
         all_plays = []
         
-        for _, play in enumerate(user_data["pp_data"][:5]):
+        for _, play in enumerate(user_data["pp_data"]):
         
             play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
          
@@ -360,7 +360,7 @@ class OsuDroid(commands.Cog):
             user_data["pp_data"][_]['beatmap_data'] = play["beatmap_data"]
             play["mods"] = _is_nomod(play["mods"])
             
-            if _ > 4:
+            if _ <= 4:
                 ppcheck_embed.add_field(
                     name=f"{_ + 1}.{play['title']} +{play['mods']}",
                     value=(
