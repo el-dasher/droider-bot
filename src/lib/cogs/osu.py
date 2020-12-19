@@ -418,11 +418,7 @@ class OsuDroid(commands.Cog):
                     index = start
                     for _, play in enumerate(all_plays[start:end]):
                         index += 1
-                        play["mods"] = _is_nomod(play["mods"])
-                        
-                        play["beatmap_data"] = await get_beatmap_data(play["hash"])
-                        user_data["pp_data"][_]['beatmap_data'] = play["beatmap_data"]
-
+                        print(play)
                         next_ppcheck_embed.add_field(
                             name=f"{index}. {play['title']} +{play['mods']}",
                             value=(
