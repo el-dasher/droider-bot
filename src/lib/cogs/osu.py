@@ -414,6 +414,9 @@ class OsuDroid(commands.Cog):
                     end = 5
                 next_ppcheck_embed = discord.Embed()
                 try:
+                    if "DT" in play["mods"] or "NC" in play["mods"]:
+                        play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
+          
                     index = start
                     for _, play in enumerate(user_data["pp_data"][start:end]):
                         index += 1
@@ -428,7 +431,7 @@ class OsuDroid(commands.Cog):
                             name=f"{index}. {play['title']} +{play['mods']}",
                             value=(
                                 (
-                                    f"```"
+                                    f">>> ```\n"
                                     f"{play['combo']}x/{play['beatmap_data']['max_combo']}x |"
                                     f" {play['accuracy']}%"
                                     f" | {play['miss']} miss\n{int(float(play['pp']))}dpp |"
