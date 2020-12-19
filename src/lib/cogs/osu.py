@@ -358,7 +358,7 @@ class OsuDroid(commands.Cog):
                 name=f"{_ + 1}.{play['title']} +{play['mods']}",
                 value=(
                     (
-                        f">>> ```"
+                        f">>> ```\n"
                         f"{play['combo']}x/{play['beatmap_data']['max_combo']}x |"
                         f" {play['accuracy']}%"
                         f" | {play['miss']} miss\n{int(float(play['pp']))}dpp |"
