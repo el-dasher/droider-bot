@@ -531,12 +531,12 @@ class OsuDroid(commands.Cog):
             return await ctx.reply("Você esqueceu de por para qual usuário(a) você quer setar!")
 
         user_data = (await get_droid_data(uid))["user_data"]
-
-        if user_data["username"] != "153456" or user_data["username"].startswith("155") is False:
+        print(user_data["username"])
+        if user_data["username"].startswith("155") is False:
             DATABASE.child("DROID_USERS").child(ctx.author.id).set({"user": user_data})
         else:
             return await ctx.reply(f"Não existe uma uid chamada: {uid}")
-
+        
         droidset_embed = discord.Embed(
             title=f"Você cadastrou seu usuário! {user_data['username']}"
         )
