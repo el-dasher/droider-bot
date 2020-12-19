@@ -456,7 +456,7 @@ class OsuDroid(commands.Cog):
                             f"{user_data['pp_data'][_ - 5]['beatmap_data']['beatmapset_id']}l.jpg"
                     )
                 except (IndexError, KeyError) as e:
-                    traceback.print_exc(e)
+                    pass
 
                 next_ppcheck_embed.set_author(name=default_author_name,
                                               url=default_author_url,
