@@ -29,6 +29,7 @@ def mention_to_uid(msg):
 
 async def get_beatmap_data(hash_: str):
     beatmap_data = requests.get(f"https://osu.ppy.sh/api/get_beatmaps?k={OSU_API}&h={hash_}").json()
+
     try:
         beatmap_data = beatmap_data[0]
     except IndexError:
@@ -536,7 +537,7 @@ class OsuDroid(commands.Cog):
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
-    @tasks.loop(minutes=1, seconds=0)
+    @tasks.loop(seconds=30)
     async def _brdpp_rank(self):
 
         if not debug:
@@ -563,18 +564,28 @@ class OsuDroid(commands.Cog):
 
             if user_data["raw_pp"] is not None or user_data["pp_data"] is not None:
 
+                print(user)
+
                 for top_play in user_data["pp_data"]:
+
                     beatmap_data = await get_beatmap_data(top_play["hash"])
 
-                    diff_ar_list.append(float(beatmap_data["diff_approach"]))
-                    diff_aim_list.append(float(beatmap_data["diff_aim"]))
-                    diff_speed_list.append(float(beatmap_data["diff_speed"]))
+                    if "DT" not in top_play["mods"]:
+                        diff_ar_list.append(float(beatmap_data["diff_approach"]))
+                        diff_aim_list.append(float(beatmap_data["diff_aim"]))
+                        diff_speed_list.append(float(beatmap_data["diff_speed"]))
+                    else:
+                        diff_ar_list.append((float(beatmap_data["diff_approach"]) * 2 + 13) / 3)
+                        diff_aim_list.append(float(beatmap_data["diff_aim"]) * 1.50)
+                        diff_speed_list.append(float(beatmap_data["diff_speed"]) * 1.50)
 
                 to_calculate = [
                     diff_ar_list,
                     diff_speed_list,
                     diff_aim_list
                 ]
+
+                print(to_calculate)
 
                 calculated = []
 
@@ -587,7 +598,7 @@ class OsuDroid(commands.Cog):
                 user_data["aim"] = calculated[2]
 
                 fetched_data.append(user_data)
-
+        return print(fetched_data)
         fetched_data = fetched_data[:25]
         fetched_data.sort(key=lambda e: e["raw_pp"], reverse=True)
 
@@ -603,6 +614,7 @@ class OsuDroid(commands.Cog):
                 ),
                 inline=False
             )
+
         # noinspection PyBroadException
 
         try:
