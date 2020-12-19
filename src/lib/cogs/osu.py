@@ -321,8 +321,6 @@ class OsuDroid(commands.Cog):
         user_data = (await get_droid_data(uid))["user_data"]
         ppcheck_embed = discord.Embed()
 
-        message = await ctx.reply("Adiquirindo dados...")
-
         ppcheck_embed.set_author(
             name=(default_author_name := f"TOP PLAYS DO(A) {user_data['username'].upper()}"),
             url=(default_author_url := f"http://droidppboard.herokuapp.com/profile?uid={uid}"),
@@ -335,6 +333,12 @@ class OsuDroid(commands.Cog):
                 return mods
             else:
                 return mods
+        try:
+            user_data["pp_data"][:5]
+        except TypeError:
+            return ctx.reply("O usuário não possui uma conta cadastrada!")
+
+        message = await ctx.reply("Adiquirindo dados...")
 
         for _, play in enumerate(user_data["pp_data"][:5]):
             play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
@@ -585,9 +589,15 @@ class OsuDroid(commands.Cog):
 
                 calculated = []
 
+                res = None
+                
                 for calc_list in to_calculate:
-                    res = sum(calc_list) / len(calc_list)
-                    calculated.append(res)
+                    try:
+                        res = sum(calc_list) / len(calc_list)
+                    except ZeroDivisionError:
+                        res = 0
+                    finally:
+                        calculated.append(res)
 
                 user_data["reading"] = calculated[0]
                 user_data["speed"] = calculated[1]
