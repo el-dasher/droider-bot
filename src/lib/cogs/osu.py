@@ -394,10 +394,10 @@ class OsuDroid(commands.Cog):
         await message.add_reaction("⬅")
         await message.add_reaction("➡")
         
-        for _, play in user_data["pp_data"]:
+        for _, play in plays_beatmap_data:
                     
             play["beatmap_data"] = plays_beatmap_data[_]
-                    
+                
             if "DT" in play["mods"] or "NC" in play["mods"]:
                 play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
             all_plays.append(play)
