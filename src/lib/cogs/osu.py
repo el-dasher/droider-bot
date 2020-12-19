@@ -34,14 +34,14 @@ async def get_beatmap_data(hash_: str):
         beatmap_data = beatmap_data[0]
     except IndexError:
         beatmap_data = {
-                "max_combo": "0",
-                "diff_aim": "0",
-                "diff_speed": "0",
-                "bpm": "0",
-                "difficultyrating": "0",
-
-                "beatmap_id": "0",
-                "beatmapset_id": "0",
+                "max_combo": 0,
+                "diff_approach": 0,
+                "diff_aim": 0,
+                "diff_speed": 0,
+                "bpm": 0,
+                "difficultyrating": 0,
+                "beatmap_id": 0,
+                "beatmapset_id": 0,
                 "title": "?"
             }
     finally:
