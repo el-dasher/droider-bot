@@ -43,6 +43,7 @@ async def get_beatmap_data(hash_):
 
     # noinspection PyBroadException
     try:
+        await asyncio.sleep(0.5)
         beatmap_data = requests.get(f"https://osu.ppy.sh/api/get_beatmaps?k={OSU_API}&h={hash_}").json()
     except Exception:
         beatmap_data = default_data
@@ -350,40 +351,36 @@ class OsuDroid(commands.Cog):
         all_plays = []
         plays_beatmap_data = []
         
-        for _, play in enumerate(user_data["pp_data"]):
+        for _, play in enumerate(user_data["pp_data"][:5]):
             
             play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
-        
-            
+
             if "DT" in play["mods"] or "NC" in play["mods"]:
                 play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
-             
+                
             user_data["pp_data"][_]['beatmap_data'] = play["beatmap_data"]
             play["mods"] = _is_nomod(play["mods"])
-            
-            if _ <= 4:
-                ppcheck_embed.add_field(
-                    name=f"{_ + 1}.{play['title']} +{play['mods']}",
-                    value=(
-                        (
-                            f">>> ```\n"
-                            f"{play['combo']}x/{play['beatmap_data']['max_combo']}x |"
-                            f" {play['accuracy']}%"
-                            f" | {play['miss']} miss\n{int(float(play['pp']))}dpp |"
-                            f" (aim: {float(play['beatmap_data']['diff_aim']):.2f},"
-                            f" speed: {float(play['beatmap_data']['diff_speed']):.2f})"
-                            f" |\nbpm: {play['beatmap_data']['bpm']}"
-                            f" | diff: {float(play['beatmap_data']['difficultyrating']):.2f}★\n"
-                            f"```"
-                            f"\n**[Link do(a) {play['beatmap_data']['title']}](https://osu.ppy.sh"
-                            f"/beatmapsets/"
-                            f"{play['beatmap_data']['beatmapset_id']}#osu/"
-                            f"{play['beatmap_data']['beatmap_id']})**"
-                        )
-                    ), inline=False
-                )
-            else:
-                all_plays.append(play)
+
+            ppcheck_embed.add_field(
+                name=f"{_ + 1}.{play['title']} +{play['mods']}",
+                value=(
+                    (
+                        f">>> ```\n"
+                        f"{play['combo']}x/{play['beatmap_data']['max_combo']}x |"
+                        f" {play['accuracy']}%"
+                        f" | {play['miss']} miss\n{int(float(play['pp']))}dpp |"
+                        f" (aim: {float(play['beatmap_data']['diff_aim']):.2f},"
+                        f" speed: {float(play['beatmap_data']['diff_speed']):.2f})"
+                        f" |\nbpm: {play['beatmap_data']['bpm']}"
+                        f" | diff: {float(play['beatmap_data']['difficultyrating']):.2f}★\n"
+                        f"```"
+                        f"\n**[Link do(a) {play['beatmap_data']['title']}](https://osu.ppy.sh"
+                        f"/beatmapsets/"
+                        f"{play['beatmap_data']['beatmapset_id']}#osu/"
+                        f"{play['beatmap_data']['beatmap_id']})**"
+                    )
+                ), inline=False
+            )
             
         ppcheck_embed.set_thumbnail(
             url=f"https://b.ppy.sh/thumb/{user_data['pp_data'][0]['beatmap_data']['beatmapset_id']}l.jpg"
@@ -396,6 +393,14 @@ class OsuDroid(commands.Cog):
 
         await message.add_reaction("⬅")
         await message.add_reaction("➡")
+        
+        for _, play in user_data["pp_data"]:
+                    
+            play["beatmap_data"] = plays_beatmap_data[_]
+                    
+            if "DT" in play["mods"] or "NC" in play["mods"]:
+                play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
+            all_plays.append(play)
                         
         start = 0
         end = 5
