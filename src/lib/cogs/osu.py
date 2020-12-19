@@ -431,7 +431,7 @@ class OsuDroid(commands.Cog):
                         play["mods"] = _is_nomod(play["mods"])
                     
                         next_ppcheck_embed.add_field(
-                            name=f"{index}. {play['title']} +{play['mods']}",
+                            name=f"{_}. {play['title']} +{play['mods']}",
                             value=(
                                 (
                                     f">>> ```\n"
