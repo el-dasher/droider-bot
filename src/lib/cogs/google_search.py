@@ -98,7 +98,11 @@ class GoogleSearch(commands.Cog):
         while time.time() < timeout:
             valid_reaction: tuple = await self.bot.wait_for(
                 "reaction_add",
-                check=lambda reaction, user: user == ctx.author and str(reaction.emoji) in ("⬅", "➡")
+                check=(
+                    lambda reaction, user: (
+                            user == ctx.author and str(reaction.emoji) in ("⬅", "➡") and reaction.message == message
+                    )
+                )
             )
 
             if valid_reaction:
