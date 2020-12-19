@@ -394,7 +394,7 @@ class OsuDroid(commands.Cog):
         await message.add_reaction("⬅")
         await message.add_reaction("➡")
         
-        for _, play in plays_beatmap_data:
+        for _, play in enumerate(plays_beatmap_data):
                     
             play["beatmap_data"] = plays_beatmap_data[_]
                 
