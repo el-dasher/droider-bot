@@ -349,7 +349,7 @@ class OsuDroid(commands.Cog):
         message = await ctx.reply("Adquirindo dados...")
         all_plays = []
         for _, play in enumerate(user_data["pp_data"]):
-            if _ <= 5:
+            if _ <= 4:
                 play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
                 if "DT" in play["mods"] or "NC" in play["mods"]:
                     play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
@@ -376,9 +376,9 @@ class OsuDroid(commands.Cog):
                         )
                     ), inline=False
                 )
-            else:
-                all_plays.append(play)
+            all_plays.append(play)
         
+        print(len(all_plays))
         ppcheck_embed.set_thumbnail(
             url=f"https://b.ppy.sh/thumb/{user_data['pp_data'][0]['beatmap_data']['beatmapset_id']}l.jpg"
         )
@@ -418,7 +418,6 @@ class OsuDroid(commands.Cog):
                     end = 5
                 next_ppcheck_embed = discord.Embed()
                 
-                print(len(all_plays))
                 try:
                     index = start
                     for _, play in enumerate(all_plays[start:end]):
