@@ -347,13 +347,14 @@ class OsuDroid(commands.Cog):
             return ctx.reply("O usuário não possui uma conta cadastrada!")
 
         message = await ctx.reply("Adquirindo dados...")
-
+        all_plays = []
         for _, play in enumerate(user_data["pp_data"][:5]):
             play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
             if "DT" in play["mods"] or "NC" in play["mods"]:
                 play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
             user_data["pp_data"][_]['beatmap_data'] = play["beatmap_data"]
             play["mods"] = _is_nomod(play["mods"])
+            all_plays.append(play)
             ppcheck_embed.add_field(
                 name=f"{_ + 1}.{play['title']} +{play['mods']}",
                 value=(
@@ -415,15 +416,8 @@ class OsuDroid(commands.Cog):
                 next_ppcheck_embed = discord.Embed()
                 try:
                     index = start
-                    for _, play in enumerate(user_data["pp_data"][start:end]):
+                    for _, play in enumerate(all_plays[start:end]):
                         index += 1
-                        play["mods"] = _is_nomod(play["mods"])
-                        play["beatmap_data"] = await get_beatmap_data(play["hash"])
-                        if "DT" in play["mods"] or "NC" in play["mods"]:
-                            play["beatmap_data"]["bpm"] = int(play["beatmap_data"]["bpm"]) * 1.50
-                        
-                        user_data["pp_data"][_]['beatmap_data'] = play["beatmap_data"]
-
                         next_ppcheck_embed.add_field(
                             name=f"{index}. {play['title']} +{play['mods']}",
                             value=(
