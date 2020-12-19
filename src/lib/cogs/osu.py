@@ -422,7 +422,14 @@ class OsuDroid(commands.Cog):
                 
                 try:
                     for _, play in enumerate(user_data["pp_data"][start:end]):
-                        
+                        play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
+                     
+                        if "DT" in play["mods"] or "NC" in play["mods"]:
+                            play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
+                            
+                        user_data["pp_data"][_]['beatmap_data'] = play["beatmap_data"]
+                        play["mods"] = _is_nomod(play["mods"])
+                    
                         next_ppcheck_embed.add_field(
                             name=f"{index}. {play['title']} +{play['mods']}",
                             value=(
