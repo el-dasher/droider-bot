@@ -537,7 +537,7 @@ class OsuDroid(commands.Cog):
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
-    @tasks.loop(seconds=30)
+    @tasks.loop(minutes=1, seconds=0)
     async def _brdpp_rank(self):
 
         if debug:
@@ -564,8 +564,6 @@ class OsuDroid(commands.Cog):
 
             if user_data["raw_pp"] is not None or user_data["pp_data"] is not None:
 
-                print(user)
-
                 for top_play in user_data["pp_data"]:
 
                     beatmap_data = await get_beatmap_data(top_play["hash"])
@@ -584,8 +582,6 @@ class OsuDroid(commands.Cog):
                     diff_speed_list,
                     diff_aim_list
                 ]
-
-                print(to_calculate)
 
                 calculated = []
 
