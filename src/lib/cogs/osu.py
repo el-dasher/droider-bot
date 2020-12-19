@@ -381,7 +381,6 @@ class OsuDroid(commands.Cog):
                         )
                     ), inline=False
                 )
-            all_plays.append(play)
             
         ppcheck_embed.set_thumbnail(
             url=f"https://b.ppy.sh/thumb/{user_data['pp_data'][0]['beatmap_data']['beatmapset_id']}l.jpg"
@@ -423,9 +422,7 @@ class OsuDroid(commands.Cog):
                 next_ppcheck_embed = discord.Embed()
                 
                 try:
-                    index = start
-                    for _, play in enumerate(all_plays[start:end]):
-                        index += 1
+                    for _, play in enumerate(user_data["pp_data"][start:end]):
                         
                         next_ppcheck_embed.add_field(
                             name=f"{index}. {play['title']} +{play['mods']}",
@@ -449,7 +446,7 @@ class OsuDroid(commands.Cog):
                         )
                     next_ppcheck_embed.set_thumbnail(
                         url=f"https://b.ppy.sh/thumb/"
-                            f"{user_data['pp_data'][index - 5]['beatmap_data']['beatmapset_id']}l.jpg"
+                            f"{user_data['pp_data'][_ - 5]['beatmap_data']['beatmapset_id']}l.jpg"
                     )
                 except (IndexError, KeyError) as e:
                     print(e)
