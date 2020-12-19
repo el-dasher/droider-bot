@@ -531,7 +531,7 @@ class OsuDroid(commands.Cog):
             return await ctx.reply("Você esqueceu de por para qual usuário(a) você quer setar!")
 
         user_data = (await get_droid_data(uid))["user_data"]
-        print(user_data["username"])
+    
         if user_data["username"].startswith("155") is False:
             DATABASE.child("DROID_USERS").child(ctx.author.id).set({"user": user_data})
         else:
