@@ -347,10 +347,15 @@ class OsuDroid(commands.Cog):
             return ctx.reply("O usuário não possui uma conta cadastrada!")
 
         message = await ctx.reply("Adquirindo dados...")
+        
         all_plays = []
+        plays_beatmap_data = []
+        
         for _, play in enumerate(user_data["pp_data"][:5]):
             
             play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
+            plays_beatmap_data.append(play["beatmap_data"])
+            
             
             if "DT" in play["mods"] or "NC" in play["mods"]:
                 play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
@@ -379,7 +384,6 @@ class OsuDroid(commands.Cog):
                 ), inline=False
             )
             
-
         ppcheck_embed.set_thumbnail(
             url=f"https://b.ppy.sh/thumb/{user_data['pp_data'][0]['beatmap_data']['beatmapset_id']}l.jpg"
         )
@@ -394,7 +398,7 @@ class OsuDroid(commands.Cog):
         
         for _, play in user_data["pp_data"]:
                     
-            play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
+            play["beatmap_data"] = plays_beatmap_data[_]
                     
             if "DT" in play["mods"] or "NC" in play["mods"]:
                 play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
