@@ -540,7 +540,7 @@ class OsuDroid(commands.Cog):
     @tasks.loop(seconds=30)
     async def _brdpp_rank(self):
 
-        if not debug:
+        if debug:
             return None
 
         try:
@@ -598,7 +598,7 @@ class OsuDroid(commands.Cog):
                 user_data["aim"] = calculated[2]
 
                 fetched_data.append(user_data)
-        return print(fetched_data)
+
         fetched_data = fetched_data[:25]
         fetched_data.sort(key=lambda e: e["raw_pp"], reverse=True)
 
