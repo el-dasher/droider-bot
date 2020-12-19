@@ -540,7 +540,7 @@ class OsuDroid(commands.Cog):
 
         try:
             br_rank_channel: discord.TextChannel = self.bot.get_channel(789613566684430346)
-            br_rank_message: discord.Message = await br_rank_channel.fetch_message(789681364986232884)
+            br_rank_message: discord.Message = await br_rank_channel.fetch_message(789691247911632956)
         except AttributeError:
             return print("Erro ao atualizar o rank de dpp")
 
