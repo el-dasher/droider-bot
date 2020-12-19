@@ -375,7 +375,7 @@ class OsuDroid(commands.Cog):
                     )
                 ), inline=False
             )
-        print(all_plays)
+    
         ppcheck_embed.set_thumbnail(
             url=f"https://b.ppy.sh/thumb/{user_data['pp_data'][0]['beatmap_data']['beatmapset_id']}l.jpg"
         )
@@ -418,7 +418,7 @@ class OsuDroid(commands.Cog):
                     index = start
                     for _, play in enumerate(all_plays[start:end]):
                         index += 1
-                    
+                        print(play)
                         next_ppcheck_embed.add_field(
                             name=f"{index}. {play['title']} +{play['mods']}",
                             value=(
