@@ -552,9 +552,9 @@ class OsuDroid(commands.Cog):
     @tasks.loop(seconds=30)
     async def _brdpp_rank(self):
 
-        if not debug:
+        if debug:
             return None
-        print("STAR")
+
         try:
             br_rank_channel: discord.TextChannel = self.bot.get_channel(789613566684430346)
             br_rank_message: discord.Message = await br_rank_channel.fetch_message(789691247911632956)
@@ -564,9 +564,9 @@ class OsuDroid(commands.Cog):
         fetched_data = []
 
         uid_list = DATABASE.child("BR_UIDS").get().val()["uids"]
-        print("1")
+
         for user in uid_list:
-            print("66")
+
             diff_aim_list = []
             diff_speed_list = []
             diff_ar_list = []
