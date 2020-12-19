@@ -350,7 +350,7 @@ class OsuDroid(commands.Cog):
         
         all_plays = []
         
-        for _, play in enumerate(user_data["pp_data"]):
+        for _, play in enumerate(user_data["pp_data"][:5]):
         
             play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
          
@@ -359,29 +359,28 @@ class OsuDroid(commands.Cog):
                 
             user_data["pp_data"][_]['beatmap_data'] = play["beatmap_data"]
             play["mods"] = _is_nomod(play["mods"])
-            
-            if _ <= 4:
-                ppcheck_embed.add_field(
-                    name=f"{_ + 1}.{play['title']} +{play['mods']}",
-                    value=(
-                        (
-                            f">>> ```\n"
-                            f"{play['combo']}x/{play['beatmap_data']['max_combo']}x |"
-                            f" {play['accuracy']}%"
-                            f" | {play['miss']} miss\n{int(float(play['pp']))}dpp |"
-                            f" (aim: {float(play['beatmap_data']['diff_aim']):.2f},"
-                            f" speed: {float(play['beatmap_data']['diff_speed']):.2f})"
-                            f" |\nbpm: {play['beatmap_data']['bpm']}"
-                            f" | diff: {float(play['beatmap_data']['difficultyrating']):.2f}★\n"
-                            f"```"
-                            f"\n**[Link do(a) {play['beatmap_data']['title']}](https://osu.ppy.sh"
-                            f"/beatmapsets/"
-                            f"{play['beatmap_data']['beatmapset_id']}#osu/"
-                            f"{play['beatmap_data']['beatmap_id']})**"
-                        )
-                    ), inline=False
-                )
-            
+        
+            ppcheck_embed.add_field(
+                name=f"{_ + 1}.{play['title']} +{play['mods']}",
+                value=(
+                    (
+                        f">>> ```\n"
+                        f"{play['combo']}x/{play['beatmap_data']['max_combo']}x |"
+                        f" {play['accuracy']}%"
+                        f" | {play['miss']} miss\n{int(float(play['pp']))}dpp |"
+                        f" (aim: {float(play['beatmap_data']['diff_aim']):.2f},"
+                        f" speed: {float(play['beatmap_data']['diff_speed']):.2f})"
+                        f" |\nbpm: {play['beatmap_data']['bpm']}"
+                        f" | diff: {float(play['beatmap_data']['difficultyrating']):.2f}★\n"
+                        f"```"
+                        f"\n**[Link do(a) {play['beatmap_data']['title']}](https://osu.ppy.sh"
+                        f"/beatmapsets/"
+                        f"{play['beatmap_data']['beatmapset_id']}#osu/"
+                        f"{play['beatmap_data']['beatmap_id']})**"
+                    )
+                ), inline=False
+            )
+        
         ppcheck_embed.set_thumbnail(
             url=f"https://b.ppy.sh/thumb/{user_data['pp_data'][0]['beatmap_data']['beatmapset_id']}l.jpg"
         )
