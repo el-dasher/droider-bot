@@ -346,7 +346,7 @@ class OsuDroid(commands.Cog):
         except TypeError:
             return ctx.reply("O usuário não possui uma conta cadastrada!")
 
-        message = await ctx.reply("Adiquirindo dados...")
+        message = await ctx.reply("Adquirindo dados...")
 
         for _, play in enumerate(user_data["pp_data"][:5]):
             play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
@@ -358,7 +358,7 @@ class OsuDroid(commands.Cog):
                 name=f"{_ + 1}.{play['title']} +{play['mods']}",
                 value=(
                     (
-                        f"```"
+                        f">>> ```"
                         f"{play['combo']}x/{play['beatmap_data']['max_combo']}x |"
                         f" {play['accuracy']}%"
                         f" | {play['miss']} miss\n{int(float(play['pp']))}dpp |"
