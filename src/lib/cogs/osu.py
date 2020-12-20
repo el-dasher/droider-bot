@@ -569,6 +569,7 @@ class OsuDroid(commands.Cog):
 
             await asyncio.sleep(0.5)
             user_data = (await get_droid_data(user))["user_data"]
+            print(user_data["username"])
 
             if user_data["raw_pp"] is not None or user_data["pp_data"] is not None:
 
