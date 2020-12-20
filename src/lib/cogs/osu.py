@@ -4,7 +4,6 @@ from datetime import datetime
 from os import getenv
 
 import discord
-import traceback
 import requests
 from dateutil.parser import parse
 from discord.ext import commands, tasks
@@ -345,11 +344,9 @@ class OsuDroid(commands.Cog):
         try:
             user_data["pp_data"][:5]
         except TypeError:
-            return ctx.reply("O usuário não possui uma conta cadastrada!")
+            return ctx.reply("O usuário não possui uma conta cadastrada na alice!")
 
         message = await ctx.reply("Adquirindo dados...")
-        
-        all_plays = []
         
         for _, play in enumerate(user_data["pp_data"][:5]):
         
@@ -455,9 +452,9 @@ class OsuDroid(commands.Cog):
                         )
                     next_ppcheck_embed.set_thumbnail(
                         url=f"https://b.ppy.sh/thumb/"
-                            f"{user_data['pp_data'][_ - 5]['beatmap_data']['beatmapset_id']}l.jpg"
+                            f"{user_data['pp_data'][start - 5]['beatmap_data']['beatmapset_id']}l.jpg"
                     )
-                except (IndexError, KeyError) as e:
+                except (IndexError, KeyError):
                     pass
 
                 next_ppcheck_embed.set_author(name=default_author_name,
@@ -504,6 +501,8 @@ class OsuDroid(commands.Cog):
                 raw_pp = int(profile_data["raw_pp"])
             except ValueError:
                 raw_pp = "OFFLINE"
+            except TypeError:
+                raw_pp = 0
 
             profile_embed.set_thumbnail(url=profile_data['avatar_url'])
             profile_embed.set_author(url=f"http://ops.dgsrz.com/profile.php?uid={uid}",
@@ -563,13 +562,10 @@ class OsuDroid(commands.Cog):
 
         for user in uid_list:
 
-            diff_aim_list = []
-            diff_speed_list = []
-            diff_ar_list = []
+            diff_aim_list, diff_speed_list, diff_ar_list, diff_size_list, combo_list = [], [], [], [], []
 
             await asyncio.sleep(0.5)
             user_data = (await get_droid_data(user))["user_data"]
-            print(user_data["username"])
 
             if user_data["raw_pp"] is not None or user_data["pp_data"] is not None:
 
@@ -577,19 +573,24 @@ class OsuDroid(commands.Cog):
 
                     beatmap_data = await get_beatmap_data(top_play["hash"])
 
+                    combo_list.append(top_play["combo"])
                     if "DT" not in top_play["mods"]:
                         diff_ar_list.append(float(beatmap_data["diff_approach"]))
                         diff_aim_list.append(float(beatmap_data["diff_aim"]))
                         diff_speed_list.append(float(beatmap_data["diff_speed"]))
+                        diff_size_list.append(float(beatmap_data["diff_size"]))
                     else:
                         diff_ar_list.append((float(beatmap_data["diff_approach"]) * 2 + 13) / 3)
                         diff_aim_list.append(float(beatmap_data["diff_aim"]) * 1.50)
                         diff_speed_list.append(float(beatmap_data["diff_speed"]) * 1.50)
+                        diff_size_list.append(float(beatmap_data["diff_size"]) / 1.50)
 
                 to_calculate = [
                     diff_ar_list,
                     diff_speed_list,
-                    diff_aim_list
+                    diff_aim_list,
+                    diff_size_list,
+                    combo_list
                 ]
 
                 calculated = []
@@ -607,6 +608,8 @@ class OsuDroid(commands.Cog):
                 user_data["reading"] = calculated[0]
                 user_data["speed"] = calculated[1]
                 user_data["aim"] = calculated[2]
+                user_data["stamina"] = calculated[3]
+                user_data["consistency"] = calculated[4] * 100 / 8192 / 2
 
                 fetched_data.append(user_data)
 
@@ -616,11 +619,16 @@ class OsuDroid(commands.Cog):
         updated_data.set_footer(text="Atualizado")
 
         for i, data in enumerate(fetched_data):
+            if len(data["pp_data"]) < 75:
+                data["overall_acc"], data["speed"], data["aim"] = 0, 0, 0
+                data["reading"], data["stamina"], data["consistency"] = 0, 0, 0
+
             updated_data.add_field(
                 name=f"{i + 1} - {data['username']}",
                 value=(
-                    f">>> ```\n{float(data['raw_pp']):.2f}pp - accuracy: {data['overall_acc']:.2f}%\n"
-                    f"[speed: {data['speed']:.2f} | aim: {data['aim']:.2f} | reading: AR{data['reading']:.2f}]\n```"
+                    f">>> ```\n> {float(data['raw_pp']):.2f}pp - accuracy: {data['overall_acc']:.2f}%\n"
+                    f"[speed: {data['speed']:.2f} | aim: {data['aim']:.2f} | reading: AR{data['reading']:.2f}]\n"
+                    f"[stamina: {data['stamina']:.2f} | {data['consistency']:.2f}]\n```"
                 ),
                 inline=False
             )
