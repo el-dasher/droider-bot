@@ -610,9 +610,8 @@ class OsuDroid(commands.Cog):
 
                 fetched_data.append(user_data)
 
-        fetched_data = fetched_data[:25]
         fetched_data.sort(key=lambda e: e["raw_pp"], reverse=True)
-
+        fetched_data = fetched_data[:25]
         updated_data = discord.Embed(title="RANK DPP BR", timestamp=datetime.utcnow())
         updated_data.set_footer(text="Atualizado")
 
