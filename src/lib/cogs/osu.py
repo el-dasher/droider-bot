@@ -595,14 +595,12 @@ class OsuDroid(commands.Cog):
 
                 calculated = []
 
-                res = None
-
                 for calc_list in to_calculate:
                     try:
                         res = sum(calc_list) / len(calc_list)
                     except ZeroDivisionError:
-                        res = 0
-                    finally:
+                        pass
+                    else:
                         calculated.append(res)
 
                 user_data["reading"] = calculated[0]
