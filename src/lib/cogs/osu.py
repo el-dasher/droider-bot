@@ -609,7 +609,7 @@ class OsuDroid(commands.Cog):
                 user_data["speed"] = calculated[1]
                 user_data["aim"] = calculated[2]
                 user_data["stamina"] = calculated[3]
-                user_data["consistency"] = calculated[4] * 100 / 8192 / 10
+                user_data["consistency"] = calculated[4] * 100 / 4096 / 10
 
                 fetched_data.append(user_data)
 
@@ -620,15 +620,14 @@ class OsuDroid(commands.Cog):
 
         for i, data in enumerate(fetched_data):
             if len(data["pp_data"]) < 75:
-                data["overall_acc"], data["speed"], data["aim"] = 0, 0, 0
-                data["reading"], data["stamina"], data["consistency"] = 0, 0, 0
+                data["speed"], data["aim"], data["reading"], data["stamina"], data["consistency"] = 0, 0, 0, 0, 0
 
             updated_data.add_field(
                 name=f"{i + 1} - {data['username']}",
                 value=(
-                    f">>> ```\n> {float(data['raw_pp']):.2f}pp - accuracy: {data['overall_acc']:.2f}%\n"
+                    f">>> ```\n{float(data['raw_pp']):.2f}pp - accuracy: {data['overall_acc']:.2f}%\n"
                     f"[speed: {data['speed']:.2f} | aim: {data['aim']:.2f} | reading: AR{data['reading']:.2f}]\n"
-                    f"[stamina: {data['stamina']:.2f} | {data['consistency']:.2f}]\n```"
+                    f"[stamina: {data['stamina']:.2f} | consistência: {data['consistency']:.2f}]\n```"
                 ),
                 inline=False
             )
