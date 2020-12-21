@@ -9,14 +9,18 @@ if debug:
 
     COGS_PATH = Path('./lib/cogs')
 
-    WEIRD_TAGS_RESPONSE_PATH = Path("./lib/db/data/json/weird_tags_response.json")
-    LUCKY_PATH = Path("./lib/db/data/json/lucky_responses.json")
-    MONTHS_PATH = Path("./lib/db/data/json/months.json")
+    FIREBASE_CONFIG_PATH = Path("./lib/db/json/firebase_config.json")
+    RECENT_OSU_FILE_PATH = Path("./lib/db/osu_files/recent.osu")
+    WEIRD_TAGS_RESPONSE_PATH = Path("./lib/db/json/weird_tags_response.json")
+    LUCKY_PATH = Path("./lib/db/json/lucky_responses.json")
+    MONTHS_PATH = Path("./lib/db/json/months.json")
 else:
     print('O BOT ESTÁ RODANDO EM "PRODUÇÃO')
 
     COGS_PATH = Path('./src/lib/cogs')
 
-    WEIRD_TAGS_RESPONSE_PATH = Path("./src/lib/db/data/json/weird_tags_response.json")
-    LUCKY_PATH = Path("./src/lib/db/data/json/lucky_responses.json")
-    MONTHS_PATH = Path("./src/lib/db/data/json/months.json")
+    FIREBASE_CONFIG_PATH = None
+    RECENT_OSU_FILE_PATH = Path("./src/lib/db/osu_files/recent.osu")
+    WEIRD_TAGS_RESPONSE_PATH = Path("./src/lib/db/json/weird_tags_response.json")
+    LUCKY_PATH = Path("./src/lib/db/json/lucky_responses.json")
+    MONTHS_PATH = Path("./src/lib/db/json/months.json")

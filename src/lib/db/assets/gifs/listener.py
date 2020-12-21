@@ -10,7 +10,7 @@ def gif_listener(listdir: list) -> list:
 
 
 def hug_gifs():
-    filelist = os.listdir('./hug/')
+    filelist = os.listdir('hug/')
     gif_listener(filelist)
 
     return filelist

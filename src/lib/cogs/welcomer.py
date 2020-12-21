@@ -6,17 +6,17 @@ from typing import List, Any
 import discord
 from discord.ext import commands
 from discord.ext.commands import Cog
-from src.paths import debug
 
 from src.lib.utils.basic_utils import ready_up_cog, get_member_name
 from src.paths import MONTHS_PATH
+from src.paths import debug
 from src.setup import DATABASE
 
 month_data = json.load(open(MONTHS_PATH, encoding="utf-8"))
 
 
 # welcomer_data = (
-#     wd_data := json.load(open(wd_path := Path("src/lib/db/data/json/welcomer_data.json").absolute()),
+#     wd_data := json.load(open(wd_path := Path("src/lib/firebase/firebase/json/welcomer_data.json").absolute()),
 #                         encoding="utf-8")
 # )
 

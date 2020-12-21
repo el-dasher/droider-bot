@@ -5,7 +5,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from discord.ext import commands
 
-from lib.db.data.pydata.pydata import bot_presences
+from src.lib.db.pydata.pydata import bot_presences
 from src.lib.utils.basic_utils import ready_up_cog
 
 

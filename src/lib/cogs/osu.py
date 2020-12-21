@@ -1,21 +1,20 @@
 import asyncio
 import time
 from datetime import datetime
-from os import getenv
 
 import discord
 import requests
 from dateutil.parser import parse
 from discord.ext import commands, tasks
-from ossapi import ossapi
 from pytz import timezone
-from src.paths import debug
 
+from lib.utils.osu.osu_droid.droid_data_getter import get_droid_data
 from src.lib.utils.basic_utils import ready_up_cog
-from src.lib.utils.droid_data_getter import get_droid_data
+from src.lib.utils.osu.osu_droid.br_pp_calculator import get_bpp
+from src.paths import debug
 from src.setup import DATABASE
-
-osu_api = ossapi((OSU_API := getenv("OSU_API")))
+from src.setup import OSU_API
+from src.setup import OSU_API_KEY
 
 
 def mention_to_uid(msg):
@@ -28,7 +27,6 @@ def mention_to_uid(msg):
 
 
 async def get_beatmap_data(hash_):
-
     default_data = {
         "max_combo": 0,
         "diff_approach": 0,
@@ -44,7 +42,7 @@ async def get_beatmap_data(hash_):
     # noinspection PyBroadException
     try:
         await asyncio.sleep(0.5)
-        beatmap_data = requests.get(f"https://osu.ppy.sh/api/get_beatmaps?k={OSU_API}&h={hash_}").json()
+        beatmap_data = requests.get(f"https://osu.ppy.sh/api/get_beatmaps?k={OSU_API_KEY}&h={hash_}").json()
     except Exception:
         beatmap_data = default_data
     else:
@@ -70,21 +68,21 @@ class OsuGame(commands.Cog):
 
     @commands.command(name="osu")
     async def osuplayer(self, ctx: commands.Context, *user):
-        # user_json = osu_api.get_user({"u": user})[0]
+        # user_json = OSU_API.get_user({"u": user})[0]
 
         if user:
             user = self.get_user(mention_to_uid(user))
             try:
-                user_json = osu_api.get_user({"u": DATABASE.child("OSU_USERS").get().val()[user]["user"]})
+                user_json = OSU_API.get_user({"u": DATABASE.child("OSU_USERS").get().val()[user]["user"]})
             except KeyError:
-                user_json = osu_api.get_user({"u": user})
+                user_json = OSU_API.get_user({"u": user})
 
                 if user_json == []:
                     return await ctx.reply("Não foi possivel encontrar o usuário!")
         else:
             try:
                 user_json = \
-                    osu_api.get_user({"u": DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"]})[0]
+                    OSU_API.get_user({"u": DATABASE.child("OSU_USERS").child(ctx.author.id).get().val()["user"]})[0]
             except TypeError:
                 return await ctx.reply("Você não possui uma conta cadastrada, use `ms!osuset <user>`")
         try:
@@ -120,8 +118,8 @@ class OsuGame(commands.Cog):
         )
                              )
 
-        profile_best_play = osu_api.get_user_best({"u": user_json['user_id']})[0]
-        played_beatmap_profile = osu_api.get_beatmaps({"b": profile_best_play["beatmap_id"]})[0]
+        profile_best_play = OSU_API.get_user_best({"u": user_json['user_id']})[0]
+        played_beatmap_profile = OSU_API.get_beatmaps({"b": profile_best_play["beatmap_id"]})[0]
 
         user_embed.add_field(name="__Melhor play__", value=(
             "**"
@@ -145,7 +143,7 @@ class OsuGame(commands.Cog):
             return await ctx.reply("Você esqueceu de por para qual usuário(a) você quer setar!")
 
         try:
-            set_user_json = osu_api.get_user({"u": user})[0]
+            set_user_json = OSU_API.get_user({"u": user})[0]
             DATABASE.child("OSU_USERS").child(ctx.author.id).set({"user": user})
         except (IndexError, ValueError):
             return await ctx.reply(f"Não foi possivel encontrar um(a) usuário(a) chamado(a): {user}")
@@ -164,7 +162,7 @@ class OsuGame(commands.Cog):
 
         async def get_username(user_):
             try:
-                return osu_api.get_user({'u': user_})[0]['username']
+                return OSU_API.get_user({'u': user_})[0]['username']
             except IndexError:
                 return "index_error"
 
@@ -186,11 +184,11 @@ class OsuGame(commands.Cog):
         if username == "index_error":
             return await ctx.reply(f"O usuário {user} não possui uma conta cadastrada")
         try:
-            recentplay = osu_api.get_user_recent({"u": user})[0]
+            recentplay = OSU_API.get_user_recent({"u": user})[0]
         except IndexError:
             await ctx.reply(f"O {username} não possui nenhuma play recente :(")
         else:
-            played_map = osu_api.get_beatmaps({"b": recentplay["beatmap_id"]})[0]
+            played_map = OSU_API.get_beatmaps({"b": recentplay["beatmap_id"]})[0]
             played_map['difficultyrating'] = float(played_map['difficultyrating'])
 
             accuracy = "NÃO POR ENQUANTO"
@@ -207,7 +205,7 @@ class OsuGame(commands.Cog):
                 timestamp=parse(recentplay['date'])
             )
 
-            rs_user_json = osu_api.get_user({"u": user})[0]
+            rs_user_json = OSU_API.get_user({"u": user})[0]
             recent_embed.set_thumbnail(
                 url=f"https://b.ppy.sh/thumb/{played_map['beatmapset_id']}l.jpg"
             )
@@ -287,11 +285,30 @@ class OsuDroid(commands.Cog):
 
     @commands.command(name="ppcheck")
     async def pp_check(self, ctx, uid=None):
+
         """
         Veja seus lindos pps do osu!droid :), ms!ppcheck <uid>,
         Lembrando que você pode cadastrar seu usuário com ms!droidset <uid>!
         Ai você não precisará passar o parâmetro de uid para ver seu usuário.
         """
+
+        def get_default_ppmsg(play_dict: dict):
+            return (
+                f">>> ```\n"
+                f"{play_dict['combo']}x/{play_dict['beatmap_data']['max_combo']}x |"
+                f" {play_dict['accuracy']}%"
+                f" | {play_dict['miss']} miss\n{int(float(play_dict['pp']))}dpp |"
+                f" (aim: {float(play_dict['beatmap_data']['diff_aim']):.2f},"
+                f" speed: {float(play_dict['beatmap_data']['diff_speed']):.2f})"
+                f" |\nbpm: {play_dict['beatmap_data']['bpm']}"
+                f" | diff: {float(play_dict['beatmap_data']['difficultyrating']):.2f}★ |"
+                f" bpp: {float(play_dict['br_pp']):.2f}\n"
+                f"```"
+                f"\n**[Link do(a) {play_dict['beatmap_data']['title']}](https://osu.ppy.sh"
+                f"/beatmapsets/"
+                f"{play_dict['beatmap_data']['beatmapset_id']}#osu/"
+                f"{play_dict['beatmap_data']['beatmap_id']})**"
+            )
 
         uid_original = uid
 
@@ -341,44 +358,33 @@ class OsuDroid(commands.Cog):
                 return mods
             else:
                 return mods
+
         try:
             user_data["pp_data"][:5]
         except TypeError:
-            return ctx.reply("O usuário não possui uma conta cadastrada na alice!")
+            return await ctx.reply("O usuário não possui uma conta cadastrada na alice!")
 
         message = await ctx.reply("Adquirindo dados...")
-        
+
         for _, play in enumerate(user_data["pp_data"][:5]):
-        
+
             play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
-         
+
+            play["br_pp"] = get_bpp(
+                play["beatmap_data"]["beatmap_id"], play["mods"], play["miss"], play["accuracy"]
+            )["raw_pp"]
+
             if "DT" in play["mods"] or "NC" in play["mods"]:
                 play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
-                
+
             user_data["pp_data"][_]['beatmap_data'] = play["beatmap_data"]
             play["mods"] = _is_nomod(play["mods"])
-        
+
             ppcheck_embed.add_field(
                 name=f"{_ + 1}.{play['title']} +{play['mods']}",
-                value=(
-                    (
-                        f">>> ```\n"
-                        f"{play['combo']}x/{play['beatmap_data']['max_combo']}x |"
-                        f" {play['accuracy']}%"
-                        f" | {play['miss']} miss\n{int(float(play['pp']))}dpp |"
-                        f" (aim: {float(play['beatmap_data']['diff_aim']):.2f},"
-                        f" speed: {float(play['beatmap_data']['diff_speed']):.2f})"
-                        f" |\nbpm: {play['beatmap_data']['bpm']}"
-                        f" | diff: {float(play['beatmap_data']['difficultyrating']):.2f}★\n"
-                        f"```"
-                        f"\n**[Link do(a) {play['beatmap_data']['title']}](https://osu.ppy.sh"
-                        f"/beatmapsets/"
-                        f"{play['beatmap_data']['beatmapset_id']}#osu/"
-                        f"{play['beatmap_data']['beatmap_id']})**"
-                    )
-                ), inline=False
+                value=get_default_ppmsg(play), inline=False
             )
-        
+
         ppcheck_embed.set_thumbnail(
             url=f"https://b.ppy.sh/thumb/{user_data['pp_data'][0]['beatmap_data']['beatmapset_id']}l.jpg"
         )
@@ -390,10 +396,10 @@ class OsuDroid(commands.Cog):
 
         await message.add_reaction("⬅")
         await message.add_reaction("➡")
-                        
+
         start = 0
         end = 5
-    
+
         timeout = time.time() + 120
         while time.time() < timeout:
             valid_reaction: tuple = await self.bot.wait_for(
@@ -417,38 +423,27 @@ class OsuDroid(commands.Cog):
                     start = 0
                     end = 5
                 next_ppcheck_embed = discord.Embed()
-                
+
                 try:
                     index = start
                     for _, play in enumerate(user_data["pp_data"][start:end]):
                         index += 1
+
                         play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
-                     
+
+                        play["br_pp"] = get_bpp(
+                            play["beatmap_data"]["beatmap_id"], play["mods"], play["miss"], play["accuracy"]
+                        )["raw_pp"]
+
                         if "DT" in play["mods"] or "NC" in play["mods"]:
                             play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
-                            
+
                         user_data["pp_data"][_]['beatmap_data'] = play["beatmap_data"]
                         play["mods"] = _is_nomod(play["mods"])
-                    
+
                         next_ppcheck_embed.add_field(
                             name=f"{index}. {play['title']} +{play['mods']}",
-                            value=(
-                                (
-                                    f">>> ```\n"
-                                    f"{play['combo']}x/{play['beatmap_data']['max_combo']}x |"
-                                    f" {play['accuracy']}%"
-                                    f" | {play['miss']} miss\n{int(float(play['pp']))}dpp |"
-                                    f" (aim: {float(play['beatmap_data']['diff_aim']):.2f},"
-                                    f" speed: {float(play['beatmap_data']['diff_speed']):.2f})"
-                                    f" |\nbpm: {play['beatmap_data']['bpm']}"
-                                    f" | diff: {float(play['beatmap_data']['difficultyrating']):.2f}★\n"
-                                    f"```"
-                                    f"\n**[Link do(a) {play['beatmap_data']['title']}](https://osu.ppy.sh"
-                                    f"/beatmapsets/"
-                                    f"{play['beatmap_data']['beatmapset_id']}#osu/"
-                                    f"{play['beatmap_data']['beatmap_id']})**"
-                                )
-                            ), inline=False
+                            value=get_default_ppmsg(play), inline=False
                         )
                     next_ppcheck_embed.set_thumbnail(
                         url=f"https://b.ppy.sh/thumb/"
@@ -530,12 +525,12 @@ class OsuDroid(commands.Cog):
             return await ctx.reply("Você esqueceu de por para qual usuário(a) você quer setar!")
 
         user_data = (await get_droid_data(uid))["user_data"]
-    
+
         if user_data["username"].startswith("155") is False:
             DATABASE.child("DROID_USERS").child(ctx.author.id).set({"user": user_data})
         else:
             return await ctx.reply(f"Não existe uma uid chamada: {uid}")
-        
+
         droidset_embed = discord.Embed(
             title=f"Você cadastrou seu usuário! {user_data['username']}"
         )
@@ -543,6 +538,38 @@ class OsuDroid(commands.Cog):
         droidset_embed.set_image(url=user_data["avatar_url"])
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
+
+    @commands.command()
+    async def calc(self, ctx, link: str = None, *params):
+        error_message: str = f'"{link}", Não é um link ou id válido!'
+
+        if link is None:
+            return await ctx.send("Você esqueceu do link do beatmap!")
+        else:
+            try:
+                beatmap_id: int = int(link.split("/")[-1])
+            except ValueError:
+                return await ctx.send(error_message)
+
+        mods: str = "NM"
+        misses: int = 0
+        accuracy: float = 100.00
+
+        parameter: str
+        for parameter in params:
+            if parameter.startswith("+"):
+                mods = parameter[1:]
+            elif parameter.startswith("-"):
+                misses = int(parameter[1:])
+            elif parameter.endswith("%"):
+                accuracy = float(parameter[:-1])
+
+        beatmap = get_bpp(beatmap_id, mods, misses, accuracy)
+
+        if len(beatmap) == 0:
+            return await ctx.send(error_message)
+        else:
+            return await ctx.send(beatmap)
 
     @tasks.loop(minutes=30, seconds=0)
     async def _brdpp_rank(self):

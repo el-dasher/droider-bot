@@ -3,16 +3,16 @@ from datetime import datetime
 from html.parser import HTMLParser
 from urllib.request import urlopen
 
+import requests
 from bs4 import BeautifulSoup
 
-from src.setup import DATABASE
-
-ppcheck_data = []
+from src.setup import DATABASE, DPPBOARD_API
 
 
-def get_droid_data(user_id):
+# noinspection PyTypeChecker
+async def get_droid_data(user_id):
     # noinspection PyGlobalUndefined
-    global ppcheck_data
+
     old_data = []
     beatmap_data = []
     html_imgs = []
@@ -50,6 +50,7 @@ def get_droid_data(user_id):
             if tag == "img":
                 html_imgs.append(attrs)
 
+    """
     pp_user_url = f"https://ppboard.herokuapp.com/profile?uid={user_id}"
 
     # noinspection PyBroadException
@@ -91,17 +92,42 @@ def get_droid_data(user_id):
 
         for x, y in zip(completed_pp_data[::2], completed_pp_data[1::2]):
             ppcheck_data.append({"beatmap-mod": x, "pp_raw": y})
+        """
 
     droid_parser = DroidParser()
     droid_parser.feed(str(droid_data_soup))
-    data_dicts = {}
+    # data_dicts = {}
 
     beatmap_dicts = {}
-    backup_pp_data = DATABASE.child("DROID_UID_DATA").child(user_id).child("raw_pp").get().val()
 
+    """
     if pp_data == "OFFLINE":
-        if backup_pp_data != []:
-            pp_data = backup_pp_data
+        if (backup_pp_data := DATABASE.child("DROID_UID_DATA").child(user_id).get().val()) is not None:
+            pp_data = backup_pp_data["raw_pp"]
+    else:
+        pp_data = float(pp_data[8][9:].strip())
+    """
+
+    dpp_board_url = f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPPBOARD_API}&uid={user_id}"
+
+    dpp_user_data = None
+
+    # noinspection PyBroadException
+    try:
+        dpp_user_data = requests.get(dpp_board_url).json()
+    except Exception:
+        raw_pp = "OFFLINE"
+        pp_data = "OFFLINE"
+    else:
+        raw_pp = None
+        pp_data = None
+
+        # noinspection PyBroadException
+        try:
+            raw_pp = dpp_user_data["data"]["pp"]["total"]
+            pp_data = dpp_user_data["data"]["pp"]["list"]
+        except Exception:
+            pass
 
     for i, data in enumerate(beatmap_data):
         beatmap_dicts[f"rs_{i}"] = {
@@ -114,34 +140,42 @@ def get_droid_data(user_id):
             "accuracy": float(data[4][:-1])
         }
 
-        try:
-            user_data = {
-                "username": old_data[26][0],
-                "avatar_url": html_imgs[3][0][1],
-                "user_id": user_id,
-                "country": old_data[27][0],
-                "raw_pp": float(pp_data[8][9:].strip()) if pp_data != "OFFLINE" else pp_data,
-                "total_score": old_data[-13][0],
-                "overall_acc": float(old_data[-11][0][:-1]),
-                "playcount": int(old_data[-9][0])
-            }
-        except ValueError:
-            user_data = {
-                "username": old_data[26][0],
-                "avatar_url": html_imgs[3][0][1],
-                "user_id": user_id,
-                "country": old_data[27][0],
-                "raw_pp": float(pp_data[8][9:].strip()) if pp_data != "OFFLINE" else pp_data,
-                "total_score": old_data[-12][0],
-                "overall_acc": float(old_data[-10][0][:-1]),
-                "playcount": "Erro!"
-            }
-        try:
-            data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": ppcheck_data}
-        except NameError:
-            data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts, "pp_data": [{"s": "OFFLINE"}]}
+    try:
+        user_data = {
+            "username": old_data[26][0],
+            "avatar_url": html_imgs[3][0][1],
+            "user_id": user_id,
+            "country": old_data[27][0],
+            "raw_pp": raw_pp,
+            "pp_data": pp_data,
+            "total_score": old_data[-13][0],
+            "overall_acc": float(old_data[-11][0][:-1]),
+            "playcount": int(old_data[-9][0])
+        }
+    except ValueError:
+        user_data = {
+            "username": old_data[26][0],
+            "avatar_url": html_imgs[3][0][1],
+            "user_id": user_id,
+            "country": old_data[27][0],
+            "raw_pp": raw_pp,
+            "pp_data": pp_data,
+            "all_pp_data": dpp_user_data,
+            "total_score": old_data[-12][0],
+            "overall_acc": float(old_data[-10][0][:-1]),
+            "playcount": "Erro!"
+        }
 
-        DATABASE.child("DROID_UID_DATA").child(user_id).set(user_data)
-        data_dicts.update(data_dict)
+    data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts}
 
-    return data_dicts
+    """
+    if pp_data != "offline":
+        await save_droid_uid_data(user_id, user_data)
+    """
+    # return data_dicts
+
+    return dict(data_dict)
+
+
+async def save_droid_uid_data(uid, profile_data):
+    DATABASE.child("DROID_UID_DATA").child(uid).set(profile_data)
