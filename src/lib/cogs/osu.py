@@ -609,7 +609,7 @@ class OsuDroid(commands.Cog):
                 user_data["speed"] = calculated[1]
                 user_data["aim"] = calculated[2]
                 user_data["stamina"] = calculated[3]
-                user_data["consistency"] = calculated[4] * 100 / 8192 / 2
+                user_data["consistency"] = calculated[4] * 100 / 8192 / 10
 
                 fetched_data.append(user_data)
 
