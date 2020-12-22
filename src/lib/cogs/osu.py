@@ -641,7 +641,7 @@ class OsuDroid(commands.Cog):
         fetched_data.sort(key=lambda e: e["raw_pp"], reverse=True)
         top_players = fetched_data[:25]
 
-        DATABASE.child("TOP_PLAYERS").push(top_players)
+        DATABASE.child("TOP_PLAYERS").child("data").push(top_players)
 
         updated_data = discord.Embed(title="RANK DPP BR", timestamp=datetime.utcnow())
         updated_data.set_footer(text="Atualizado")
