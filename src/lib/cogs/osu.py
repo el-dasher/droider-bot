@@ -8,7 +8,7 @@ from dateutil.parser import parse
 from discord.ext import commands, tasks
 from pytz import timezone
 
-from lib.utils.osu.osu_droid.droid_data_getter import get_droid_data
+from src.lib.utils.osu.osu_droid.droid_data_getter import get_droid_data
 from src.lib.utils.basic_utils import ready_up_cog
 from src.lib.utils.osu.osu_droid.br_pp_calculator import get_bpp
 from src.paths import debug
