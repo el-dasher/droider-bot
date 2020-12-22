@@ -646,6 +646,8 @@ class OsuDroid(commands.Cog):
         updated_data = discord.Embed(title="RANK DPP BR", timestamp=datetime.utcnow())
         updated_data.set_footer(text="Atualizado")
 
+        print(fetched_data)
+
         for i, data in enumerate(top_players):
             if len(data["pp_data"]) < 75:
                 data["speed"], data["aim"], data["reading"], data["stamina"], data["consistency"] = 0, 0, 0, 0, 0
