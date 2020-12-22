@@ -639,11 +639,14 @@ class OsuDroid(commands.Cog):
                 fetched_data.append(user_data)
 
         fetched_data.sort(key=lambda e: e["raw_pp"], reverse=True)
-        fetched_data = fetched_data[:25]
+        top_players = fetched_data[:25]
+
+        DATABASE.child("TOP_PLAYERS").push(top_players)
+
         updated_data = discord.Embed(title="RANK DPP BR", timestamp=datetime.utcnow())
         updated_data.set_footer(text="Atualizado")
 
-        for i, data in enumerate(fetched_data):
+        for i, data in enumerate(top_players):
             if len(data["pp_data"]) < 75:
                 data["speed"], data["aim"], data["reading"], data["stamina"], data["consistency"] = 0, 0, 0, 0, 0
 
