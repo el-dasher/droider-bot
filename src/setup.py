@@ -8,7 +8,7 @@ from ossapi import ossapi
 from pygelbooru import Gelbooru
 from pyrebase.pyrebase import Database
 
-from lib.db.firebase.firebase_db import database as firebase
+from src.lib.db.firebase.firebase_db import database as firebase
 from src.paths import COGS_PATH
 from src.paths import debug
 
