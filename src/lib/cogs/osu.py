@@ -338,7 +338,7 @@ class OsuDroid(commands.Cog):
         user = OsuDroidProfile(uid)
 
         try:
-            dict(user.profile())
+            dict(user.profile)
         except KeyError:
             return await ctx.reply(f"Não existe uid: {uid_original}, cadastrada na alice, Ok?")
 
@@ -440,7 +440,7 @@ class OsuDroid(commands.Cog):
         user = OsuDroidProfile(uid)
         try:
             try:
-                dict(user.profile())
+                dict(user.profile)
             except IndexError:
                 return await ctx.reply(
                     f"Não existe uma uid ou o usuário não se cadastrou: {uid_original}")
@@ -451,7 +451,7 @@ class OsuDroid(commands.Cog):
             profile_embed.set_author(url=f"http://ops.dgsrz.com/profile.php?uid={uid}",
                                      name=f"Perfil do(a) {user.username}")
 
-            profile_data = user.profile()
+            profile_data = user.profile
             total_dpp = f"{user.total_pp: .2f}"
 
             profile_embed.add_field(name="---Performance", value="**"
@@ -543,7 +543,7 @@ class OsuDroid(commands.Cog):
             diff_aim_list, diff_speed_list, diff_ar_list, diff_size_list, combo_list = [], [], [], [], []
 
             await asyncio.sleep(0.5)
-            user_data = (user := OsuDroidProfile(uid)).profile()
+            user_data = (user := OsuDroidProfile(uid)).profile
 
             if user_data["raw_pp"] is not None or user_data["pp_data"] is not None:
 
