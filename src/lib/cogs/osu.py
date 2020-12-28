@@ -590,7 +590,7 @@ class OsuDroid(commands.Cog):
                     user_data["aim"] = calculated[2]
                     user_data["consistency"] = calculated[3] * 100 / 6142 / 10
     
-                    fetched_data.append(user.profile)
+                    fetched_data.append(user_data)
             except KeyError:
                 pass
         print(fetched_data)
@@ -610,7 +610,7 @@ class OsuDroid(commands.Cog):
             updated_data.add_field(
                 name=f"{i + 1} - {data['profile']['username']}",
                 value=(
-                    f">>> ```\n{float(data['raw_pp']):.2f}pp - accuracy: {data['overall_acc']:.2f}%\n"
+                    f">>> ```\n{float(data['profile']['raw_pp']):.2f}pp - accuracy: {data['profile']['overall_acc']:.2f}%\n"
                     f"[speed: {data['speed']:.2f} | aim: {data['aim']:.2f} | reading: AR{data['reading']:.2f}]\n"
                     f" / consistência: {data['consistency']:.2f}]\n```"
                 ),
