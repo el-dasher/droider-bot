@@ -581,16 +581,20 @@ class OsuDroid(commands.Cog):
                         pass
                     else:
                         calculated.append(res)
-
+                
+                user_data = {
+                    "profile": user.profile,
+                }
+                
                 user_data["reading"] = calculated[0]
                 user_data["speed"] = calculated[1]
                 user_data["aim"] = calculated[2]
                 user_data["consistency"] = calculated[3] * 100 / 6142 / 10
 
-                fetched_data.append(user_data)
+                fetched_data.append(user.profile)
                 print("Ok")
         print(fetched_data)
-        fetched_data.sort(key=lambda e: e["raw_pp"], reverse=True)
+        fetched_data.sort(key=lambda e: e["profile"]["raw_pp"], reverse=True)
         top_players = fetched_data[:25]
 
         DATABASE.child("TOP_PLAYERS").child("data").set(top_players)
