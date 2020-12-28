@@ -8,7 +8,6 @@ class OsuDroidProfile:
     def __init__(self, uid: int):
         self.uid = uid
 
-    @property
     def profile(self):
         unfiltered_profile_info = BeautifulSoup(requests.get(
             f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
