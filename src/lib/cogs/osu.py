@@ -562,8 +562,6 @@ class OsuDroid(commands.Cog):
                             diff_aim_list.append(float(beatmap_data["diff_aim"]) * 1.50)
                             diff_speed_list.append(float(beatmap_data["diff_speed"]) * 1.50)
                             diff_size_list.append(float(beatmap_data["diff_size"]) / 1.50)
-                            
-                            print(top_play)
     
                     to_calculate = [
                         diff_ar_list,
@@ -593,7 +591,6 @@ class OsuDroid(commands.Cog):
                     user_data["consistency"] = calculated[3] * 100 / 6142 / 10
     
                     fetched_data.append(user.profile)
-                    print("Ok")
             except KeyError:
                 pass
         print(fetched_data)
