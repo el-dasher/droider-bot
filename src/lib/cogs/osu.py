@@ -584,6 +584,7 @@ class OsuDroid(commands.Cog):
                 
                 user_data = {
                     "profile": user.profile,
+                    "pp_data": user.pp_data["list"]
                 }
                 
                 user_data["reading"] = calculated[0]
@@ -603,11 +604,12 @@ class OsuDroid(commands.Cog):
         updated_data.set_footer(text="Atualizado")
 
         for i, data in enumerate(top_players):
+            print("Almost")
             if len(data["pp_data"]) < 75:
                 data["speed"], data["aim"], data["reading"], data["consistency"] = 0, 0, 0, 0
 
             updated_data.add_field(
-                name=f"{i + 1} - {data['username']}",
+                name=f"{i + 1} - {data['profile']['username']}",
                 value=(
                     f">>> ```\n{float(data['raw_pp']):.2f}pp - accuracy: {data['overall_acc']:.2f}%\n"
                     f"[speed: {data['speed']:.2f} | aim: {data['aim']:.2f} | reading: AR{data['reading']:.2f}]\n"
