@@ -544,56 +544,58 @@ class OsuDroid(commands.Cog):
 
             await asyncio.sleep(0.5)
             user = OsuDroidProfile(uid)
-
-            if user.total_pp is not None or user.pp_data["list"] is not None:
-
-                for top_play in user.pp_data['list']:
-
-                    beatmap_data = await get_beatmap_data(top_play["hash"])
-
-                    combo_list.append(top_play["combo"])
-                    if "DT" not in top_play["mods"]:
-                        diff_ar_list.append(float(beatmap_data["diff_approach"]))
-                        diff_aim_list.append(float(beatmap_data["diff_aim"]))
-                        diff_speed_list.append(float(beatmap_data["diff_speed"]))
-                        diff_size_list.append(float(beatmap_data["diff_size"]))
-                    else:
-                        diff_ar_list.append((float(beatmap_data["diff_approach"]) * 2 + 13) / 3)
-                        diff_aim_list.append(float(beatmap_data["diff_aim"]) * 1.50)
-                        diff_speed_list.append(float(beatmap_data["diff_speed"]) * 1.50)
-                        diff_size_list.append(float(beatmap_data["diff_size"]) / 1.50)
-                        
-                        print(top_play)
-
-                to_calculate = [
-                    diff_ar_list,
-                    diff_speed_list,
-                    diff_aim_list,
-                    combo_list
-                ]
-
-                calculated = []
-
-                for calc_list in to_calculate:
-                    try:
-                        res = sum(calc_list) / len(calc_list)
-                    except ZeroDivisionError:
-                        pass
-                    else:
-                        calculated.append(res)
-                
-                user_data = {
-                    "profile": user.profile,
-                    "pp_data": user.pp_data["list"]
-                }
-                
-                user_data["reading"] = calculated[0]
-                user_data["speed"] = calculated[1]
-                user_data["aim"] = calculated[2]
-                user_data["consistency"] = calculated[3] * 100 / 6142 / 10
-
-                fetched_data.append(user.profile)
-                print("Ok")
+            try:
+                if user.total_pp is not None or user.pp_data["list"] is not None:
+    
+                    for top_play in user.pp_data['list']:
+                        await asyncio.sleep(1.25)
+                        beatmap_data = await get_beatmap_data(top_play["hash"])
+    
+                        combo_list.append(top_play["combo"])
+                        if "DT" not in top_play["mods"]:
+                            diff_ar_list.append(float(beatmap_data["diff_approach"]))
+                            diff_aim_list.append(float(beatmap_data["diff_aim"]))
+                            diff_speed_list.append(float(beatmap_data["diff_speed"]))
+                            diff_size_list.append(float(beatmap_data["diff_size"]))
+                        else:
+                            diff_ar_list.append((float(beatmap_data["diff_approach"]) * 2 + 13) / 3)
+                            diff_aim_list.append(float(beatmap_data["diff_aim"]) * 1.50)
+                            diff_speed_list.append(float(beatmap_data["diff_speed"]) * 1.50)
+                            diff_size_list.append(float(beatmap_data["diff_size"]) / 1.50)
+                            
+                            print(top_play)
+    
+                    to_calculate = [
+                        diff_ar_list,
+                        diff_speed_list,
+                        diff_aim_list,
+                        combo_list
+                    ]
+    
+                    calculated = []
+    
+                    for calc_list in to_calculate:
+                        try:
+                            res = sum(calc_list) / len(calc_list)
+                        except ZeroDivisionError:
+                            pass
+                        else:
+                            calculated.append(res)
+                    
+                    user_data = {
+                        "profile": user.profile,
+                        "pp_data": user.pp_data["list"]
+                    }
+                    
+                    user_data["reading"] = calculated[0]
+                    user_data["speed"] = calculated[1]
+                    user_data["aim"] = calculated[2]
+                    user_data["consistency"] = calculated[3] * 100 / 6142 / 10
+    
+                    fetched_data.append(user.profile)
+                    print("Ok")
+            except KeyError:
+                pass
         print(fetched_data)
         fetched_data.sort(key=lambda e: e["profile"]["raw_pp"], reverse=True)
         top_players = fetched_data[:25]
