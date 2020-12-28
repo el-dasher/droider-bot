@@ -1,181 +1,158 @@
-from abc import ABC
-from datetime import datetime
-from html.parser import HTMLParser
-from urllib.request import urlopen
-
 import requests
 from bs4 import BeautifulSoup
 
-from src.setup import DATABASE, DPPBOARD_API
+from src.setup import DPPBOARD_API as DPP_BOARD_API
 
 
-# noinspection PyTypeChecker
-async def get_droid_data(user_id):
-    # noinspection PyGlobalUndefined
+class OsuDroidProfile:
+    def __init__(self, uid: int):
+        self.uid = uid
 
-    old_data = []
-    beatmap_data = []
-    html_imgs = []
+    @property
+    def profile(self):
+        unfiltered_profile_info = BeautifulSoup(requests.get(
+            f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
+                                                ).find_all("div", attrs={"class": "panel"})[1].find_all(
+            "span", attrs={"class": "pull-right"})[:3]
 
-    user_url = f"http://ops.dgsrz.com/profile.php?uid={user_id}"
-    droid_html = urlopen(user_url).read()
-    droid_data_soup = BeautifulSoup(droid_html, features="html.parser")
+        profile_info = [profile_data.text for profile_data in unfiltered_profile_info]
 
-    class DroidParser(HTMLParser, ABC):
-        def handle_data(self, html_data):
-            html_data = html_data.replace("\n", "").replace("\r", "").strip()
-            if len(html_data) != 1 and html_data != "":
-                # noinspection PyBroadException
-                try:
-                    if html_data[0] != "{" and html_data[-1] != "}":
-
-                        html_data = html_data.strip().split("/")
-
-                        old_data.append(html_data.copy())
-
-                        if old_data[old_data.index(html_data) - 1][0] != html_data[0]:
-                            beatmap_name = old_data[old_data.index(html_data) - 1][0]
-                        else:
-                            beatmap_name = None
-
-                        html_data[0] = datetime.strptime(html_data[0].strip(), "%Y-%m-%d %H:%M:%S")
-                        html_data.append(beatmap_name)
-
-                        beatmap_data.append(html_data)
-
-                except Exception:
-                    pass
-
-        def handle_starttag(self, tag, attrs):
-            if tag == "img":
-                html_imgs.append(attrs)
-
-    """
-    pp_user_url = f"https://ppboard.herokuapp.com/profile?uid={user_id}"
-
-    # noinspection PyBroadException
-    try:
-        pp_html = urlopen(pp_user_url).read()
-    except Exception:
-        pp_data = "OFFLINE"
-        completed_pp_data = None
-    else:
-        pp_data_soup = BeautifulSoup(pp_html, features="html.parser")
-
-        pp_data = []
-        completed_pp_data = []
-
-        class PPBoardParser(HTMLParser, ABC):
-            def __init__(self):
-                super().__init__()
-                self.counter = 0
-
-            def handle_data(self, pp_html_data):
-                if "{" not in pp_html_data or "}" not in pp_html_data:
-                    pp_data.append(pp_html_data)
-
-                    if pp_html_data != "-> Raw PP: ":
-                        if not str(pp_html_data).__contains__("Net pp"):
-                            beatmap_specifict_data = [pp_html_data]
-                            completed_pp_data.append(beatmap_specifict_data)
-
-        pp_parser = PPBoardParser()
-        pp_parser.feed(str(pp_data_soup))
-
-        for _ in range(9):
-            try:
-                completed_pp_data.pop(0)
-            except IndexError:
-                pass
-
-        ppcheck_data = []
-
-        for x, y in zip(completed_pp_data[::2], completed_pp_data[1::2]):
-            ppcheck_data.append({"beatmap-mod": x, "pp_raw": y})
-        """
-
-    droid_parser = DroidParser()
-    droid_parser.feed(str(droid_data_soup))
-    # data_dicts = {}
-
-    beatmap_dicts = {}
-
-    """
-    if pp_data == "OFFLINE":
-        if (backup_pp_data := DATABASE.child("DROID_UID_DATA").child(user_id).get().val()) is not None:
-            pp_data = backup_pp_data["raw_pp"]
-    else:
-        pp_data = float(pp_data[8][9:].strip())
-    """
-
-    dpp_board_url = f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPPBOARD_API}&uid={user_id}"
-
-    dpp_user_data = None
-
-    # noinspection PyBroadException
-    try:
-        dpp_user_data = requests.get(dpp_board_url).json()
-    except Exception:
-        raw_pp = "OFFLINE"
-        pp_data = "OFFLINE"
-    else:
-        raw_pp = None
-        pp_data = None
-
-        # noinspection PyBroadException
-        try:
-            raw_pp = dpp_user_data["data"]["pp"]["total"]
-            pp_data = dpp_user_data["data"]["pp"]["list"]
-        except Exception:
-            pass
-
-    for i, data in enumerate(beatmap_data):
-        beatmap_dicts[f"rs_{i}"] = {
-            "username": old_data[26][0],
-            "beatmap": data[5],
-            "date": data[0],
-            "score": data[1],
-            "mods": data[2],
-            "combo": int(data[3][:-2]),
-            "accuracy": float(data[4][:-1])
+        return {
+            "username": self.username,
+            "avatar_url": self.avatar,
+            "rankscore": self.rankscore,
+            "raw_pp": self.total_pp,
+            "country": self.country,
+            "total_score": profile_info[0],
+            "overall_acc": profile_info[1],
+            "playcount": profile_info[2],
+            "player_best": self.best_play,
+            "user_id": self.uid
         }
 
-    try:
-        user_data = {
-            "username": old_data[26][0],
-            "avatar_url": html_imgs[3][0][1],
-            "user_id": user_id,
-            "country": old_data[27][0],
-            "raw_pp": raw_pp,
-            "pp_data": pp_data,
-            "total_score": old_data[-13][0],
-            "overall_acc": float(old_data[-11][0][:-1]),
-            "playcount": int(old_data[-9][0])
-        }
-    except ValueError:
-        user_data = {
-            "username": old_data[26][0],
-            "avatar_url": html_imgs[3][0][1],
-            "user_id": user_id,
-            "country": old_data[27][0],
-            "raw_pp": raw_pp,
-            "pp_data": pp_data,
-            "all_pp_data": dpp_user_data,
-            "total_score": old_data[-12][0],
-            "overall_acc": float(old_data[-10][0][:-1]),
-            "playcount": "Erro!"
-        }
+    @property
+    def pp_data(self):
+        data = requests.get(f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPP_BOARD_API}&uid={self.uid}")
 
-    data_dict = {"user_data": user_data, "beatmap_data": beatmap_dicts}
+        return data.json()["data"]["pp"]
 
-    """
-    if pp_data != "offline":
-        await save_droid_uid_data(user_id, user_data)
-    """
-    # return data_dicts
+    @property
+    def avatar(self):
+        avatar_url = BeautifulSoup(requests.get(
+            f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
+                                   ).find_all("section", attrs={"class": "scrollable"})[2].find("img")["src"]
 
-    return dict(data_dict)
+        return avatar_url
 
+    @property
+    def rankscore(self):
+        rankscore = BeautifulSoup(requests.get(
+            f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
+                                  ).find_all("section", attrs={"class": "scrollable"}
+                                             )[1].find("span", attrs={"class": "m-b-xs h4 block"}).text
 
-async def save_droid_uid_data(uid, profile_data):
-    DATABASE.child("DROID_UID_DATA").child(uid).set(profile_data)
+        return rankscore
+
+    @property
+    def username(self):
+        username = BeautifulSoup(requests.get(
+            f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
+                                 ).find_all("section", attrs={"class": "scrollable"}
+                                            )[1].find("div", attrs={"class": "h3 m-t-xs m-b-xs"}).text
+
+        return username
+
+    @property
+    def country(self):
+        username = BeautifulSoup(requests.get(
+            f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
+                                 ).find_all("section", attrs={"class": "scrollable"}
+                                            )[1].find("small").text
+
+        return username
+
+    @property
+    def total_pp(self):
+        data = requests.get(f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPP_BOARD_API}&uid={self.uid}")
+
+        return data.json()["data"]["pp"]["total"]
+
+    @property
+    def best_play(self):
+        data = requests.get(f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPP_BOARD_API}&uid={self.uid}")
+
+        return data.json()["data"]["pp"]["list"][0]
+
+    @property
+    def recent_plays(self):
+        unfiltered_recent_plays = BeautifulSoup(requests.get(
+            f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
+                                                ).find_all("section", attrs={"class": "scrollable"})[1].find_all(
+            "li", attrs={"class": "list-group-item"})
+        semi_filtered_recent_plays = list(filter(lambda a: len(a) > 0,
+                                                 [play.find_all("a", attrs={"class": "clear"})
+                                                  for play in unfiltered_recent_plays]
+                                                 )
+                                          )
+        recent_plays = []
+        for play in semi_filtered_recent_plays:
+            for tag in play:
+                play_info = (tag.text.replace("\n", "").strip().split("/"))
+                play_info[-1] = play_info[-1].split("{")
+
+                accuracy = play_info[-1][0].replace(" ", "")
+
+                play_info[-1] = play_info[-1][1].split('"miss": ')
+                play_info.append(play_info[-1][0])
+                play_info.append(play_info[-2][-1])
+
+                play_info.pop(-3)
+
+                play_info.append(play_info[0].split("]")[-1])
+                play_info[0] = play_info[0].split("]")[0] + "]"
+                play_info[-2] = play_info[-2].split('"hash": ')
+                play_info.append(play_info[-2][0].split(","))
+                play_info.append(play_info[-1][0].split(":")[1])
+                play_info.append(play_info[-2][1].split(":")[1].replace("}", ""))
+
+                play_info.pop(-3)
+                play_info.pop(-4)
+                play_info.pop(-4)
+
+                play_info = list(filter(lambda a: len(a) > 0, play_info))
+
+                if len(play_info[-2]) == 0:
+                    play_info[-2] = 0
+
+                play_info[2] = play_info[2].replace(",", "")
+
+                for i, data in enumerate(play_info):
+                    if i > 0 and i != 4:
+                        play_info[i] = data.replace(" ", "")
+                        if i == 2:
+                            if len(data) == 2 or "None" in data:
+                                play_info[i] = "NM"
+                            play_info[i] = play_info[i].replace("DoubleTime", "DT").replace(
+                                "Hidden", "HD").replace("HardRock", "HR").replace(
+                                "Precise", "PR").replace("NoFail", "NF").replace("Easy", "EZ")
+
+                title = play_info[0]
+                score = play_info[1]
+                mods = play_info[2]
+                combo = play_info[3]
+                date = play_info[4]
+                misscount = play_info[5]
+                hash_ = play_info[6]
+
+                recent_plays.append({
+                    "title": title,
+                    "score": score,
+                    "mods": mods,
+                    "combo": combo,
+                    "accuracy": accuracy,
+                    "misscount": misscount,
+                    "date": date,
+                    "hash": hash_
+                })
+
+        return recent_plays

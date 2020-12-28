@@ -6,11 +6,10 @@ import discord
 import requests
 from dateutil.parser import parse
 from discord.ext import commands, tasks
-from pytz import timezone
 
-from src.lib.utils.osu.osu_droid.droid_data_getter import get_droid_data
 from src.lib.utils.basic_utils import ready_up_cog
 from src.lib.utils.osu.osu_droid.br_pp_calculator import get_bpp
+from src.lib.utils.osu.osu_droid.droid_data_getter import OsuDroidProfile
 from src.paths import debug
 from src.setup import DATABASE
 from src.setup import OSU_API
@@ -41,7 +40,6 @@ async def get_beatmap_data(hash_):
 
     # noinspection PyBroadException
     try:
-        await asyncio.sleep(0.5)
         beatmap_data = requests.get(f"https://osu.ppy.sh/api/get_beatmaps?k={OSU_API_KEY}&h={hash_}").json()
     except Exception:
         beatmap_data = default_data
@@ -52,6 +50,13 @@ async def get_beatmap_data(hash_):
             beatmap_data = default_data
 
     return beatmap_data
+
+
+def is_beatmap_valid(beatmap_json):
+    if beatmap_json["title"] == "?":
+        return False
+    else:
+        return True
 
 
 class OsuGame(commands.Cog):
@@ -234,159 +239,132 @@ class OsuDroid(commands.Cog):
         se você passar o paramêtro de <uid>, ms!rs <uid>
         """
 
-        uid_original = uid
-
         if uid is None:
+            # noinspection PyBroadException
             try:
                 uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
-            except Exception as e:
-                print(e)
+            except Exception:
                 return await ctx.reply(self.missing_uid_msg)
         elif len(uid) >= 9:
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
+        profile = OsuDroidProfile(uid)
         try:
-            _droid_data = await get_droid_data(uid)
-        except IndexError:
-            return await ctx.reply(f"Não existe essa uid ou o usuário não se cadastrou: {mention_to_uid(uid_original)}")
-        try:
-            rs_data = _droid_data["beatmap_data"]["rs_0"]
-        except KeyError:
-            await ctx.reply(f"O usuário infelizmente não possui nenhuma play, ghost de...")
+            rs_data = profile.recent_plays[0]
+        except (IndexError, KeyError):
+            await ctx.reply(f"O usuário infelizmente não possui nenhuma play ou o mesmo não possui uma conta...")
         else:
-            rs_embed = discord.Embed(timestamp=rs_data["date"].replace(tzinfo=timezone("Africa/Algiers")))
+            rs_bm_data = await get_beatmap_data(rs_data["hash"])
+
+            rs_embed = discord.Embed()
             rs_embed.set_author(
-                name=f"Play recente do(a) {rs_data['username']}",
-                icon_url=_droid_data["user_data"]["avatar_url"],
+                name=f"Play recente do(a) {profile.username}",
+                icon_url=profile.avatar,
                 url=f"http://ops.dgsrz.com/profile.php?uid={uid}"
             )
+            rs_embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{rs_bm_data['beatmapset_id']}l.jpg")
 
-            rs_embed.set_footer(text="Play feita")
+            if is_beatmap_valid(rs_bm_data):
+                play_bpp = get_bpp(int(rs_bm_data['beatmap_id']), rs_data['mods'],
+                                   int(rs_data['misscount']), float(rs_data['accuracy'][:-1]),
+                                   int(rs_data['combo'][:-1]),
+                                   True)['raw_pp']
+                max_bpp = get_bpp(int(rs_bm_data['beatmap_id']), rs_data['mods'], formatted=True)['raw_pp']
 
-            mod_dict = {
-                "None": "NM",
-                "Hidden": "HD",
-                "DoubleTime": "DT",
-                "HardRock": "HR",
-                "Precise": "PR"
-            }
+                bm_data_string = (">>> **"
+                                  f"CS/OD/AR/HP:"
+                                  f" {rs_bm_data['diff_size']}/{rs_bm_data['diff_overall']}/"
+                                  f"{rs_bm_data['diff_approach']}/{rs_bm_data['diff_drain']}\n"
+                                  "**")
+            else:
+                play_bpp = 0
+                max_bpp = 0
+                bm_data_string = "> Não foi possivel encontrar o beatmap nos servidores do osu..."
 
-            mod_list = [mod_dict[mod.strip()] for mod in rs_data["mods"].split(",")]
-            mods = "".join(mod_list)
+            rs_embed.add_field(
+                name=f"Dados da play do(a) {profile.username}",
+                value=">>> **"
+                      f"BPP: {play_bpp}/{max_bpp}\n"
+                      f"Precisão: {rs_data['accuracy']}\n"
+                      f"Score: {rs_data['score']}\n"
+                      f"Combo: {rs_data['combo']} / {rs_bm_data['max_combo']}x\n"
+                      f"Misses: {rs_data['misscount']}"
+                      "**"
+            )
 
-            rs_embed.add_field(name="Dados da play", value="**"
-                                                           f"Beatmap: `{rs_data['beatmap']}`\n"
-                                                           f"Precisão: `{rs_data['accuracy']}%`\n"
-                                                           f"Score: `{rs_data['score']}`\n"
-                                                           f"Combo: `{rs_data['combo']}x`\n"
-                                                           f"Mods: `{mods}`\n"
-                                                           "**")
+            rs_embed.add_field(
+                name="Dados do beatmap",
+                value=bm_data_string
+            )
+
+            rs_embed.set_author(
+                name=f"{rs_data['title']} +{rs_data['mods']} - {float(rs_bm_data['difficultyrating']):.2f}★",
+                url=f"https://osu.ppy.sh/b/{rs_bm_data['beatmap_id']}"
+            )
 
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=rs_embed)
 
     @commands.command(name="ppcheck")
     async def pp_check(self, ctx, uid=None):
 
-        """
-        Veja seus lindos pps do osu!droid :), ms!ppcheck <uid>,
-        Lembrando que você pode cadastrar seu usuário com ms!droidset <uid>!
-        Ai você não precisará passar o parâmetro de uid para ver seu usuário.
-        """
+        def get_default_ppmsg(play_dict: dict, beatmap_json):
+            raw_bpp = (
+                get_bpp(beatmap_json['beatmap_id'], play_dict['mods'],
+                        int(play_dict['miss']), float(play_dict['accuracy']), play_dict['combo'], formatted=True
+                        )['raw_pp']
+            )
 
-        def get_default_ppmsg(play_dict: dict):
             return (
                 f">>> ```\n"
-                f"{play_dict['combo']}x/{play_dict['beatmap_data']['max_combo']}x |"
+                f"{play_dict['combo']}x/{beatmap_data['max_combo']}x |"
                 f" {play_dict['accuracy']}%"
                 f" | {play_dict['miss']} miss\n{int(float(play_dict['pp']))}dpp |"
-                f" (aim: {float(play_dict['beatmap_data']['diff_aim']):.2f},"
-                f" speed: {float(play_dict['beatmap_data']['diff_speed']):.2f})"
-                f" |\nbpm: {play_dict['beatmap_data']['bpm']}"
-                f" | diff: {float(play_dict['beatmap_data']['difficultyrating']):.2f}★ |"
-                f" bpp: {float(play_dict['br_pp']):.2f}\n"
+                f" BPP: {raw_bpp}\n"
                 f"```"
-                f"\n**[Link do(a) {play_dict['beatmap_data']['title']}](https://osu.ppy.sh"
-                f"/beatmapsets/"
-                f"{play_dict['beatmap_data']['beatmapset_id']}#osu/"
-                f"{play_dict['beatmap_data']['beatmap_id']})**"
+                f"\n**[Link do(a) {beatmap_data['title']}](https://osu.ppy.sh"
+                f"/beatmapsets/{beatmap_data['beatmapset_id']}#osu/{beatmap_data['beatmap_id']}"
+                f")**"
             )
 
         uid_original = uid
 
         if uid is None:
+            # noinspection PyBroadException
             try:
                 uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
-            except Exception as e:
-                print(e)
+            except Exception:
                 return await ctx.reply(self.missing_uid_msg)
         elif len(uid) >= 9:
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
+        user = OsuDroidProfile(uid)
+
         try:
-            try:
-                profile_data = (await get_droid_data(uid))["user_data"]
-            except IndexError:
-                return await ctx.reply(
-                    f"Não existe uma uid ou o usuário não se cadastrou: {mention_to_uid(uid_original)}"
-                )
-            else:
-                if profile_data == "OFFLINE":
-                    return await ctx.reply(
-                        "A ppboard do rian8337 está offline, logo não foi possivel obter os dados :("
-                    )
+            dict(user.profile)
+        except KeyError:
+            return await ctx.reply(f"Não existe uid: {uid_original}, cadastrada na alice, Ok?")
 
-            if profile_data["username"].startswith("154"):
-                return await ctx.reply(
-                    "Infelizmente você ou o usuário não possuem sua id cadastrada,"
-                    " cadastre agora mesmo usando: `ms!droidset <uid>`"
-                )
-
-        except KeyError as e:
-            print(e)
-            await ctx.reply(f"Não existe uma user id chamada: {uid}")
-
-        user_data = (await get_droid_data(uid))["user_data"]
         ppcheck_embed = discord.Embed()
 
         ppcheck_embed.set_author(
-            name=(default_author_name := f"TOP PLAYS DO(A) {user_data['username'].upper()}"),
+            name=(default_author_name := f"TOP PLAYS DO(A) {user.username.upper()}"),
             url=(default_author_url := f"http://droidppboard.herokuapp.com/profile?uid={uid}"),
-            icon_url=(default_icon_url := user_data["avatar_url"])
+            icon_url=(default_icon_url := user.avatar)
         )
 
-        def _is_nomod(mods):
-            if mods == "":
-                mods = "NM"
-                return mods
-            else:
-                return mods
-
-        try:
-            user_data["pp_data"][:5]
-        except TypeError:
-            return await ctx.reply("O usuário não possui uma conta cadastrada na alice!")
-
         message = await ctx.reply("Adquirindo dados...")
+        top_pp_beatmap = None
 
-        for _, play in enumerate(user_data["pp_data"][:5]):
-
-            play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
-
-            play["br_pp"] = get_bpp(
-                play["beatmap_data"]["beatmap_id"], play["mods"], play["miss"], play["accuracy"]
-            )["raw_pp"]
-
-            if "DT" in play["mods"] or "NC" in play["mods"]:
-                play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
-
-            user_data["pp_data"][_]['beatmap_data'] = play["beatmap_data"]
-            play["mods"] = _is_nomod(play["mods"])
+        for i, play in enumerate((pp_data := user.pp_data['list'])[:5]):
+            beatmap_data = (await get_beatmap_data(play["hash"]))
+            if i == 0:
+                top_pp_beatmap = beatmap_data
 
             ppcheck_embed.add_field(
-                name=f"{_ + 1}.{play['title']} +{play['mods']}",
-                value=get_default_ppmsg(play), inline=False
+                name=f"{i + 1}.{play['title']} +{play['mods']}",
+                value=get_default_ppmsg(play, beatmap_data), inline=False
             )
 
         ppcheck_embed.set_thumbnail(
-            url=f"https://b.ppy.sh/thumb/{user_data['pp_data'][0]['beatmap_data']['beatmapset_id']}l.jpg"
+            url=f"https://b.ppy.sh/thumb/{top_pp_beatmap['beatmapset_id']}l.jpg"
         )
 
         await message.edit(content=f"<@{ctx.author.id}>", embed=ppcheck_embed)
@@ -404,8 +382,8 @@ class OsuDroid(commands.Cog):
         while time.time() < timeout:
             valid_reaction: tuple = await self.bot.wait_for(
                 "reaction_add",
-                check=lambda reaction, user: (
-                        user == ctx.author and str(reaction.emoji) in ("⬅", "➡") and reaction.message == message
+                check=lambda reaction, user_: (
+                        user_ == ctx.author and str(reaction.emoji) in ("⬅", "➡") and reaction.message == message
                 )
             )
 
@@ -424,33 +402,16 @@ class OsuDroid(commands.Cog):
                     end = 5
                 next_ppcheck_embed = discord.Embed()
 
-                try:
-                    index = start
-                    for _, play in enumerate(user_data["pp_data"][start:end]):
-                        index += 1
+                index = start
+                for i, play in enumerate(pp_data[start:end]):
+                    index += 1
 
-                        play["beatmap_data"] = (await get_beatmap_data(play["hash"]))
+                    beatmap_data = (await get_beatmap_data(play["hash"]))
 
-                        play["br_pp"] = get_bpp(
-                            play["beatmap_data"]["beatmap_id"], play["mods"], play["miss"], play["accuracy"]
-                        )["raw_pp"]
-
-                        if "DT" in play["mods"] or "NC" in play["mods"]:
-                            play["beatmap_data"]["bpm"] = int(float(play["beatmap_data"]["bpm"])) * 1.50
-
-                        user_data["pp_data"][_]['beatmap_data'] = play["beatmap_data"]
-                        play["mods"] = _is_nomod(play["mods"])
-
-                        next_ppcheck_embed.add_field(
-                            name=f"{index}. {play['title']} +{play['mods']}",
-                            value=get_default_ppmsg(play), inline=False
-                        )
-                    next_ppcheck_embed.set_thumbnail(
-                        url=f"https://b.ppy.sh/thumb/"
-                            f"{user_data['pp_data'][start - 5]['beatmap_data']['beatmapset_id']}l.jpg"
+                    next_ppcheck_embed.add_field(
+                        name=f"{index}. {play['title']} +{play['mods']}",
+                        value=get_default_ppmsg(play, beatmap_data), inline=False
                     )
-                except (IndexError, KeyError):
-                    pass
 
                 next_ppcheck_embed.set_author(name=default_author_name,
                                               url=default_author_url,
@@ -476,66 +437,56 @@ class OsuDroid(commands.Cog):
                 return await ctx.reply(self.missing_uid_msg)
         elif len(uid) >= 9:
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
+        user = OsuDroidProfile(uid)
         try:
             try:
-                profile_data = (await get_droid_data(uid))["user_data"]
+                dict(user.profile)
             except IndexError:
                 return await ctx.reply(
-                    f"Não existe uma uid ou o usuário não se cadastrou: {mention_to_uid(uid_original)}")
-            # if profile_data["username"] == "153460":
-            #    return await ctx.reply(f"Não existe uma uid chamada: {uid}")
+                    f"Não existe uma uid ou o usuário não se cadastrou: {uid_original}")
+
             profile_embed = discord.Embed()
 
-            if profile_data["username"].startswith("154"):
-                return await ctx.reply(
-                    "Infelizmente você ou o usuário não possuem sua id cadastrada,"
-                    " cadastre agora mesmo usando: `ms!droidset <uid>`"
-                )
-
-            try:
-                raw_pp = int(profile_data["raw_pp"])
-            except ValueError:
-                raw_pp = "OFFLINE"
-            except TypeError:
-                raw_pp = 0
-
-            profile_embed.set_thumbnail(url=profile_data['avatar_url'])
+            profile_embed.set_thumbnail(url=user.avatar)
             profile_embed.set_author(url=f"http://ops.dgsrz.com/profile.php?uid={uid}",
-                                     name=f"Perfil do(a) {profile_data['username']}")
+                                     name=f"Perfil do(a) {user.username}")
+
+            profile_data = user.profile
+            total_dpp = f"{user.total_pp: .2f}"
 
             profile_embed.add_field(name="---Performance", value="**"
                                                                  f"Ele(a) é do(a)"
                                                                  f" {(user_country := profile_data['country'])}"
                                                                  f"(:flag_{user_country.lower()}:)\n"
+                                                                 f"Rank: `#{profile_data['rankscore']}`\n"
                                                                  f"Total score: `{profile_data['total_score']}`\n"
-                                                                 f"Total dpp: `{raw_pp}`\n"
-                                                                 f"Overall acc: `{profile_data['overall_acc']}%`\n"
+                                                                 f"Total dpp: `{total_dpp}`\n"
+                                                                 f"Overall acc: `{profile_data['overall_acc']}`\n"
                                                                  f"Playcount: `{profile_data['playcount']}`"
                                                                  "**")
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=profile_embed)
 
-        except KeyError as e:
-            print(e)
+        except KeyError:
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
 
-    @commands.command(name="droidset")
+    @commands.command(name="droidset", aliases=["bind"])
     async def droid_set(self, ctx, uid=None):
 
         if not uid:
             return await ctx.reply("Você esqueceu de por para qual usuário(a) você quer setar!")
 
-        user_data = (await get_droid_data(uid))["user_data"]
+        user = OsuDroidProfile(uid)
 
-        if user_data["username"].startswith("155") is False:
-            DATABASE.child("DROID_USERS").child(ctx.author.id).set({"user": user_data})
+        if user.username != "":
+            DATABASE.child("DROID_USERS").child(ctx.author.id).set({"user": user.profile})
         else:
             return await ctx.reply(f"Não existe uma uid chamada: {uid}")
 
         droidset_embed = discord.Embed(
-            title=f"Você cadastrou seu usuário! {user_data['username']}"
+            title=f"Você cadastrou seu usuário! {user.username}"
         )
 
-        droidset_embed.set_image(url=user_data["avatar_url"])
+        droidset_embed.set_image(url=user.avatar)
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
@@ -571,7 +522,7 @@ class OsuDroid(commands.Cog):
         else:
             return await ctx.send(beatmap)
 
-    @tasks.loop(minutes=30, seconds=0)
+    @tasks.loop(hours=1, minutes=0, seconds=0)
     async def _brdpp_rank(self):
 
         if debug:
@@ -587,16 +538,16 @@ class OsuDroid(commands.Cog):
 
         uid_list = DATABASE.child("BR_UIDS").get().val()["uids"]
 
-        for user in uid_list:
+        for uid in uid_list:
 
             diff_aim_list, diff_speed_list, diff_ar_list, diff_size_list, combo_list = [], [], [], [], []
 
             await asyncio.sleep(0.5)
-            user_data = (await get_droid_data(user))["user_data"]
+            user_data = (user := OsuDroidProfile(uid)).profile
 
             if user_data["raw_pp"] is not None or user_data["pp_data"] is not None:
 
-                for top_play in user_data["pp_data"]:
+                for top_play in user.pp_data['list']:
 
                     beatmap_data = await get_beatmap_data(top_play["hash"])
 
@@ -616,7 +567,6 @@ class OsuDroid(commands.Cog):
                     diff_ar_list,
                     diff_speed_list,
                     diff_aim_list,
-                    diff_size_list,
                     combo_list
                 ]
 
@@ -633,8 +583,7 @@ class OsuDroid(commands.Cog):
                 user_data["reading"] = calculated[0]
                 user_data["speed"] = calculated[1]
                 user_data["aim"] = calculated[2]
-                user_data["stamina"] = calculated[3]
-                user_data["consistency"] = calculated[4] * 100 / 6142 / 10
+                user_data["consistency"] = calculated[3] * 100 / 6142 / 10
 
                 fetched_data.append(user_data)
 
@@ -646,24 +595,21 @@ class OsuDroid(commands.Cog):
         updated_data = discord.Embed(title="RANK DPP BR", timestamp=datetime.utcnow())
         updated_data.set_footer(text="Atualizado")
 
-        print(fetched_data)
-
         for i, data in enumerate(top_players):
             if len(data["pp_data"]) < 75:
-                data["speed"], data["aim"], data["reading"], data["stamina"], data["consistency"] = 0, 0, 0, 0, 0
+                data["speed"], data["aim"], data["reading"], data["consistency"] = 0, 0, 0, 0
 
             updated_data.add_field(
                 name=f"{i + 1} - {data['username']}",
                 value=(
                     f">>> ```\n{float(data['raw_pp']):.2f}pp - accuracy: {data['overall_acc']:.2f}%\n"
                     f"[speed: {data['speed']:.2f} | aim: {data['aim']:.2f} | reading: AR{data['reading']:.2f}]\n"
-                    f"[stamina: {data['stamina']:.2f} | consistência: {data['consistency']:.2f}]\n```"
+                    f" / consistência: {data['consistency']:.2f}]\n```"
                 ),
                 inline=False
             )
 
         # noinspection PyBroadException
-
         try:
             return await br_rank_message.edit(content="", embed=updated_data)
         except Exception:
