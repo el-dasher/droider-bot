@@ -134,7 +134,8 @@ class OsuDroidProfile:
                                 play_info[i] = "NM"
                             play_info[i] = play_info[i].replace("DoubleTime", "DT").replace(
                                 "Hidden", "HD").replace("HardRock", "HR").replace(
-                                "Precise", "PR").replace("NoFail", "NF").replace("Easy", "EZ")
+                                "Precise", "PR").replace("NoFail", "NF").replace(
+                                    "Easy", "EZ").replace("NightCore", "NC")
 
                 title = play_info[0]
                 score = play_info[1]
