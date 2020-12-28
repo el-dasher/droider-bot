@@ -543,9 +543,9 @@ class OsuDroid(commands.Cog):
             diff_aim_list, diff_speed_list, diff_ar_list, diff_size_list, combo_list = [], [], [], [], []
 
             await asyncio.sleep(0.5)
-            user_data = (user := OsuDroidProfile(uid)).profile
+            user = OsuDroidProfile(uid)
 
-            if user_data["raw_pp"] is not None or user_data["pp_data"] is not None:
+            if user.total_pp is not None or user.pp_data["list"] is not None:
 
                 for top_play in user.pp_data['list']:
 
@@ -562,6 +562,8 @@ class OsuDroid(commands.Cog):
                         diff_aim_list.append(float(beatmap_data["diff_aim"]) * 1.50)
                         diff_speed_list.append(float(beatmap_data["diff_speed"]) * 1.50)
                         diff_size_list.append(float(beatmap_data["diff_size"]) / 1.50)
+                        
+                        print(top_play)
 
                 to_calculate = [
                     diff_ar_list,
@@ -586,7 +588,8 @@ class OsuDroid(commands.Cog):
                 user_data["consistency"] = calculated[3] * 100 / 6142 / 10
 
                 fetched_data.append(user_data)
-
+                print("Ok")
+        print(fetched_data)
         fetched_data.sort(key=lambda e: e["raw_pp"], reverse=True)
         top_players = fetched_data[:25]
 
