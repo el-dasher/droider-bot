@@ -580,16 +580,10 @@ class OsuDroid(commands.Cog):
                         else:
                             calculated.append(res)
                     
-                    user_data = {
-                        "profile": user.profile,
-                        "pp_data": user.pp_data["list"]
-                    }
-                    
-                    user_data["reading"] = calculated[0]
-                    user_data["speed"] = calculated[1]
-                    user_data["aim"] = calculated[2]
-                    user_data["consistency"] = calculated[3] * 100 / 6142 / 10
-    
+                    user_data = {"profile": user.profile, "pp_data": user.pp_data["list"], "reading": calculated[0],
+                                 "speed": calculated[1], "aim": calculated[2],
+                                 "consistency": calculated[3] * 100 / 6142 / 10}
+
                     fetched_data.append(user_data)
             except KeyError:
                 pass
@@ -603,14 +597,21 @@ class OsuDroid(commands.Cog):
         updated_data.set_footer(text="Atualizado")
 
         for i, data in enumerate(top_players):
-            print("Almost")
+
+            data['profile']['raw_pp'] = float(data['profile']['raw_pp'])
+            data['profile']['overall_acc'] = float(data['profile']['overall_acc'])
+            data['speed'] = float(data['speed'])
+            data['aim'] = float(data['aim'])
+            data['reading'] = float(data['reading'])
+            data['consistency'] = float(data['consistency'])
+
             if len(data["pp_data"]) < 75:
                 data["speed"], data["aim"], data["reading"], data["consistency"] = 0, 0, 0, 0
 
             updated_data.add_field(
                 name=f"{i + 1} - {data['profile']['username']}",
                 value=(
-                    f">>> ```\n{float(data['profile']['raw_pp']):.2f}pp - accuracy: {data['profile']['overall_acc']:.2f}%\n"
+                    f">>> ```\n{data['profile']['raw_pp']:.2f}pp - accuracy: {data['profile']['overall_acc']:.2f}%\n"
                     f"[speed: {data['speed']:.2f} | aim: {data['aim']:.2f} | reading: AR{data['reading']:.2f}]\n"
                     f" / consistência: {data['consistency']:.2f}]\n```"
                 ),
