@@ -599,7 +599,7 @@ class OsuDroid(commands.Cog):
         for i, data in enumerate(top_players):
 
             data['profile']['raw_pp'] = float(data['profile']['raw_pp'])
-            data['profile']['overall_acc'] = float(data['profile']['overall_acc'])
+            data['profile']['overall_acc'] = float(data['profile']['overall_acc'][:-1])
             data['speed'] = float(data['speed'])
             data['aim'] = float(data['aim'])
             data['reading'] = float(data['reading'])
