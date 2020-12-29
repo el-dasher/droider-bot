@@ -16,6 +16,12 @@ class OsuDroidProfile:
             "span", attrs={"class": "pull-right"})[:3]
 
         profile_info = [profile_data.text for profile_data in unfiltered_profile_info]
+        
+        try:
+            raw_pp = self.total_pp
+        except KeyError:
+            raw_pp = 0
+        
 
         return {
             "username": self.username,
@@ -120,7 +126,7 @@ class OsuDroidProfile:
                 play_info.pop(-4)
 
                 play_info = list(filter(lambda a: len(a) > 0, play_info))
-
+    
                 if len(play_info[-2]) == 0:
                     play_info[-2] = 0
 
