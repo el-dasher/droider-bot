@@ -249,7 +249,7 @@ class OsuDroid(commands.Cog):
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
         profile = OsuDroidProfile(uid)
         try:
-            rs_data = profile.recent_plays[0]
+            rs_data = profile.recent_play
         except (IndexError, KeyError):
             await ctx.reply(f"O usuário infelizmente não possui nenhuma play ou o mesmo não possui uma conta...")
         else:

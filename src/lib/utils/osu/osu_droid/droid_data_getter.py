@@ -8,6 +8,37 @@ class OsuDroidProfile:
     def __init__(self, uid: int):
         self.uid = uid
 
+    def get_play_data(self, play_html):
+        play = play_html
+
+        title = play.find("strong", attrs={"class": "block"}).text
+        stats = list(map(lambda a: a.strip(), play.find("small").text.split("/")))
+        date = stats[0]
+        score = stats[1]
+        mods = stats[2].replace("DoubleTime", "DT").replace(
+            "Hidden", "HD").replace("HardRock", "HR").replace(
+            "Precise", "PR").replace("NoFail", "NF").replace(
+            "Easy", "EZ").replace("NightCore", "NC")
+        combo = stats[3]
+        accuracy = stats[4]
+
+        hidden_data = list(map(lambda a: a.strip().split(":")[1].replace("}", ""),
+                               play.find("span", attrs={"class": "hidden"}).text.split(",")))
+
+        misscount = hidden_data[0]
+        hash_ = hidden_data[1]
+
+        return {
+            "title": title,
+            "score": score,
+            "mods": mods,
+            "combo": combo,
+            "accuracy": accuracy,
+            "misscount": misscount,
+            "date": date,
+            "hash": hash_
+        }
+
     @property
     def profile(self):
         unfiltered_profile_info = BeautifulSoup(requests.get(
@@ -21,13 +52,12 @@ class OsuDroidProfile:
             raw_pp = self.total_pp
         except KeyError:
             raw_pp = 0
-        
 
         return {
             "username": self.username,
             "avatar_url": self.avatar,
             "rankscore": self.rankscore,
-            "raw_pp": self.total_pp,
+            "raw_pp": raw_pp,
             "country": self.country,
             "total_score": profile_info[0],
             "overall_acc": profile_info[1],
@@ -90,76 +120,30 @@ class OsuDroidProfile:
         return data.json()["data"]["pp"]["list"][0]
 
     @property
+    def recent_play(self):
+        recent_play = self.get_play_data(BeautifulSoup(requests.get(
+            f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
+                                                ).find_all("section", attrs={"class": "scrollable"})[1].find_all(
+            "li", attrs={"class": "list-group-item"})[0].find_all("a")[-1])
+
+        return recent_play
+
+    @property
     def recent_plays(self):
         unfiltered_recent_plays = BeautifulSoup(requests.get(
             f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
                                                 ).find_all("section", attrs={"class": "scrollable"})[1].find_all(
             "li", attrs={"class": "list-group-item"})
-        semi_filtered_recent_plays = list(filter(lambda a: len(a) > 0,
-                                                 [play.find_all("a", attrs={"class": "clear"})
-                                                  for play in unfiltered_recent_plays]
-                                                 )
-                                          )
+
         recent_plays = []
-        for play in semi_filtered_recent_plays:
-            for tag in play:
-                play_info = (tag.text.replace("\n", "").strip().split("/"))
-                play_info[-1] = play_info[-1].split("{")
-
-                accuracy = play_info[-1][0].replace(" ", "")
-
-                play_info[-1] = play_info[-1][1].split('"miss": ')
-                play_info.append(play_info[-1][0])
-                play_info.append(play_info[-2][-1])
-
-                play_info.pop(-3)
-
-                play_info.append(play_info[0].split("]")[-1])
-                play_info[0] = play_info[0].split("]")[0] + "]"
-                play_info[-2] = play_info[-2].split('"hash": ')
-                play_info.append(play_info[-2][0].split(","))
-                play_info.append(play_info[-1][0].split(":")[1])
-                play_info.append(play_info[-2][1].split(":")[1].replace("}", ""))
-
-                play_info.pop(-3)
-                play_info.pop(-4)
-                play_info.pop(-4)
-
-                play_info = list(filter(lambda a: len(a) > 0, play_info))
-    
-                if len(play_info[-2]) == 0:
-                    play_info[-2] = 0
-
-                play_info[2] = play_info[2].replace(",", "")
-
-                for i, data in enumerate(play_info):
-                    if i > 0 and i != 4:
-                        play_info[i] = data.replace(" ", "")
-                        if i == 2:
-                            if len(data) == 2 or "None" in data:
-                                play_info[i] = "NM"
-                            play_info[i] = play_info[i].replace("DoubleTime", "DT").replace(
-                                "Hidden", "HD").replace("HardRock", "HR").replace(
-                                "Precise", "PR").replace("NoFail", "NF").replace(
-                                    "Easy", "EZ").replace("NightCore", "NC")
-
-                title = play_info[0]
-                score = play_info[1]
-                mods = play_info[2]
-                combo = play_info[3]
-                date = play_info[4]
-                misscount = play_info[5]
-                hash_ = play_info[6]
-
-                recent_plays.append({
-                    "title": title,
-                    "score": score,
-                    "mods": mods,
-                    "combo": combo,
-                    "accuracy": accuracy,
-                    "misscount": misscount,
-                    "date": date,
-                    "hash": hash_
-                })
-
+        for play in unfiltered_recent_plays:
+            try:
+                play_data = self.get_play_data(play)
+            except AttributeError:
+                pass
+            else:
+                recent_plays.append(play_data)
         return recent_plays
+
+
+print(OsuDroidProfile(158287).recent_plays)
