@@ -20,6 +20,10 @@ class OsuDroidProfile:
             "Hidden", "HD").replace("HardRock", "HR").replace(
             "Precise", "PR").replace("NoFail", "NF").replace(
             "Easy", "EZ").replace("NightCore", "NC").replace(",", "").strip().replace(" ", "")
+
+        if mods == "":
+            mods = "NM"
+        
         combo = stats[3]
         accuracy = stats[4]
 

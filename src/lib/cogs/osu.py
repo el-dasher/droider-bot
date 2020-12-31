@@ -305,9 +305,9 @@ class OsuDroid(commands.Cog):
         def get_default_ppmsg(play_dict: dict):
             return (
                 f">>> ```\n"
-                f"{play_dict['combo']}x/{beatmap_data['max_combo']}x |"
+                f"{play_dict['combo']}x |"
                 f" {play_dict['accuracy']}%"
-                f" | {play_dict['miss']} miss\n{int(float(play_dict['pp']))}dpp |"
+                f" | {play_dict['miss']} miss {int(float(play_dict['pp']))}dpp |"
                 f"```"
             )
 
