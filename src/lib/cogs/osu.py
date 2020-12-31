@@ -338,7 +338,7 @@ class OsuDroid(commands.Cog):
 
         for i, play in enumerate((pp_data := user.pp_data['list'])[:5]):
             ppcheck_embed.add_field(
-                name=f"{i + 1}={play['title']} +{play['mods']}",
+                name=f"{i + 1}. {play['title']} +{play['mods']}",
                 value=get_default_ppmsg(play), inline=False
             )
 
