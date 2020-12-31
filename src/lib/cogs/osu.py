@@ -378,8 +378,12 @@ class OsuDroid(commands.Cog):
                 for i, play in enumerate(pp_data[start:end]):
                     index += 1
 
+                    modstring: str = ""
+                    if play['mods'] != "":
+                        modstring = f"+{play['mods']}"
+
                     next_ppcheck_embed.add_field(
-                        name=f"{index}. {play['title']} +{play['mods']}",
+                        name=f"{index}. {play['title']} {modstring}",
                         value=get_default_ppmsg(play), inline=False
                     )
 
