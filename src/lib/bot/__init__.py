@@ -6,6 +6,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from discord.ext import commands
 
 import src.setup as settings
+from random import randint
 
 
 # from apscheduler.triggers.cron import CronTrigger
@@ -108,7 +109,10 @@ class DroiderBR(commands.Bot):
 
                 return
 
-        # print(f"{msg.author}: {msg}")
+        if randint(1, 10000) == 5000:
+            await msg.reply("PARABENS ESSA MENSAGEM TEM 1 EM 10000 CHANCES DE APARECER QUE LEGAL MANO,"
+                            " REIVINDIQUE SEUS 250K NO CASSINÃO COM UM ADM")
+
         await self.process_commands(msg)
 
 
