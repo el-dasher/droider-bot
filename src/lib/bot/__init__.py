@@ -111,7 +111,7 @@ class DroiderBR(commands.Bot):
 
         if randint(1, 10000) == 5000:
             await msg.reply("PARABENS ESSA MENSAGEM TEM 1 EM 10000 CHANCES DE APARECER QUE LEGAL MANO,"
-                            " REIVINDIQUE SEUS 250K NO CASSINÃO COM UM ADM")
+                            " REIVINDIQUE SEUS 25K NO CASSINÃO COM UM ADM")
 
         await self.process_commands(msg)
 
