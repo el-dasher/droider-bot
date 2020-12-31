@@ -2,8 +2,7 @@ from src.lib.utils.osu.osu_std.ppv2_calculator import get_ppv2
 
 
 def get_bpp(beatmap_id, mods: str = "NM", misses: int = 0,
-            accuracy: float = 100.00, max_combo: int = None,  formatted: bool = False):
-
+            accuracy: float = 100.00, max_combo: int = None, formatted: bool = False):
     mods = f"{mods.upper()}TD"
     useful_data = get_ppv2(beatmap_id, mods, misses, accuracy, max_combo, formatted=False)
 
@@ -32,11 +31,11 @@ def get_bpp(beatmap_id, mods: str = "NM", misses: int = 0,
 
     if not formatted:
         return {
-            "raw_pp": f"{raw_pp}",
-            "aim_pp": f"{aim_pp}",
-            "speed_pp": f"{speed_pp}",
-            "acc_pp": f"{acc_pp}",
-            "acc_percent": f"{acc_percent}"
+            "raw_pp": raw_pp,
+            "aim_pp": aim_pp,
+            "speed_pp": speed_pp,
+            "acc_pp": acc_pp,
+            "acc_percent": acc_percent
         }
     else:
         return {

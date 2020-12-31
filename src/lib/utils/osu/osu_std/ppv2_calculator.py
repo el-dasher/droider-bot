@@ -1,6 +1,6 @@
-from src.lib.external.oppadc import oppadc
 import requests
 
+from src.lib.external.oppadc import oppadc
 from src.paths import RECENT_OSU_FILE_PATH
 
 

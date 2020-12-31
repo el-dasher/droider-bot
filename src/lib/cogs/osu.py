@@ -490,12 +490,30 @@ class OsuDroid(commands.Cog):
             elif parameter.endswith("%"):
                 accuracy = float(parameter[:-1])
 
-        beatmap = get_bpp(beatmap_id, mods, misses, accuracy)
+        beatmap_pp_data = get_bpp(beatmap_id, mods, misses, accuracy)
 
-        if len(beatmap) == 0:
+        if len(beatmap_pp_data) == 0:
             return await ctx.send(error_message)
         else:
-            return await ctx.send(beatmap)
+            beatmap_data = OSU_API.get_beatmaps({"b": beatmap_id})[0]
+
+            calc_embed = discord.Embed()
+
+            calc_embed.set_author(
+                name=f"{beatmap_data['title']} +{mods} -{misses} {float(accuracy):.2f}%",
+                url=link
+            )
+
+            calc_embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{beatmap_data['beatmapset_id']}l.jpg")
+
+            calc_embed.add_field(name="Calculado...", value=">>> **"
+                                                            f"BPP: {beatmap_pp_data['raw_pp']: .2f}\n"
+                                                            f"Aim BPP: {beatmap_pp_data['aim_pp']: .2f}\n"
+                                                            f"Speed BPP: {beatmap_pp_data['speed_pp']: .2f}\n"
+                                                            f"Acc BPP: {beatmap_pp_data['acc_pp']: .2f}"
+                                                            f"**"
+                                 )
+            return await ctx.reply(f"<@{ctx.author.id}>", embed=calc_embed)
 
     @tasks.loop(hours=1, minutes=0, seconds=0)
     async def _brdpp_rank(self):
@@ -521,11 +539,11 @@ class OsuDroid(commands.Cog):
             user = OsuDroidProfile(uid)
             try:
                 if user.total_pp is not None or user.pp_data["list"] is not None:
-    
+
                     for top_play in user.pp_data['list']:
                         await asyncio.sleep(1.25)
                         beatmap_data = await get_beatmap_data(top_play["hash"])
-    
+
                         combo_list.append(top_play["combo"])
                         if "DT" not in top_play["mods"]:
                             diff_ar_list.append(float(beatmap_data["diff_approach"]))
@@ -537,16 +555,16 @@ class OsuDroid(commands.Cog):
                             diff_aim_list.append(float(beatmap_data["diff_aim"]) * 1.50)
                             diff_speed_list.append(float(beatmap_data["diff_speed"]) * 1.50)
                             diff_size_list.append(float(beatmap_data["diff_size"]) / 1.50)
-    
+
                     to_calculate = [
                         diff_ar_list,
                         diff_speed_list,
                         diff_aim_list,
                         combo_list
                     ]
-    
+
                     calculated = []
-    
+
                     for calc_list in to_calculate:
                         try:
                             res = sum(calc_list) / len(calc_list)
@@ -554,7 +572,7 @@ class OsuDroid(commands.Cog):
                             pass
                         else:
                             calculated.append(res)
-                    
+
                     user_data = {"profile": user.profile, "pp_data": user.pp_data["list"], "reading": calculated[0],
                                  "speed": calculated[1], "aim": calculated[2],
                                  "consistency": calculated[3] * 100 / 6142 / 10}

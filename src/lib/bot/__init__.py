@@ -1,4 +1,5 @@
 import asyncio
+from random import randint
 from typing import Union
 
 import discord
@@ -6,7 +7,6 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from discord.ext import commands
 
 import src.setup as settings
-from random import randint
 
 
 # from apscheduler.triggers.cron import CronTrigger

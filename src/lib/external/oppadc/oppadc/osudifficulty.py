@@ -1,120 +1,124 @@
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
-	from .osumap import OsuMap
+    from .osumap import OsuMap
 
 import math
 from .osumod import GeneralOsuMod, OsuModIndex
 
-MODS_SPEED_FASTER:int = OsuModIndex.getValueFromString("NCDT")
-MODS_SPEED_SLOWER:int = OsuModIndex.getValueFromString("HT")
+MODS_SPEED_FASTER: int = OsuModIndex.getValueFromString("NCDT")
+MODS_SPEED_SLOWER: int = OsuModIndex.getValueFromString("HT")
+
 
 class OsuDifficulty(object):
-	"""
-		Contains the difficulty and allowes to apply mods.
-		applying mods will change the stats
-	"""
-	def __init__(self, Map:"OsuMap"):
-		self.Map:"OsuMap" = Map
+    """
+        Contains the difficulty and allowes to apply mods.
+        applying mods will change the stats
+    """
 
-		self.mods_str:str = ""
-		self.mods_value:int = 0
+    def __init__(self, Map: "OsuMap"):
+        self.Map: "OsuMap" = Map
 
-		self.speed_multiplier:float = 1.0
-		self.ar:float = Map.ar
-		self.cs:float = Map.cs
-		self.od:float = Map.od
-		self.hp:float = Map.hp
+        self.mods_str: str = ""
+        self.mods_value: int = 0
 
-	def __repr__(self) -> str:
-		return f"<{self.__class__.__name__} ar={round(self.ar, 2)} cs={round(self.cs, 2)} od={round(self.od, 2)} hp={round(self.hp, 2)} mods='{self.mods_str}'>"
+        self.speed_multiplier: float = 1.0
+        self.ar: float = Map.ar
+        self.cs: float = Map.cs
+        self.od: float = Map.od
+        self.hp: float = Map.hp
 
-	def __str__(self) -> str:
-		return self.__repr__()
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} ar={round(self.ar, 2)} cs={round(self.cs, 2)} od={round(self.od, 2)} hp={round(self.hp, 2)} mods='{self.mods_str}'>"
 
-	def applyMods(self, Mods:GeneralOsuMod or list or str or int=None, calc:list=["AR","OD","CS","HP"]) -> None:
-		if not Mods: return
+    def __str__(self) -> str:
+        return self.__repr__()
 
-		mods_value:int = 0
-		if type(Mods) is int:
-			mods_value = Mods
-		elif type(Mods) is str:
-			mods_value = OsuModIndex.getValueFromString(Mods)
-		elif type(Mods) is GeneralOsuMod:
-			mods_value = Mods.value
+    def applyMods(self, Mods: GeneralOsuMod or list or str or int = None,
+                  calc: list = ["AR", "OD", "CS", "HP"]) -> None:
+        if not Mods: return
 
-		self.mods_value = mods_value
-		self.mods_str = OsuModIndex.getStringFromValue(mods_value)
+        mods_value: int = 0
+        if type(Mods) is int:
+            mods_value = Mods
+        elif type(Mods) is str:
+            mods_value = OsuModIndex.getValueFromString(Mods)
+        elif type(Mods) is GeneralOsuMod:
+            mods_value = Mods.value
 
-		OD0_MS:int = 80
-		OD10_MS:int = 20
-		AR0_MS:int = 1800
-		AR5_MS:int = 1200
-		AR10_MS:int = 450
+        self.mods_value = mods_value
+        self.mods_str = OsuModIndex.getStringFromValue(mods_value)
 
-		OD_MS_STEP:float = (OD0_MS - OD10_MS) / 10.0
-		AR_MS_STEP1:float = (AR0_MS - AR5_MS) / 5.0
-		AR_MS_STEP2:float = (AR5_MS - AR10_MS) / 5.0
+        OD0_MS: int = 80
+        OD10_MS: int = 20
+        AR0_MS: int = 1800
+        AR5_MS: int = 1200
+        AR10_MS: int = 450
 
-		MODS_SPEED_CHANGING:int = OsuModIndex.getValueFromString("DTHTNC")
-		MODS_MAP_CHANGING:int = MODS_SPEED_CHANGING | OsuModIndex.getValueFromString("HREZ")
+        OD_MS_STEP: float = (OD0_MS - OD10_MS) / 10.0
+        AR_MS_STEP1: float = (AR0_MS - AR5_MS) / 5.0
+        AR_MS_STEP2: float = (AR5_MS - AR10_MS) / 5.0
 
-		# no mods will change stuff we care about
-		if not mods_value & MODS_MAP_CHANGING: return
+        MODS_SPEED_CHANGING: int = OsuModIndex.getValueFromString("DTHTNC")
+        MODS_MAP_CHANGING: int = MODS_SPEED_CHANGING | OsuModIndex.getValueFromString("HREZ")
 
-		if mods_value & MODS_SPEED_FASTER:
-			self.speed_multiplier = 1.5
+        # no mods will change stuff we care about
+        if not mods_value & MODS_MAP_CHANGING: return
 
-		elif mods_value & MODS_SPEED_SLOWER:
-			self.speed_multiplier = 0.75
+        if mods_value & MODS_SPEED_FASTER:
+            self.speed_multiplier = 1.5
 
-		OD_AR_HP_Multiplier:float = 1.0
+        elif mods_value & MODS_SPEED_SLOWER:
+            self.speed_multiplier = 0.75
 
-		if mods_value & OsuModIndex.index["HR"].value:
-			OD_AR_HP_Multiplier = 1.4
+        OD_AR_HP_Multiplier: float = 1.0
 
-		elif mods_value & OsuModIndex.index["EZ"].value:
-			OD_AR_HP_Multiplier = 0.5
+        if mods_value & OsuModIndex.index["HR"].value:
+            OD_AR_HP_Multiplier = 1.4
 
-		# AR
-		if "AR" in calc:
-			self.ar *= OD_AR_HP_Multiplier
+        elif mods_value & OsuModIndex.index["EZ"].value:
+            OD_AR_HP_Multiplier = 0.5
 
-			ar_ms:float = AR5_MS
+        # AR
+        if "AR" in calc:
+            self.ar *= OD_AR_HP_Multiplier
 
-			if self.ar < 5:
-				ar_ms = AR0_MS - (AR_MS_STEP1 * self.ar)
-			else:
-				ar_ms = AR5_MS - (AR_MS_STEP2 * (self.ar - 5))
+            ar_ms: float = AR5_MS
 
-			# NOTE from Francesco149:
-			# stats must be capped to 0-10 before HT/DT which brings
-			# them to a range of -4.42-11.08 for OD and -5-11 for AR
-			ar_ms = min(AR0_MS, max(AR10_MS, ar_ms))
-			ar_ms /= self.speed_multiplier
+            if self.ar < 5:
+                ar_ms = AR0_MS - (AR_MS_STEP1 * self.ar)
+            else:
+                ar_ms = AR5_MS - (AR_MS_STEP2 * (self.ar - 5))
 
-			# convert back to AR
-			if ar_ms > AR5_MS:
-				self.ar = (AR0_MS - ar_ms) / AR_MS_STEP1
-			else:
-				self.ar = 5.0 + (AR5_MS - ar_ms) / AR_MS_STEP2
+            # NOTE from Francesco149:
+            # stats must be capped to 0-10 before HT/DT which brings
+            # them to a range of -4.42-11.08 for OD and -5-11 for AR
+            ar_ms = min(AR0_MS, max(AR10_MS, ar_ms))
+            ar_ms /= self.speed_multiplier
 
-		if "OD" in calc:
-			self.od *= OD_AR_HP_Multiplier
+            # convert back to AR
+            if ar_ms > AR5_MS:
+                self.ar = (AR0_MS - ar_ms) / AR_MS_STEP1
+            else:
+                self.ar = 5.0 + (AR5_MS - ar_ms) / AR_MS_STEP2
 
-			od_ms:float = OD0_MS - math.ceil(OD_MS_STEP * self.od)
-			od_ms = min(OD0_MS, max(OD10_MS, od_ms))
-			od_ms /= self.speed_multiplier
+        if "OD" in calc:
+            self.od *= OD_AR_HP_Multiplier
 
-			self.od = (OD0_MS - od_ms) / OD_MS_STEP
+            od_ms: float = OD0_MS - math.ceil(OD_MS_STEP * self.od)
+            od_ms = min(OD0_MS, max(OD10_MS, od_ms))
+            od_ms /= self.speed_multiplier
 
-		if "CS" in calc:
-			if mods_value & OsuModIndex.index["HR"].value:
-				self.cs *= 1.3
+            self.od = (OD0_MS - od_ms) / OD_MS_STEP
 
-			elif mods_value & OsuModIndex.index["EZ"].value:
-				self.cs *= 0.5
+        if "CS" in calc:
+            if mods_value & OsuModIndex.index["HR"].value:
+                self.cs *= 1.3
 
-			self.cs = min(10, self.cs)
+            elif mods_value & OsuModIndex.index["EZ"].value:
+                self.cs *= 0.5
 
-		if "HP" in calc:
-			self.hp = min(10, self.hp * OD_AR_HP_Multiplier)
+            self.cs = min(10, self.cs)
+
+        if "HP" in calc:
+            self.hp = min(10, self.hp * OD_AR_HP_Multiplier)
