@@ -8,7 +8,8 @@ class OsuDroidProfile:
     def __init__(self, uid: int):
         self.uid = uid
 
-    def get_play_data(self, play_html):
+    @staticmethod
+    def get_play_data(play_html):
         play = play_html
 
         title = play.find("strong", attrs={"class": "block"}).text
@@ -41,28 +42,33 @@ class OsuDroidProfile:
 
     @property
     def profile(self):
-        unfiltered_profile_info = BeautifulSoup(requests.get(
+        profile_info = BeautifulSoup(requests.get(
             f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
-                                                ).find_all("div", attrs={"class": "panel"})[1].find_all(
-            "span", attrs={"class": "pull-right"})[:3]
+                                     )
+        stats = list(map(lambda a: a.text, profile_info.find_all("div", attrs={"class": "panel"})[1].find_all(
+            "span", attrs={"class": "pull-right"})[:3]))
+        username = profile_info.find_all("section", attrs={"class": "scrollable"}
+                                         )[1].find("div", attrs={"class": "h3 m-t-xs m-b-xs"}).text
+        country = profile_info.find_all("section", attrs={"class": "scrollable"}
+                                        )[1].find("small").text
+        avatar = profile_info.find_all("section", attrs={"class": "scrollable"})[2].find("img")["src"]
+        rankscore = profile_info.find_all("section", attrs={"class": "scrollable"}
+                                             )[1].find("span", attrs={"class": "m-b-xs h4 block"}).text
 
-        profile_info = [profile_data.text for profile_data in unfiltered_profile_info]
-        
         try:
             raw_pp = self.total_pp
         except KeyError:
             raw_pp = 0
 
         return {
-            "username": self.username,
-            "avatar_url": self.avatar,
-            "rankscore": self.rankscore,
+            "username": username,
+            "avatar_url": avatar,
+            "rankscore": rankscore,
             "raw_pp": raw_pp,
-            "country": self.country,
-            "total_score": profile_info[0],
-            "overall_acc": profile_info[1],
-            "playcount": profile_info[2],
-            "player_best": self.best_play,
+            "country": country,
+            "total_score": stats[0],
+            "overall_acc": stats[1],
+            "playcount": stats[2],
             "user_id": self.uid
         }
 
@@ -73,39 +79,11 @@ class OsuDroidProfile:
         return data.json()["data"]["pp"]
 
     @property
-    def avatar(self):
-        avatar_url = BeautifulSoup(requests.get(
-            f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
-                                   ).find_all("section", attrs={"class": "scrollable"})[2].find("img")["src"]
-
-        return avatar_url
-
-    @property
     def rankscore(self):
         rankscore = BeautifulSoup(requests.get(
             f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
-                                  ).find_all("section", attrs={"class": "scrollable"}
-                                             )[1].find("span", attrs={"class": "m-b-xs h4 block"}).text
-
+                                  )
         return rankscore
-
-    @property
-    def username(self):
-        username = BeautifulSoup(requests.get(
-            f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
-                                 ).find_all("section", attrs={"class": "scrollable"}
-                                            )[1].find("div", attrs={"class": "h3 m-t-xs m-b-xs"}).text
-
-        return username
-
-    @property
-    def country(self):
-        username = BeautifulSoup(requests.get(
-            f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
-                                 ).find_all("section", attrs={"class": "scrollable"}
-                                            )[1].find("small").text
-
-        return username
 
     @property
     def total_pp(self):
@@ -123,7 +101,7 @@ class OsuDroidProfile:
     def recent_play(self):
         recent_play = self.get_play_data(BeautifulSoup(requests.get(
             f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
-                                                ).find_all("section", attrs={"class": "scrollable"})[1].find_all(
+                                                       ).find_all("section", attrs={"class": "scrollable"})[1].find_all(
             "li", attrs={"class": "list-group-item"})[0].find_all("a")[-1])
 
         return recent_play
@@ -144,6 +122,3 @@ class OsuDroidProfile:
             else:
                 recent_plays.append(play_data)
         return recent_plays
-
-
-print(OsuDroidProfile(158287).recent_plays)

@@ -247,20 +247,15 @@ class OsuDroid(commands.Cog):
                 return await ctx.reply(self.missing_uid_msg)
         elif len(uid) >= 9:
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
-        profile = OsuDroidProfile(uid)
+        user = OsuDroidProfile(uid)
         try:
-            rs_data = profile.recent_play
+            rs_data = user.recent_play
         except (IndexError, KeyError):
             await ctx.reply(f"O usuário infelizmente não possui nenhuma play ou o mesmo não possui uma conta...")
         else:
             rs_bm_data = await get_beatmap_data(rs_data["hash"])
 
             rs_embed = discord.Embed()
-            rs_embed.set_author(
-                name=f"Play recente do(a) {profile.username}",
-                icon_url=profile.avatar,
-                url=f"http://ops.dgsrz.com/profile.php?uid={uid}"
-            )
             rs_embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{rs_bm_data['beatmapset_id']}l.jpg")
 
             if is_beatmap_valid(rs_bm_data):
@@ -281,7 +276,7 @@ class OsuDroid(commands.Cog):
                 bm_data_string = "> Não foi possivel encontrar o beatmap nos servidores do osu..."
 
             rs_embed.add_field(
-                name=f"Dados da play do(a) {profile.username}",
+                name=f"Dados da play do(a) {user.profile['username']}",
                 value=">>> **"
                       f"BPP: {play_bpp}/{max_bpp}\n"
                       f"Precisão: {rs_data['accuracy']}\n"
@@ -298,7 +293,8 @@ class OsuDroid(commands.Cog):
 
             rs_embed.set_author(
                 name=f"{rs_data['title']} +{rs_data['mods']} - {float(rs_bm_data['difficultyrating']):.2f}★",
-                url=f"https://osu.ppy.sh/b/{rs_bm_data['beatmap_id']}"
+                url=f"https://osu.ppy.sh/b/{rs_bm_data['beatmap_id']}",
+                icon_url=user.profile['avatar_url']
             )
 
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=rs_embed)
@@ -345,9 +341,9 @@ class OsuDroid(commands.Cog):
         ppcheck_embed = discord.Embed()
 
         ppcheck_embed.set_author(
-            name=(default_author_name := f"TOP PLAYS DO(A) {user.username.upper()}"),
+            name=(default_author_name := f"TOP PLAYS DO(A) {user.profile['username'].upper()}"),
             url=(default_author_url := f"http://droidppboard.herokuapp.com/profile?uid={uid}"),
-            icon_url=(default_icon_url := user.avatar)
+            icon_url=(default_icon_url := user.profile['avatar_url'])
         )
 
         message = await ctx.reply("Adquirindo dados...")
@@ -430,10 +426,10 @@ class OsuDroid(commands.Cog):
         uid_original = uid
 
         if uid is None:
+            # noinspection PyBroadException
             try:
                 uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
-            except Exception as e:
-                print(e)
+            except Exception:
                 return await ctx.reply(self.missing_uid_msg)
         elif len(uid) >= 9:
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
@@ -446,12 +442,12 @@ class OsuDroid(commands.Cog):
                     f"Não existe uma uid ou o usuário não se cadastrou: {uid_original}")
 
             profile_embed = discord.Embed()
-
-            profile_embed.set_thumbnail(url=user.avatar)
-            profile_embed.set_author(url=f"http://ops.dgsrz.com/profile.php?uid={uid}",
-                                     name=f"Perfil do(a) {user.username}")
-
             profile_data = user.profile
+
+            profile_embed.set_thumbnail(url=profile_data['avatar_url'])
+            profile_embed.set_author(url=f"http://ops.dgsrz.com/profile.php?uid={uid}",
+                                     name=f"Perfil do(a) {profile_data['username']}")
+
             total_dpp = f"{user.total_pp: .2f}"
 
             profile_embed.add_field(name="---Performance", value="**"
@@ -476,17 +472,18 @@ class OsuDroid(commands.Cog):
             return await ctx.reply("Você esqueceu de por para qual usuário(a) você quer setar!")
 
         user = OsuDroidProfile(uid)
+        profile = user.profile
 
-        if user.username != "":
+        if profile['username'] != "":
             DATABASE.child("DROID_USERS").child(ctx.author.id).set({"user": user.profile})
         else:
             return await ctx.reply(f"Não existe uma uid chamada: {uid}")
 
         droidset_embed = discord.Embed(
-            title=f"Você cadastrou seu usuário! {user.username}"
+            title=f"Você cadastrou seu usuário! {profile['username']}"
         )
 
-        droidset_embed.set_image(url=user.avatar)
+        droidset_embed.set_image(url=profile['avatar_url'])
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
