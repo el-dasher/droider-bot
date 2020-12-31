@@ -302,23 +302,13 @@ class OsuDroid(commands.Cog):
     @commands.command(name="ppcheck")
     async def pp_check(self, ctx, uid=None):
 
-        def get_default_ppmsg(play_dict: dict, beatmap_json):
-            raw_bpp = (
-                get_bpp(beatmap_json['beatmap_id'], play_dict['mods'],
-                        int(play_dict['miss']), float(play_dict['accuracy']), play_dict['combo'], formatted=True
-                        )['raw_pp']
-            )
-
+        def get_default_ppmsg(play_dict: dict):
             return (
                 f">>> ```\n"
                 f"{play_dict['combo']}x/{beatmap_data['max_combo']}x |"
                 f" {play_dict['accuracy']}%"
                 f" | {play_dict['miss']} miss\n{int(float(play_dict['pp']))}dpp |"
-                f" BPP: {raw_bpp}\n"
                 f"```"
-                f"\n**[Link do(a) {beatmap_data['title']}](https://osu.ppy.sh"
-                f"/beatmapsets/{beatmap_data['beatmapset_id']}#osu/{beatmap_data['beatmap_id']}"
-                f")**"
             )
 
         uid_original = uid
@@ -347,26 +337,14 @@ class OsuDroid(commands.Cog):
         )
 
         message = await ctx.reply("Adquirindo dados...")
-        top_pp_beatmap = None
 
         for i, play in enumerate((pp_data := user.pp_data['list'])[:5]):
-            beatmap_data = (await get_beatmap_data(play["hash"]))
-            if i == 0:
-                top_pp_beatmap = beatmap_data
-
             ppcheck_embed.add_field(
                 name=f"{i + 1}.{play['title']} +{play['mods']}",
-                value=get_default_ppmsg(play, beatmap_data), inline=False
+                value=get_default_ppmsg(play), inline=False
             )
 
-        ppcheck_embed.set_thumbnail(
-            url=f"https://b.ppy.sh/thumb/{top_pp_beatmap['beatmapset_id']}l.jpg"
-        )
-
         await message.edit(content=f"<@{ctx.author.id}>", embed=ppcheck_embed)
-
-        # if profile_data["raw_pp"] != "OFFLINE":
-        #    _save_droid_uid_data(uid, profile_data)
 
         await message.add_reaction("⬅")
         await message.add_reaction("➡")
@@ -406,7 +384,7 @@ class OsuDroid(commands.Cog):
 
                     next_ppcheck_embed.add_field(
                         name=f"{index}. {play['title']} +{play['mods']}",
-                        value=get_default_ppmsg(play, beatmap_data), inline=False
+                        value=get_default_ppmsg(play), inline=False
                     )
 
                 next_ppcheck_embed.set_author(name=default_author_name,

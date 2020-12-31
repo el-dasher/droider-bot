@@ -19,7 +19,7 @@ class OsuDroidProfile:
         mods = stats[2].replace("DoubleTime", "DT").replace(
             "Hidden", "HD").replace("HardRock", "HR").replace(
             "Precise", "PR").replace("NoFail", "NF").replace(
-            "Easy", "EZ").replace("NightCore", "NC")
+            "Easy", "EZ").replace("NightCore", "NC").replace(",", "").strip().replace(" ", "")
         combo = stats[3]
         accuracy = stats[4]
 
@@ -53,7 +53,7 @@ class OsuDroidProfile:
                                         )[1].find("small").text
         avatar = profile_info.find_all("section", attrs={"class": "scrollable"})[2].find("img")["src"]
         rankscore = profile_info.find_all("section", attrs={"class": "scrollable"}
-                                             )[1].find("span", attrs={"class": "m-b-xs h4 block"}).text
+                                          )[1].find("span", attrs={"class": "m-b-xs h4 block"}).text
 
         try:
             raw_pp = self.total_pp
@@ -89,7 +89,11 @@ class OsuDroidProfile:
     def total_pp(self):
         data = requests.get(f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPP_BOARD_API}&uid={self.uid}")
 
-        return data.json()["data"]["pp"]["total"]
+        # noinspection PyBroadException
+        try:
+            return data.json()["data"]["pp"]["total"]
+        except Exception:
+            return 0
 
     @property
     def best_play(self):
