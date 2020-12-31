@@ -23,7 +23,7 @@ class OsuDroidProfile:
 
         if mods == "":
             mods = "NM"
-        
+
         combo = stats[3]
         accuracy = stats[4]
 

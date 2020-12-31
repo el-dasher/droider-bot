@@ -307,7 +307,7 @@ class OsuDroid(commands.Cog):
                 f">>> ```\n"
                 f"{play_dict['combo']}x |"
                 f" {play_dict['accuracy']}%"
-                f" | {play_dict['miss']} miss {int(float(play_dict['pp']))}dpp |"
+                f" | {play_dict['miss']} miss | {int(float(play_dict['pp']))}dpp |"
                 f"```"
             )
 
@@ -336,15 +336,13 @@ class OsuDroid(commands.Cog):
             icon_url=(default_icon_url := user.profile['avatar_url'])
         )
 
-        message = await ctx.reply("Adquirindo dados...")
-
         for i, play in enumerate((pp_data := user.pp_data['list'])[:5]):
             ppcheck_embed.add_field(
                 name=f"{i + 1}.{play['title']} +{play['mods']}",
                 value=get_default_ppmsg(play), inline=False
             )
 
-        await message.edit(content=f"<@{ctx.author.id}>", embed=ppcheck_embed)
+        message = await ctx.reply(content=f"<@{ctx.author.id}>", embed=ppcheck_embed)
 
         await message.add_reaction("⬅")
         await message.add_reaction("➡")
