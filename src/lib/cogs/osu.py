@@ -305,7 +305,7 @@ class OsuDroid(commands.Cog):
         def get_default_ppmsg(play_dict: dict):
             return (
                 f">>> ```\n"
-                f"{play_dict['combo']}x |"
+                f"| {play_dict['combo']}x |"
                 f" {play_dict['accuracy']}%"
                 f" | {play_dict['miss']} miss | {int(float(play_dict['pp']))}dpp |"
                 f"```"
@@ -338,7 +338,7 @@ class OsuDroid(commands.Cog):
 
         for i, play in enumerate((pp_data := user.pp_data['list'])[:5]):
             ppcheck_embed.add_field(
-                name=f"{i + 1}.{play['title']} +{play['mods']}",
+                name=f"{i + 1}={play['title']} +{play['mods']}",
                 value=get_default_ppmsg(play), inline=False
             )
 
@@ -377,8 +377,6 @@ class OsuDroid(commands.Cog):
                 index = start
                 for i, play in enumerate(pp_data[start:end]):
                     index += 1
-
-                    beatmap_data = (await get_beatmap_data(play["hash"]))
 
                     next_ppcheck_embed.add_field(
                         name=f"{index}. {play['title']} +{play['mods']}",
