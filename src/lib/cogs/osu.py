@@ -14,6 +14,7 @@ from src.paths import debug
 from src.setup import DATABASE
 from src.setup import OSU_API
 from src.setup import OSU_API_KEY
+from json.decoder import JSONDecodeError
 
 
 def mention_to_uid(msg):
@@ -578,7 +579,7 @@ class OsuDroid(commands.Cog):
                                  "consistency": calculated[3] * 100 / 6142 / 10}
 
                     fetched_data.append(user_data)
-            except KeyError:
+            except (KeyError, JSONDecodeError):
                 pass
         print(fetched_data)
         fetched_data.sort(key=lambda e: e["profile"]["raw_pp"], reverse=True)
