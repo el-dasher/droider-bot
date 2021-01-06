@@ -8,6 +8,17 @@ class OsuDroidProfile:
     def __init__(self, uid: int):
         self.uid = uid
 
+    def _replace_mods(self, modstring: str):
+        modstring.replace("DoubleTime", "DT").replace(
+            "Hidden", "HD").replace("HardRock", "HR").replace(
+            "Precise", "PR").replace("NoFail", "NF").replace(
+            "Easy", "EZ").replace("NightCore", "NC").replace(",", "").strip().replace(" ", "")
+
+        if modstring == "":
+            modstring = "NM"
+
+        return modstring
+
     @staticmethod
     def get_play_data(play_html):
         play = play_html
@@ -77,10 +88,24 @@ class OsuDroidProfile:
         }
 
     @property
-    def pp_data(self):
-        data = requests.get(f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPP_BOARD_API}&uid={self.uid}")
+    def basic_user_data(self):
+        data = requests.get(f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPP_BOARD_API}&uid={self.uid}"
+                            ).json()['data']
 
-        return data.json()["data"]["pp"]
+        return {
+            "uid": data['uid'],
+            "username": data['username']
+        }
+
+    @property
+    def pp_data(self):
+        data = requests.get(
+                f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPP_BOARD_API}&uid={self.uid}"
+            ).json()['data']['pp']
+
+        data['list'] = [{**d, **{"mods": self._replace_mods(d['mods'])}} for d in data['list']]
+
+        return data
 
     @property
     def rankscore(self):
@@ -130,3 +155,6 @@ class OsuDroidProfile:
             else:
                 recent_plays.append(play_data)
         return recent_plays
+
+
+print(OsuDroidProfile(158287).pp_data)
