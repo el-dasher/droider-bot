@@ -328,12 +328,13 @@ class OsuDroid(commands.Cog):
 
         if uid == "+":
             faster = True
+        not_registered_msg = "Você não possui uma conta registrada na database, utilize `&bind uid>`"
 
         if faster is True:
             try:
                 pp_data = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("pp_data").get().val()
             except Exception:
-                return await ctx.reply("Você não possui uma conta registrada na database, utilize `&bind uid>`")
+                return await ctx.reply(not_registered_msg)
         else:
             try:
                 pp_data = user.pp_data
@@ -342,10 +343,13 @@ class OsuDroid(commands.Cog):
 
         ppcheck_embed = discord.Embed()
 
-        ppcheck_embed.set_author(
-            name=(default_author_name := f"TOP PLAYS DO(A) {pp_data['username'].upper()}"),
-            url=(default_author_url := f"http://droidppboard.herokuapp.com/profile?uid={uid}"),
-        )
+        try:
+            ppcheck_embed.set_author(
+                name=(default_author_name := f"TOP PLAYS DO(A) {pp_data['username'].upper()}"),
+                url=(default_author_url := f"http://droidppboard.herokuapp.com/profile?uid={uid}"),
+            )
+        except TypeError:
+            return await ctx.reply(not_registered_msg)
 
         for i, play in enumerate((pp_data := pp_data['list'])[:5]):
             ppcheck_embed.add_field(
