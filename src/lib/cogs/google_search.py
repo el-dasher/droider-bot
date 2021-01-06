@@ -20,7 +20,7 @@ class GoogleSearch(commands.Cog):
     async def on_ready(self):
         ready_up_cog(self.bot, __name__)
 
-    @commands.command()
+    @commands.command(aliases=['gsearch'])
     async def googlesearch(self, ctx: discord.ext.commands.Context, *query):
         query = list(query)
 

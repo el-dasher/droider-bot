@@ -302,6 +302,7 @@ class OsuDroid(commands.Cog):
 
     @commands.command(name="ppcheck")
     async def pp_check(self, ctx, uid=None):
+        faster = False
 
         def get_default_ppmsg(play_dict: dict):
             return (
@@ -324,19 +325,25 @@ class OsuDroid(commands.Cog):
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
         user = OsuDroidProfile(uid)
 
-        try:
-            dict(user.pp_data)
-        except KeyError:
-            return await ctx.reply(f"Não existe uid: {uid_original}, cadastrada na alice, Ok?")
+        if uid == "+":
+            faster = True
+
+        if faster is True:
+            pp_data = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("pp_data").get().val()
+        else:
+            try:
+                pp_data = user.pp_data
+            except KeyError:
+                return await ctx.reply(f"Não existe uid: {uid_original}, cadastrada na alice, Ok?")
 
         ppcheck_embed = discord.Embed()
 
         ppcheck_embed.set_author(
-            name=(default_author_name := f"TOP PLAYS DO(A) {user.pp_data['username'].upper()}"),
+            name=(default_author_name := f"TOP PLAYS DO(A) {pp_data['username'].upper()}"),
             url=(default_author_url := f"http://droidppboard.herokuapp.com/profile?uid={uid}"),
         )
 
-        for i, play in enumerate((pp_data := user.pp_data['list'])[:5]):
+        for i, play in enumerate((pp_data := pp_data['list'])[:5]):
             ppcheck_embed.add_field(
                 name=f"{i + 1}. {play['title']} +{play['mods']}",
                 value=get_default_ppmsg(play), inline=False
@@ -388,6 +395,26 @@ class OsuDroid(commands.Cog):
                                               )
                 await message.edit(embed=next_ppcheck_embed)
         return await message.clear_reactions()
+
+    @commands.command(name="pp")
+    async def submit_pp(self, ctx: commands.Context):
+        """
+        Submita o seu ppcheck atual para a database :)
+        """
+        # noinspection PyBroadException
+        try:
+            uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
+        except Exception:
+            return await ctx.reply("Você não tem uma conta cadastrada no bot, faça o mesmo com: `&bind <uid>`")
+        else:
+            try:
+                user = OsuDroidProfile(uid)
+                DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("pp_data").set(user.pp_data)
+
+                return await ctx.reply("Os seus pp's foram submitados à database com sucesso!")
+            except Exception as e:
+                print(e)
+                return await ctx.reply("Não foi possivel submitar os seus pp's à database.")
 
     @commands.command(name="pf", aliases=["pfme"])
     async def droid_pfme(self, ctx, uid=None):

@@ -158,6 +158,3 @@ class OsuDroidProfile:
             else:
                 recent_plays.append(play_data)
         return recent_plays
-
-
-print(OsuDroidProfile(158287).pp_data)
