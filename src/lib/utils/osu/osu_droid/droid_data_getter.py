@@ -20,7 +20,6 @@ class OsuDroidProfile:
 
         return modstring
 
-    @staticmethod
     def get_play_data(play_html):
         play = play_html
 
@@ -28,13 +27,7 @@ class OsuDroidProfile:
         stats = list(map(lambda a: a.strip(), play.find("small").text.split("/")))
         date = stats[0]
         score = stats[1]
-        mods = stats[2].replace("DoubleTime", "DT").replace(
-            "Hidden", "HD").replace("HardRock", "HR").replace(
-            "Precise", "PR").replace("NoFail", "NF").replace(
-            "Easy", "EZ").replace("NightCore", "NC").replace(",", "").strip().replace(" ", "")
-
-        if mods == "":
-            mods = "NM"
+        mods = self._replace_mods(stats[2])
 
         combo = stats[3]
         accuracy = stats[4]
