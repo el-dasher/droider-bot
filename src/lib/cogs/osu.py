@@ -300,6 +300,7 @@ class OsuDroid(commands.Cog):
 
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=rs_embed)
 
+    # noinspection PyBroadException
     @commands.command(name="ppcheck")
     async def pp_check(self, ctx, uid=None):
         faster = False
@@ -329,7 +330,10 @@ class OsuDroid(commands.Cog):
             faster = True
 
         if faster is True:
-            pp_data = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("pp_data").get().val()
+            try:
+                pp_data = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("pp_data").get().val()
+            except Exception:
+                return await ctx.reply("Você não possui uma conta registrada na database, utilize `&bind uid>`")
         else:
             try:
                 pp_data = user.pp_data
