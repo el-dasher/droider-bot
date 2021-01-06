@@ -8,7 +8,8 @@ class OsuDroidProfile:
     def __init__(self, uid: int):
         self.uid = uid
 
-    def _replace_mods(self, modstring: str):
+    @staticmethod
+    def _replace_mods(modstring: str):
         modstring.replace("DoubleTime", "DT").replace(
             "Hidden", "HD").replace("HardRock", "HR").replace(
             "Precise", "PR").replace("NoFail", "NF").replace(
@@ -99,10 +100,12 @@ class OsuDroidProfile:
 
     @property
     def pp_data(self):
-        data = requests.get(
-                f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPP_BOARD_API}&uid={self.uid}"
-            ).json()['data']['pp']
+        data = (raw_data := requests.get(
+            f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPP_BOARD_API}&uid={self.uid}"
+        ).json()['data'])['pp']
 
+        data['uid'] = raw_data['uid']
+        data['username'] = raw_data['username']
         data['list'] = [{**d, **{"mods": self._replace_mods(d['mods'])}} for d in data['list']]
 
         return data

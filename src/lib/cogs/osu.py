@@ -325,14 +325,14 @@ class OsuDroid(commands.Cog):
         user = OsuDroidProfile(uid)
 
         try:
-            dict(user.basic_user_data)
+            dict(user.pp_data)
         except KeyError:
             return await ctx.reply(f"Não existe uid: {uid_original}, cadastrada na alice, Ok?")
 
         ppcheck_embed = discord.Embed()
 
         ppcheck_embed.set_author(
-            name=(default_author_name := f"TOP PLAYS DO(A) {user.basic_user_data['username'].upper()}"),
+            name=(default_author_name := f"TOP PLAYS DO(A) {user.pp_data['username'].upper()}"),
             url=(default_author_url := f"http://droidppboard.herokuapp.com/profile?uid={uid}"),
         )
 
@@ -378,12 +378,8 @@ class OsuDroid(commands.Cog):
                 for i, play in enumerate(pp_data[start:end]):
                     index += 1
 
-                    modstring: str = ""
-                    if play['mods'] != "":
-                        modstring = f"+{play['mods']}"
-
                     next_ppcheck_embed.add_field(
-                        name=f"{index}. {play['title']} {modstring}",
+                        name=f"{index}. {play['title']} +{play['mods']}",
                         value=get_default_ppmsg(play), inline=False
                     )
 
