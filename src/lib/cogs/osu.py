@@ -328,7 +328,9 @@ class OsuDroid(commands.Cog):
 
         if uid == "+":
             faster = True
-        not_registered_msg = "Você não possui uma conta registrada na database, utilize `&bind uid>`"
+        not_registered_msg = "Você não possui uma conta registrada na database" \
+                             " ou você esqueceu de submitar seus pp's use `&pp` ou `&bind uid>`" \
+                             "Para os respectivos erros."
 
         if faster is True:
             try:
