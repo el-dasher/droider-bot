@@ -478,6 +478,11 @@ class OsuDroid(commands.Cog):
 
         if not uid:
             return await ctx.reply("Você esqueceu de por para qual usuário(a) você quer setar!")
+        else:
+            try:
+                uid = [int(s) for s in uid.split() if s.isdigit()][0]
+            except IndexError:
+                return await ctx.reply("O uid pode apenas conter números :(")
 
         user = OsuDroidProfile(uid)
         profile = user.profile
