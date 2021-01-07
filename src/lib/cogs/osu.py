@@ -4,6 +4,8 @@ from datetime import datetime
 
 import discord
 import requests
+
+from typing import Union
 from dateutil.parser import parse
 from discord.ext import commands, tasks
 
@@ -373,7 +375,7 @@ class OsuDroid(commands.Cog):
                     bpp_string = ""
 
                 embed.add_field(
-                    name=f"{index_start + i_}. {play_['title']} +{play_['mods']}",
+                    name=f"{index_start + i_ + 1}. {play_['title']} +{play_['mods']}",
                     value=f">>> ```\n"
                           f"| {play_['combo']}x |"
                           f" {play_['accuracy']}%"
@@ -418,21 +420,29 @@ class OsuDroid(commands.Cog):
                 await message.edit(embed=next_ppcheck_embed)
         return await message.clear_reactions()
 
-    @commands.command(name="pp")
-    async def submit_pp(self, ctx: commands.Context):
+    @commands.command(name="completecalc", aliases=["pp"])
+    async def submit_pp(self, ctx: commands.Context, user: discord.Member = None):
         """
         Submita o seu ppcheck atual para a database :)
         """
+
+        user_to_submit = ctx.author.id
+        submit_string: str = "O seu pp sera submitado à database em 1 à 3 minutos!"
+        if dict(ctx.author.guild_permissions)['administrator'] is True:
+            if user is not None:
+                user_to_submit = user
+                submit_string = "O pp dele será submitado à database em 1 à 3 minutos!"
+
         # noinspection PyBroadException
         try:
-            uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
+            uid = DATABASE.child("DROID_USERS").child(user_to_submit).child("user").child("user_id").get().val()
         except Exception:
             return await ctx.reply("Você não tem uma conta cadastrada no bot, faça o mesmo com: `&bind <uid>`")
         else:
-            await ctx.reply("O seu pp sera submitado à database em 1 à 3 minutos!")
+            await ctx.reply(submit_string)
             # noinspection PyBroadException
             try:
-                await self.submit_user_data(uid, ctx.author.id)
+                await self.submit_user_data(uid, user_to_submit)
                 return await ctx.reply("Os seus pp's foram submitados à database com sucesso!")
             except Exception:
                 return await ctx.reply("Não foi possivel submitar os seus pp's à database.")
@@ -513,8 +523,11 @@ class OsuDroid(commands.Cog):
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
 
     @commands.command(name="droidset", aliases=["bind"])
-    async def droid_set(self, ctx, uid=None):
-
+    async def droid_set(self, ctx, uid: Union[str, int] = None, discord_user: discord.Member = None):
+        user_to_bind = ctx.author.id
+        if dict(ctx.author.guild_permissions)['administrator'] is True:
+            if discord_user is not None:
+                user_to_bind = discord_user
         if not uid:
             return await ctx.reply("Você esqueceu de por para qual usuário(a) você quer setar!")
         else:
@@ -526,15 +539,16 @@ class OsuDroid(commands.Cog):
         user = OsuDroidProfile(uid)
         profile = user.profile
 
+        if user_to_bind is None:
+            bind_msg = f"Você cadastrou seu usuário! {profile['username']}"
+        else:
+            bind_msg = f"O adm cadastrou o(a) {profile['username']} pro {user_to_bind}"
         if profile['username'] != "":
-            DATABASE.child("DROID_USERS").child(ctx.author.id).set({"user": user.profile})
+            DATABASE.child("DROID_USERS").child(user_to_bind.id).set({"user": user.profile})
         else:
             return await ctx.reply(f"Não existe uma uid chamada: {uid}")
 
-        droidset_embed = discord.Embed(
-            title=f"Você cadastrou seu usuário! {profile['username']}"
-        )
-
+        droidset_embed = discord.Embed(title=bind_msg)
         droidset_embed.set_image(url=profile['avatar_url'])
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)

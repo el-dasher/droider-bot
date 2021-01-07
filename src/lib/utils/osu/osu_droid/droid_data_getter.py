@@ -20,7 +20,7 @@ class OsuDroidProfile:
 
         return modstring
 
-    def get_play_data(play_html):
+    def get_play_data(self, play_html):
         play = play_html
 
         title = play.find("strong", attrs={"class": "block"}).text
