@@ -446,13 +446,13 @@ class OsuDroid(commands.Cog):
             await ctx.reply(submit_string)
             # noinspection PyBroadException
             try:
-                await self.submit_get_user_data(uid, user_to_submit)
+                await self.submit_user_data(uid, user_to_submit)
                 return await ctx.reply(succesful_msg)
             except Exception:
                 return await ctx.reply(fail_msg)
 
     @staticmethod
-    async def submit_get_user_data(uid: int, discord_id: int = 0, get: bool = False):
+    async def submit_user_data(uid: int, discord_id: int):
         user = OsuDroidProfile(uid)
         pp_data = user.pp_data
 
@@ -475,10 +475,7 @@ class OsuDroid(commands.Cog):
             play['net_bpp'] = play_bpp * 0.95 ** i
             pp_data['total_bpp'] += play['net_bpp']
 
-        if get is False:
-            DATABASE.child("DROID_USERS").child(discord_id).child("user").child("pp_data").set(pp_data)
-        else:
-            return pp_data
+        DATABASE.child("DROID_USERS").child(discord_id).child("user").child("pp_data").set(pp_data)
 
     @commands.command(name="pf", aliases=["pfme"])
     async def droid_pfme(self, ctx, uid=None):
@@ -632,52 +629,47 @@ class OsuDroid(commands.Cog):
 
             await asyncio.sleep(0.5)
             user = OsuDroidProfile(uid)
-            pp_data = await self.submit_get_user_data(uid, get=True)
             try:
-                for top_play in user.pp_data['list']:
-                    await asyncio.sleep(1.25)
-                    beatmap_data = await get_beatmap_data(top_play["hash"])
+                if user.total_pp is not None or user.pp_data["list"] is not None:
 
-                    combo_list.append(top_play["combo"])
-                    if "DT" not in top_play["mods"]:
-                        diff_ar_list.append(float(beatmap_data["diff_approach"]))
-                        diff_aim_list.append(float(beatmap_data["diff_aim"]))
-                        diff_speed_list.append(float(beatmap_data["diff_speed"]))
-                        diff_size_list.append(float(beatmap_data["diff_size"]))
-                    else:
-                        diff_ar_list.append((float(beatmap_data["diff_approach"]) * 2 + 13) / 3)
-                        diff_aim_list.append(float(beatmap_data["diff_aim"]) * 1.50)
-                        diff_speed_list.append(float(beatmap_data["diff_speed"]) * 1.50)
-                        diff_size_list.append(float(beatmap_data["diff_size"]) / 1.50)
+                    for top_play in user.pp_data['list']:
+                        await asyncio.sleep(1.25)
+                        beatmap_data = await get_beatmap_data(top_play["hash"])
 
-                to_calculate = [
-                    diff_ar_list,
-                    diff_speed_list,
-                    diff_aim_list,
-                    combo_list
-                ]
+                        combo_list.append(top_play["combo"])
+                        if "DT" not in top_play["mods"]:
+                            diff_ar_list.append(float(beatmap_data["diff_approach"]))
+                            diff_aim_list.append(float(beatmap_data["diff_aim"]))
+                            diff_speed_list.append(float(beatmap_data["diff_speed"]))
+                            diff_size_list.append(float(beatmap_data["diff_size"]))
+                        else:
+                            diff_ar_list.append((float(beatmap_data["diff_approach"]) * 2 + 13) / 3)
+                            diff_aim_list.append(float(beatmap_data["diff_aim"]) * 1.50)
+                            diff_speed_list.append(float(beatmap_data["diff_speed"]) * 1.50)
+                            diff_size_list.append(float(beatmap_data["diff_size"]) / 1.50)
 
-                calculated = []
+                    to_calculate = [
+                        diff_ar_list,
+                        diff_speed_list,
+                        diff_aim_list,
+                        combo_list
+                    ]
 
-                for calc_list in to_calculate:
-                    try:
-                        res = sum(calc_list) / len(calc_list)
-                    except ZeroDivisionError:
-                        pass
-                    else:
-                        calculated.append(res)
+                    calculated = []
 
-                user_data = {
-                    "profile": user.profile,
-                    "pp_data": user.pp_data["list"],
-                    "reading": calculated[0],
-                    "speed": calculated[1],
-                    "aim": calculated[2],
-                    "consistency": calculated[3] * 100 / 6142 / 10,
-                    "total_bpp": pp_data['total_bpp']
-                }
+                    for calc_list in to_calculate:
+                        try:
+                            res = sum(calc_list) / len(calc_list)
+                        except ZeroDivisionError:
+                            pass
+                        else:
+                            calculated.append(res)
 
-                fetched_data.append(user_data)
+                    user_data = {"profile": user.profile, "pp_data": user.pp_data["list"], "reading": calculated[0],
+                                 "speed": calculated[1], "aim": calculated[2],
+                                 "consistency": calculated[3] * 100 / 6142 / 10}
+
+                    fetched_data.append(user_data)
             except (KeyError, JSONDecodeError):
                 pass
         print(fetched_data)
@@ -704,10 +696,9 @@ class OsuDroid(commands.Cog):
             updated_data.add_field(
                 name=f"{i + 1} - {data['profile']['username']}",
                 value=(
-                    f">>> ```\n{data['profile']['raw_pp']:.2f}pp - {data['total_bpp']}bpp\n| accuracy:"
-                    f" {data['profile']['overall_acc']:.2f}%"
+                    f">>> ```\n{data['profile']['raw_pp']:.2f}pp - accuracy: {data['profile']['overall_acc']:.2f}%\n"
                     f"[speed: {data['speed']:.2f} | aim: {data['aim']:.2f} | reading: AR{data['reading']:.2f}]\n"
-                    f"| consistência: {data['consistency']:.2f}]\n```"
+                    f" / consistência: {data['consistency']:.2f}]\n```"
                 ),
                 inline=False
             )
