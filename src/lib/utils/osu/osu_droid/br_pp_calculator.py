@@ -7,7 +7,7 @@ def get_bpp(beatmap_id, mods: str = "NM", misses: int = 0,
     useful_data = get_ppv2(beatmap_id, mods, misses, accuracy, max_combo, formatted=False)
 
     beatmap = useful_data["beatmap"]
-
+    
     beatmap.od -= 4
     beatmap.cs -= 4
 
@@ -22,12 +22,23 @@ def get_bpp(beatmap_id, mods: str = "NM", misses: int = 0,
         beatmap.hp /= 4
 
     pp_data = beatmap.getPP(Mods=mods, accuracy=accuracy, combo=max_combo, recalculate=True)
-
+    
+    
     raw_pp = pp_data.total_pp
     aim_pp = pp_data.aim_pp
     speed_pp = pp_data.speed_pp
     acc_pp = pp_data.acc_pp
     acc_percent = pp_data.accuracy
+    
+    raw_pp -= pp_data.aim_pp
+    pp_data.aim_pp *= 0.8
+    raw_pp += pp_data.aim_pp
+    
+    pp_datas = [raw_pp, aim_pp, speed_pp, acc_pp]
+    for i in pp_datas:
+        if i < 0:
+            raw_pp += i * -1
+            i = 0
 
     if not formatted:
         return {
