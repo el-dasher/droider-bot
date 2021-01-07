@@ -560,68 +560,55 @@ class OsuDroid(commands.Cog):
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
-    # &calc
-    @commands.Cog.listener()
-    async def on_message(self, msg: discord.Message):
-        if (msg.content.startswith("&calc") or
-                msg.content.startswith("https://osu.ppy.sh/beatmapsets/")
-                and msg.author.id != self.bot.user.id
-                and debug is False
-       ):
+    @commands.command()
+    async def calc(self, ctx, link: str = None, *params):
+        error_message: str = f'"{link}", Não é um link ou id válido!'
+
+        if link is None:
+            return await ctx.send("Você esqueceu do link do beatmap!")
+        else:
             try:
-                msg_content = msg.content.replace("&calc", "").split("")
+                beatmap_id: int = int(link.split("/")[-1])
             except ValueError:
-                msg_content = msg.content
-                link = msg_content
-            else:
-                link = msg_content[0]
+                return await ctx.send(error_message)
 
-            mods: str = "NM"
-            misses: int = 0
-            accuracy: float = 100
+        mods: str = "NM"
+        misses: int = 0
+        accuracy: float = 100.00
 
-            for parameter in msg_content:
-                if parameter.startswith("+"):
-                    mods = parameter[1:]
-                elif parameter.startswith("-"):
-                    misses = int(parameter[1:])
-                elif parameter.endswith("%"):
-                    accuracy = float(parameter[:-1])
+        parameter: str
+        for parameter in params:
+            if parameter.startswith("+"):
+                mods = parameter[1:]
+            elif parameter.startswith("-"):
+                misses = int(parameter[1:])
+            elif parameter.endswith("%"):
+                accuracy = float(parameter[:-1])
 
-            error_message: str = f'"{link}", Não é um link ou id válido!'
+        beatmap_pp_data = get_bpp(beatmap_id, mods, misses, accuracy)
 
-            if link is None:
-                return await msg.reply("Você esqueceu do link do beatmap!")
-            else:
-                try:
-                    beatmap_id: int = int(link.split("/")[-1])
-                except ValueError:
-                    return await msg.reply(error_message)
+        if len(beatmap_pp_data) == 0:
+            return await ctx.send(error_message)
+        else:
+            beatmap_data = OSU_API.get_beatmaps({"b": beatmap_id})[0]
 
-            beatmap_pp_data = get_bpp(beatmap_id, mods, misses, accuracy)
+            calc_embed = discord.Embed()
 
-            if len(beatmap_pp_data) == 0:
-                return await msg.reply(error_message)
-            else:
-                beatmap_data = OSU_API.get_beatmaps({"b": beatmap_id})[0]
+            calc_embed.set_author(
+                name=f"{beatmap_data['title']} +{mods} -{misses} {float(accuracy):.2f}%",
+                url=link
+            )
 
-                calc_embed = discord.Embed()
+            calc_embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{beatmap_data['beatmapset_id']}l.jpg")
 
-                calc_embed.set_author(
-                    name=f"{beatmap_data['title']} +{mods} -{misses} {float(accuracy):.2f}%",
-                    url=link
-                )
-
-                calc_embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{beatmap_data['beatmapset_id']}l.jpg")
-
-                calc_embed.add_field(name="Calculado...", value=">>> **"
-                                                                f"BPP: {beatmap_pp_data['raw_pp']: .2f}\n"
-                                                                f"Aim BPP: {beatmap_pp_data['aim_pp']: .2f}\n"
-                                                                f"Speed BPP: {beatmap_pp_data['speed_pp']: .2f}\n"
-                                                                f"Acc BPP: {beatmap_pp_data['acc_pp']: .2f}"
-                                                                f"**"
-                                     )
-                return await msg.reply(f"<@{msg.author.id}>", embed=calc_embed)
+            calc_embed.add_field(name="Calculado...", value=">>> **"
+                                                            f"BPP: {beatmap_pp_data['raw_pp']: .2f}\n"
+                                                            f"Aim BPP: {beatmap_pp_data['aim_pp']: .2f}\n"
+                                                            f"Speed BPP: {beatmap_pp_data['speed_pp']: .2f}\n"
+                                                            f"Acc BPP: {beatmap_pp_data['acc_pp']: .2f}"
+                                                            f"**"
+                                 )
+            return await ctx.reply(f"<@{ctx.author.id}>", embed=calc_embed)
 
     @tasks.loop(hours=1, minutes=0, seconds=0)
     async def _brdpp_rank(self):
