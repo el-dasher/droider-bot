@@ -432,7 +432,7 @@ class OsuDroid(commands.Cog):
             await ctx.reply("O seu pp sera submitado à database em 1 à 3 minutos!")
             # noinspection PyBroadException
             try:
-                await self.submit_user_data(uid, ctx.author)
+                await self.submit_user_data(uid, ctx.author.id)
                 return await ctx.reply("Os seus pp's foram submitados à database com sucesso!")
             except Exception:
                 return await ctx.reply("Não foi possivel submitar os seus pp's à database.")
