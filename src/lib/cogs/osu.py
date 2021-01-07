@@ -302,17 +302,7 @@ class OsuDroid(commands.Cog):
 
     # noinspection PyBroadException
     @commands.command(name="ppcheck")
-    async def pp_check(self, ctx, uid=None):
-        faster = False
-
-        def get_default_ppmsg(play_dict: dict):
-            return (
-                f">>> ```\n"
-                f"| {play_dict['combo']}x |"
-                f" {play_dict['accuracy']}%"
-                f" | {play_dict['miss']} miss | {int(float(play_dict['pp']))}dpp |"
-                f"```"
-            )
+    async def pp_check(self, ctx, uid=None, faster=None):
 
         uid_original = uid
 
@@ -326,15 +316,23 @@ class OsuDroid(commands.Cog):
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
         user = OsuDroidProfile(uid)
 
-        if uid == "+":
+        if uid == "+" or faster == "+":
+            if not faster == "+":
+                uid = ctx.author.id
+            else:
+                uid = uid_original
+
             faster = True
-        not_registered_msg = "Você não possui uma conta registrada na database" \
+        else:
+            faster = False
+
+        not_registered_msg = "O usuário ou você não possui uma conta registrada na database" \
                              " ou você esqueceu de submitar seus pp's use `&pp` ou `&bind uid>`" \
-                             "Para os respectivos erros."
+                             " Para os respectivos erros."
 
         if faster is True:
             try:
-                pp_data = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("pp_data").get().val()
+                pp_data = DATABASE.child("DROID_USERS").child(uid).child("user").child("pp_data").get().val()
             except Exception:
                 return await ctx.reply(not_registered_msg)
         else:
@@ -343,22 +341,47 @@ class OsuDroid(commands.Cog):
             except KeyError:
                 return await ctx.reply(f"Não existe uid: {uid_original}, cadastrada na alice, Ok?")
 
-        ppcheck_embed = discord.Embed()
-
-        try:
-            ppcheck_embed.set_author(
-                name=(default_author_name := f"TOP PLAYS DO(A) {pp_data['username'].upper()}"),
-                url=(default_author_url := f"http://droidppboard.herokuapp.com/profile?uid={uid}"),
-            )
-        except TypeError:
+        if pp_data is None:
             return await ctx.reply(not_registered_msg)
 
-        for i, play in enumerate((pp_data := pp_data['list'])[:5]):
-            ppcheck_embed.add_field(
-                name=f"{i + 1}. {play['title']} +{play['mods']}",
-                value=get_default_ppmsg(play), inline=False
+        ppcheck_embed = discord.Embed()
+
+        async def generate_ppcheck_embed(embed: discord.Embed, index_start: int = 0, index_end: int = 5):
+            embed.set_author(
+                name=f"TOP PLAYS DO(A) {pp_data['username'].upper()}",
+                url=f"http://droidppboard.herokuapp.com/profile?uid={uid}",
             )
 
+            bpp_data = False
+            total_bpp = None
+            try:
+                total_bpp = pp_data['total_bpp']
+            except KeyError:
+                total_bpp = 0
+            else:
+                bpp_data = True
+            finally:
+                embed.add_field(name="\u200b", value=f">>> ```\n{float(pp_data['total']):.2f}dpp /"
+                                                     f" {float(total_bpp):.2f}bpp\n```")
+            for i_, play_ in enumerate(pp_data['list'][index_start:index_end]):
+                if faster:
+                    if bpp_data:
+                        bpp_string = f"| {float(play_['bpp']):.2f}bpp - ({float(play_['net_bpp']):.2f}) |"
+                    else:
+                        bpp_string = "| 0bpp - (0) |"
+                else:
+                    bpp_string = ""
+
+                embed.add_field(
+                    name=f"{index_start + i_}. {play_['title']} +{play_['mods']}",
+                    value=f">>> ```\n"
+                          f"| {play_['combo']}x |"
+                          f" {play_['accuracy']}%"
+                          f" | {play_['miss']} miss | {int(float(play_['pp']))}dpp |\n{bpp_string}"
+                          f"```", inline=False
+                )
+
+        await generate_ppcheck_embed(ppcheck_embed, index_end=5)
         message = await ctx.reply(content=f"<@{ctx.author.id}>", embed=ppcheck_embed)
 
         await message.add_reaction("⬅")
@@ -390,19 +413,8 @@ class OsuDroid(commands.Cog):
                     start = 0
                     end = 5
                 next_ppcheck_embed = discord.Embed()
+                await generate_ppcheck_embed(next_ppcheck_embed, index_start=start, index_end=end)
 
-                index = start
-                for i, play in enumerate(pp_data[start:end]):
-                    index += 1
-
-                    next_ppcheck_embed.add_field(
-                        name=f"{index}. {play['title']} +{play['mods']}",
-                        value=get_default_ppmsg(play), inline=False
-                    )
-
-                next_ppcheck_embed.set_author(name=default_author_name,
-                                              url=default_author_url,
-                                              )
                 await message.edit(embed=next_ppcheck_embed)
         return await message.clear_reactions()
 
@@ -417,14 +429,39 @@ class OsuDroid(commands.Cog):
         except Exception:
             return await ctx.reply("Você não tem uma conta cadastrada no bot, faça o mesmo com: `&bind <uid>`")
         else:
+            await ctx.reply("O seu pp sera submitado à database em 1 à 3 minutos!")
+            # noinspection PyBroadException
             try:
-                user = OsuDroidProfile(uid)
-                DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("pp_data").set(user.pp_data)
-
+                await self.submit_user_data(uid, ctx.author)
                 return await ctx.reply("Os seus pp's foram submitados à database com sucesso!")
-            except Exception as e:
-                print(e)
+            except Exception:
                 return await ctx.reply("Não foi possivel submitar os seus pp's à database.")
+
+    @staticmethod
+    async def submit_user_data(uid: int, discord_id: int):
+        user = OsuDroidProfile(uid)
+        pp_data = user.pp_data
+
+        for play in pp_data['list']:
+            await asyncio.sleep(1)
+            try:
+                play['bpp'] = get_bpp((await get_beatmap_data(play['hash']))['beatmap_id'],
+                                      mods=play['mods'],
+                                      misses=play['miss'],
+                                      accuracy=play['accuracy'],
+                                      max_combo=play['combo']
+                                      )['raw_pp']
+
+            except KeyError:
+                play['bpp'] = 0
+
+        pp_data['total_bpp'] = 0
+        for i, play in enumerate(pp_data['list']):
+            play_bpp = play['bpp']
+            play['net_bpp'] = play_bpp * 0.95 ** i
+            pp_data['total_bpp'] += play['net_bpp']
+
+        DATABASE.child("DROID_USERS").child(discord_id).child("user").child("pp_data").set(pp_data)
 
     @commands.command(name="pf", aliases=["pfme"])
     async def droid_pfme(self, ctx, uid=None):
