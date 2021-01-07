@@ -632,98 +632,91 @@ class OsuDroid(commands.Cog):
 
             await asyncio.sleep(0.5)
             user = OsuDroidProfile(uid)
+            pp_data = await self.submit_get_user_data(uid, get=True)
             try:
-                pp_data = await self.submit_get_user_data(uid, get=True)
-            except KeyError:
-                pass
-            else:
-                print(pp_data)
-                try:
-                    for top_play in user.pp_data['list']:
-                        await asyncio.sleep(1.25)
-                        beatmap_data = await get_beatmap_data(top_play["hash"])
+                for top_play in user.pp_data['list']:
+                    await asyncio.sleep(1.25)
+                    beatmap_data = await get_beatmap_data(top_play["hash"])
 
-                        combo_list.append(top_play["combo"])
-                        if "DT" not in top_play["mods"]:
-                            diff_ar_list.append(float(beatmap_data["diff_approach"]))
-                            diff_aim_list.append(float(beatmap_data["diff_aim"]))
-                            diff_speed_list.append(float(beatmap_data["diff_speed"]))
-                            diff_size_list.append(float(beatmap_data["diff_size"]))
-                        else:
-                            diff_ar_list.append((float(beatmap_data["diff_approach"]) * 2 + 13) / 3)
-                            diff_aim_list.append(float(beatmap_data["diff_aim"]) * 1.50)
-                            diff_speed_list.append(float(beatmap_data["diff_speed"]) * 1.50)
-                            diff_size_list.append(float(beatmap_data["diff_size"]) / 1.50)
+                    combo_list.append(top_play["combo"])
+                    if "DT" not in top_play["mods"]:
+                        diff_ar_list.append(float(beatmap_data["diff_approach"]))
+                        diff_aim_list.append(float(beatmap_data["diff_aim"]))
+                        diff_speed_list.append(float(beatmap_data["diff_speed"]))
+                        diff_size_list.append(float(beatmap_data["diff_size"]))
+                    else:
+                        diff_ar_list.append((float(beatmap_data["diff_approach"]) * 2 + 13) / 3)
+                        diff_aim_list.append(float(beatmap_data["diff_aim"]) * 1.50)
+                        diff_speed_list.append(float(beatmap_data["diff_speed"]) * 1.50)
+                        diff_size_list.append(float(beatmap_data["diff_size"]) / 1.50)
 
-                    to_calculate = [
-                        diff_ar_list,
-                        diff_speed_list,
-                        diff_aim_list,
-                        combo_list
-                    ]
+                to_calculate = [
+                    diff_ar_list,
+                    diff_speed_list,
+                    diff_aim_list,
+                    combo_list
+                ]
 
-                    calculated = []
+                calculated = []
 
-                    for calc_list in to_calculate:
-                        try:
-                            res = sum(calc_list) / len(calc_list)
-                        except ZeroDivisionError:
-                            pass
-                        else:
-                            calculated.append(res)
-
-                    user_data = {
-                        "profile": user.profile,
-                        "pp_data": user.pp_data["list"],
-                        "reading": calculated[0],
-                        "speed": calculated[1],
-                        "aim": calculated[2],
-                        "consistency": calculated[3] * 100 / 6142 / 10,
-                        "total_bpp": pp_data['total_bpp']
-                    }
-
-                    fetched_data.append(user_data)
-                except (KeyError, JSONDecodeError):
-                    pass
-                finally:
-                    print(fetched_data)
-                    fetched_data.sort(key=lambda e: e["profile"]["raw_pp"], reverse=True)
-                    top_players = fetched_data[:25]
-
-                    DATABASE.child("TOP_PLAYERS").child("data").set(top_players)
-
-                    updated_data = discord.Embed(title="RANK DPP BR", timestamp=datetime.utcnow())
-                    updated_data.set_footer(text="Atualizado")
-
-                    for i, data in enumerate(top_players):
-
-                        data['profile']['raw_pp'] = float(data['profile']['raw_pp'])
-                        data['profile']['overall_acc'] = float(data['profile']['overall_acc'][:-1])
-                        data['speed'] = float(data['speed'])
-                        data['aim'] = float(data['aim'])
-                        data['reading'] = float(data['reading'])
-                        data['consistency'] = float(data['consistency'])
-
-                        if len(data["pp_data"]) < 75:
-                            data["speed"], data["aim"], data["reading"], data["consistency"] = 0, 0, 0, 0
-
-                        updated_data.add_field(
-                            name=f"{i + 1} - {data['profile']['username']}",
-                            value=(
-                                f">>> ```\n{data['profile']['raw_pp']:.2f}pp - {data['total_bpp']}bpp\n| accuracy:"
-                                f" {data['profile']['overall_acc']:.2f}%"
-                                f"[speed: {data['speed']:.2f} | aim: {data['aim']:.2f} |"
-                                f" reading: AR{data['reading']:.2f}]\n"
-                                f"| consistência: {data['consistency']:.2f}]\n```"
-                            ),
-                            inline=False
-                        )
-
-                    # noinspection PyBroadException
+                for calc_list in to_calculate:
                     try:
-                        return await br_rank_message.edit(content="", embed=updated_data)
-                    except Exception:
-                        return await br_rank_channel.send("Não foi possivel encontrar a mensagem do rank dpp")
+                        res = sum(calc_list) / len(calc_list)
+                    except ZeroDivisionError:
+                        pass
+                    else:
+                        calculated.append(res)
+
+                user_data = {
+                    "profile": user.profile,
+                    "pp_data": user.pp_data["list"],
+                    "reading": calculated[0],
+                    "speed": calculated[1],
+                    "aim": calculated[2],
+                    "consistency": calculated[3] * 100 / 6142 / 10,
+                    "total_bpp": pp_data['total_bpp']
+                }
+
+                fetched_data.append(user_data)
+            except (KeyError, JSONDecodeError):
+                pass
+        print(fetched_data)
+        fetched_data.sort(key=lambda e: e["profile"]["raw_pp"], reverse=True)
+        top_players = fetched_data[:25]
+
+        DATABASE.child("TOP_PLAYERS").child("data").set(top_players)
+
+        updated_data = discord.Embed(title="RANK DPP BR", timestamp=datetime.utcnow())
+        updated_data.set_footer(text="Atualizado")
+
+        for i, data in enumerate(top_players):
+
+            data['profile']['raw_pp'] = float(data['profile']['raw_pp'])
+            data['profile']['overall_acc'] = float(data['profile']['overall_acc'][:-1])
+            data['speed'] = float(data['speed'])
+            data['aim'] = float(data['aim'])
+            data['reading'] = float(data['reading'])
+            data['consistency'] = float(data['consistency'])
+
+            if len(data["pp_data"]) < 75:
+                data["speed"], data["aim"], data["reading"], data["consistency"] = 0, 0, 0, 0
+
+            updated_data.add_field(
+                name=f"{i + 1} - {data['profile']['username']}",
+                value=(
+                    f">>> ```\n{data['profile']['raw_pp']:.2f}pp - {data['total_bpp']}bpp\n| accuracy:"
+                    f" {data['profile']['overall_acc']:.2f}%"
+                    f"[speed: {data['speed']:.2f} | aim: {data['aim']:.2f} | reading: AR{data['reading']:.2f}]\n"
+                    f"| consistência: {data['consistency']:.2f}]\n```"
+                ),
+                inline=False
+            )
+
+        # noinspection PyBroadException
+        try:
+            return await br_rank_message.edit(content="", embed=updated_data)
+        except Exception:
+            return await br_rank_channel.send("Não foi possivel encontrar a mensagem do rank dpp")
 
 
 def setup(bot):
