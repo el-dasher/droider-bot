@@ -428,10 +428,14 @@ class OsuDroid(commands.Cog):
 
         user_to_submit = ctx.author.id
         submit_string: str = "O seu pp sera submitado à database em 1 à 3 minutos!"
+        succesful_msg: str = "O seu pp foi submitado com sucesso!"
+        fail_msg: str = "Não foi possível submitar seu pp!"
         if dict(ctx.author.guild_permissions)['administrator'] is True:
             if user is not None:
-                user_to_submit = user
+                user_to_submit = user.id
                 submit_string = "O pp dele será submitado à database em 1 à 3 minutos!"
+                succesful_msg = "O pp dele foi submitado com sucesso!"
+                fail_msg = "Não foi possivel submitar o pp dele!"
 
         # noinspection PyBroadException
         try:
@@ -443,9 +447,9 @@ class OsuDroid(commands.Cog):
             # noinspection PyBroadException
             try:
                 await self.submit_user_data(uid, user_to_submit)
-                return await ctx.reply("Os seus pp's foram submitados à database com sucesso!")
+                return await ctx.reply(succesful_msg)
             except Exception:
-                return await ctx.reply("Não foi possivel submitar os seus pp's à database.")
+                return await ctx.reply(fail_msg)
 
     @staticmethod
     async def submit_user_data(uid: int, discord_id: int):
