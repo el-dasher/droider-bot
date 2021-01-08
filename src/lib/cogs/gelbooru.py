@@ -74,7 +74,7 @@ class Gelbooru(commands.Cog):
                             )
                 if bad_query is False:
 
-                    booru_embed = discord.Embed()
+                    booru_embed = discord.Embed(color=ctx.author.color)
                     if img.source is not None:
                         sauce_msg = choice(
                             (

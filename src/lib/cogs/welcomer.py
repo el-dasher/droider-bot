@@ -48,7 +48,7 @@ class Welcomer(Cog):
 
         join_embed = discord.Embed(
             title=f"{choice(welcome_msg)}, {get_member_name(member).upper()}",
-            description=f"Um(a) novo(a) <@{member.id}> entrou no server",
+            description=f"Um(a) novo(a) <@{member.id}> entrou no server", color=member.color
         )
 
         created_month = month_data["MONTHS"][member.created_at.month - 1]
@@ -73,7 +73,7 @@ class Welcomer(Cog):
     @Cog.listener()
     async def on_member_remove(self, member: discord.Member):
 
-        if not debug:
+        if debug:
             return None
 
         remove_str: str = f"O(A) {get_member_name(member)} saiu do servidor"
@@ -87,7 +87,8 @@ class Welcomer(Cog):
         remove_embed = discord.Embed(title=remove_str,
                                      description=f"Estou muito triste com uma notícia dessas..."
                                                  f" <a:emojidanssa:780835162916651018>",
-                                     timestamp=datetime.utcnow())
+                                     timestamp=datetime.utcnow(),
+                                     color=member.color)
         remove_embed.set_thumbnail(url=member.avatar_url)
 
         remove_embed.add_field(name="Tag do usuário", value=get_member_name(member))

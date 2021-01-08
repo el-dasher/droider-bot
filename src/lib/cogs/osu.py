@@ -258,7 +258,7 @@ class OsuDroid(commands.Cog):
         else:
             rs_bm_data = await get_beatmap_data(rs_data["hash"])
 
-            rs_embed = discord.Embed()
+            rs_embed = discord.Embed(color=ctx.author.color)
             rs_embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{rs_bm_data['beatmapset_id']}l.jpg")
 
             if is_beatmap_valid(rs_bm_data):
@@ -346,7 +346,7 @@ class OsuDroid(commands.Cog):
         if pp_data is None:
             return await ctx.reply(not_registered_msg)
 
-        ppcheck_embed = discord.Embed()
+        ppcheck_embed = discord.Embed(color=ctx.author.color)
 
         async def generate_ppcheck_embed(embed: discord.Embed, index_start: int = 0, index_end: int = 5):
             embed.set_author(
@@ -416,7 +416,7 @@ class OsuDroid(commands.Cog):
                 elif end == 80:
                     start = 0
                     end = 5
-                next_ppcheck_embed = discord.Embed()
+                next_ppcheck_embed = discord.Embed(color=ctx.author.color)
                 await generate_ppcheck_embed(next_ppcheck_embed, index_start=start, index_end=end)
 
                 await message.edit(embed=next_ppcheck_embed)
@@ -504,7 +504,7 @@ class OsuDroid(commands.Cog):
                 return await ctx.reply(
                     f"Não existe uma uid ou o usuário não se cadastrou: {uid_original}")
 
-            profile_embed = discord.Embed()
+            profile_embed = discord.Embed(color=ctx.author.color)
             profile_data = user.profile
 
             profile_embed.set_thumbnail(url=profile_data['avatar_url'])
@@ -517,11 +517,11 @@ class OsuDroid(commands.Cog):
                                                                  f"Ele(a) é do(a)"
                                                                  f" {(user_country := profile_data['country'])}"
                                                                  f"(:flag_{user_country.lower()}:)\n"
-                                                                 f"Rank: `#{profile_data['rankscore']}`\n"
-                                                                 f"Total score: `{profile_data['total_score']}`\n"
-                                                                 f"Total dpp: `{total_dpp}`\n"
-                                                                 f"Overall acc: `{profile_data['overall_acc']}`\n"
-                                                                 f"Playcount: `{profile_data['playcount']}`"
+                                                                 f"Rank: #{profile_data['rankscore']}\n"
+                                                                 f"Total score: {profile_data['total_score']}\n"
+                                                                 f"Total dpp: {total_dpp}\n"
+                                                                 f"Overall acc: {profile_data['overall_acc']}\n"
+                                                                 f"Playcount: {profile_data['playcount']}"
                                                                  "**")
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=profile_embed)
 
@@ -554,7 +554,7 @@ class OsuDroid(commands.Cog):
         else:
             return await ctx.reply(f"Não existe uma uid chamada: {uid}")
 
-        droidset_embed = discord.Embed(title=bind_msg)
+        droidset_embed = discord.Embed(title=bind_msg, color=ctx.author.color)
         droidset_embed.set_image(url=profile['avatar_url'])
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
@@ -591,7 +591,7 @@ class OsuDroid(commands.Cog):
         else:
             beatmap_data = OSU_API.get_beatmaps({"b": beatmap_id})[0]
 
-            calc_embed = discord.Embed()
+            calc_embed = discord.Embed(color=ctx.author.color)
 
             calc_embed.set_author(
                 name=f"{beatmap_data['title']} +{mods} -{misses} {float(accuracy):.2f}%",
@@ -680,7 +680,7 @@ class OsuDroid(commands.Cog):
 
         DATABASE.child("TOP_PLAYERS").child("data").set(top_players)
 
-        updated_data = discord.Embed(title="RANK DPP BR", timestamp=datetime.utcnow())
+        updated_data = discord.Embed(title="RANK DPP BR", timestamp=datetime.utcnow(), color=self.bot.user.color)
         updated_data.set_footer(text="Atualizado")
 
         for i, data in enumerate(top_players):

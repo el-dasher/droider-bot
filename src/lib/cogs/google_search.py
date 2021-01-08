@@ -35,7 +35,7 @@ class GoogleSearch(commands.Cog):
             f"v1?key={GOOGLE_API}&cx={GOOGLE_SEARCH_ID}&q={query[:-1]}"
         )
 
-        result_embed = discord.Embed()
+        result_embed = discord.Embed(color=ctx.author.color)
 
         try:
             results = requests.get(url).json()["items"]
@@ -83,7 +83,7 @@ class GoogleSearch(commands.Cog):
         title = first_img_data["title"]
         link = first_img_data["link"]
 
-        im_embed = discord.Embed()
+        im_embed = discord.Embed(color=ctx.author.color)
 
         im_embed.set_author(name=title, url=link)
         im_embed.set_image(url=image_url)
@@ -111,7 +111,7 @@ class GoogleSearch(commands.Cog):
                 else:
                     counter -= 1
 
-                next_im_embed = discord.Embed()
+                next_im_embed = discord.Embed(color=ctx.author.color)
 
                 try:
                     current_request = (

@@ -3,7 +3,6 @@ import discord
 import discord.errors
 from src.lib.utils.basic_utils import get_member_name
 from typing import Union
-from src.setup import DATABASE
 
 from src.lib.utils.basic_utils import ready_up_cog
 
@@ -56,6 +55,7 @@ class Moderation(commands.Cog):
                 await ctx.channel.purge(limit=limit, check=lambda m: m != res)
             else:
                 return await ctx.reply("O limite de mensagens tem que ser maior que 0", delete_after=10)
+
 
 """
 class DiscordLog(commands.Cog):

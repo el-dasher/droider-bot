@@ -7,6 +7,7 @@ from discord.ext import commands
 
 from src.lib.db.pydata.pydata import bot_presences
 from src.lib.utils.basic_utils import ready_up_cog
+from src.setup import DATABASE
 
 
 class Funny(commands.Cog):
@@ -45,6 +46,57 @@ class Funny(commands.Cog):
         follower_role = ctx.guild.get_role(789638184048525363)
         await ctx.author.remove_roles(follower_role)
         return await ctx.reply("Sinceramente, pau no seu cu.")
+
+    @commands.Cog.listener()
+    async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
+        if type(reaction.emoji) == str:
+            reaction_emoji_name = reaction.emoji
+        else:
+            reaction_emoji_name = reaction.emoji.name
+        print(reaction_emoji_name)
+        if reaction_emoji_name == "AuTiStIcSoUl":
+            valid_reaction_count = len(list(filter(lambda x: x is not False, [
+                u != user async for u in reaction.users()
+            ])))
+
+            if valid_reaction_count == 3:
+                reaction_message: discord.Message = reaction.message
+                reaction_guild: discord.Guild = reaction_message.guild
+                pearl_creator: discord.User = reaction_message.author
+
+                starboard: discord.TextChannel = reaction_guild.get_channel(
+                    DATABASE.child("STARBOARDS").child(str(reaction_guild.id)).child("id").get().val()
+                )
+
+                pearl_embed = discord.Embed(title="Nova perola!", color=pearl_creator.color)
+
+                pearl_content = reaction_message.content
+                if reaction_message.content == "":
+                    pearl_content = "\u200b"
+
+                pearl_embed.add_field(name="Conteúdo", value=pearl_content)
+
+                if len(reaction_message.attachments) != 0:
+                    pearl_embed.set_image(url=list(reaction_message.attachments)[0].url)
+
+                pearl_embed.set_author(name=pearl_creator.name, icon_url=pearl_creator.avatar_url)
+
+                return await starboard.send("", embed=pearl_embed)
+
+    @commands.command()
+    async def setpearl(self, ctx: commands.Context, pearl_channel: discord.TextChannel = None):
+        if pearl_channel is None:
+            pearl_channel = ctx.channel
+
+        DATABASE.child("STARBOARDS").child(ctx.guild.id).set({
+            "id": pearl_channel.id,
+            "name": pearl_channel.name,
+            "position": pearl_channel.position,
+            "nsfw": str(pearl_channel.nsfw),
+            "category_id": pearl_channel.category_id
+        })
+
+        return await ctx.reply(f"O novo canal de perolas é o {pearl_channel.mention}")
 
 
 def setup(bot):

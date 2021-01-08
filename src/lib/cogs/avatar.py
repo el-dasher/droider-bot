@@ -30,7 +30,8 @@ class Avatar(commands.Cog):
         avatar_embed: discord.Embed = discord.Embed(
             title=f"Avatar do(a) {member_name}",
             description=f"{ava_desc} [Link]({member.avatar_url})",
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
+            color=member.color
         )
 
         avatar_embed.set_image(url=member.avatar_url)
