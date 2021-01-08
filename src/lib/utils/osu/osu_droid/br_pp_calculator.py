@@ -8,11 +8,11 @@ def get_bpp(beatmap_id, mods: str = "NM", misses: int = 0,
 
     beatmap = useful_data["beatmap"]
     
-    beatmap.od -= 4
+    beatmap.od -= 5
     beatmap.cs -= 4
 
     if "PR" in mods:
-        beatmap.od += 4
+        beatmap.od += 5
     if "SC" in mods:
         beatmap.cs += 4
     if "REZ" in mods:
@@ -22,7 +22,6 @@ def get_bpp(beatmap_id, mods: str = "NM", misses: int = 0,
         beatmap.hp /= 4
 
     pp_data = beatmap.getPP(Mods=mods, accuracy=accuracy, combo=max_combo, recalculate=True)
-    
     
     raw_pp = pp_data.total_pp
     aim_pp = pp_data.aim_pp
