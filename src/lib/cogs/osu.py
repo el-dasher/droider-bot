@@ -322,8 +322,10 @@ class OsuDroid(commands.Cog):
         user = OsuDroidProfile(uid)
 
         if uid == "+" or faster == "+":
+            discord_id = mention_to_uid(str(uid_original))
             if uid == "+":
                 discord_id = ctx.author.id
+
             faster = True
         else:
             faster = False

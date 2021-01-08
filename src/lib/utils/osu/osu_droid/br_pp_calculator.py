@@ -37,7 +37,6 @@ def get_bpp(beatmap_id, mods: str = "NM", misses: int = 0,
     for i in pp_datas:
         if i < 0:
             raw_pp += i * -1
-            i = 0
 
     if not formatted:
         return {
