@@ -72,71 +72,51 @@ class Welcomer(Cog):
 
     @Cog.listener()
     async def on_member_remove(self, member: discord.Member):
-        if debug:
+
+        if not debug:
             return None
+
+        remove_str: str = f"O(A) {get_member_name(member)} saiu do servidor"
+        if member.guild.fetch_ban(member):
+            remove_str = f"O(A) {get_member_name(member)} foi banido(a) do servidor"
+        elif member.guild.get_member(member.id) is None:
+            remove_str = f"O(A) {get_member_name(member)} foi kickado(a) do servidor"
+
         created_month = month_data["MONTHS"][member.created_at.month - 1]
 
-        left_embed = discord.Embed(title=f"O(A) {get_member_name(member)} saiu do servidor",
-                                   description=f"Estou muito triste com uma notícia dessas..."
-                                               f" <a:emojidanssa:780835162916651018>",
-                                   timestamp=datetime.utcnow())
-        left_embed.set_thumbnail(url=member.avatar_url)
+        remove_embed = discord.Embed(title=remove_str,
+                                     description=f"Estou muito triste com uma notícia dessas..."
+                                                 f" <a:emojidanssa:780835162916651018>",
+                                     timestamp=datetime.utcnow())
+        remove_embed.set_thumbnail(url=member.avatar_url)
 
-        left_embed.add_field(name="Tag do usuário", value=get_member_name(member))
-        left_embed.add_field(name=f"ID do(a) {get_member_name(member)}", value=member.id)
-        left_embed.add_field(
+        remove_embed.add_field(name="Tag do usuário", value=get_member_name(member))
+        remove_embed.add_field(name=f"ID do(a) {get_member_name(member)}", value=member.id)
+        remove_embed.add_field(
             name="Será que era o lywi?",
             value=f"Entrou no discord em {member.created_at.year}, no dia {member.created_at.day} de {created_month}")
 
         left_guild = str(member.guild.id)
         welcome_channel = self.bot.get_channel(self.welcomer_data()[left_guild]["id"])
 
-        await welcome_channel.send(embed=left_embed)
+        await welcome_channel.send(embed=remove_embed)
 
     @commands.command(aliases=("welcome", "convidados", "setwelcome", "welcomechannel"))
     @commands.has_permissions(manage_channels=True)
-    async def set_welcome(self, ctx: discord.ext.commands.context, channel=None):
+    async def set_welcome(self, ctx: discord.ext.commands.context, welcome_channel: discord.TextChannel = None):
+        if welcome_channel is None:
+            welcome_channel = ctx.channel
 
-        channels = []
+        DATABASE.child("WELCOMER_DATA").child(str(ctx.guild.id)).set({
+            "id": welcome_channel.id,
+            "name": welcome_channel.name,
+            "position": welcome_channel.position,
+            "nsfw": str(welcome_channel.nsfw),
+            "category_id": welcome_channel.category_id
 
-        for channel_ in ctx.message.guild.text_channels:
-            channels.append(channel_.id)
+        })
 
-        if channel is None:
-            channel = ctx.message.channel
-
-        if channel not in channels and channel != ctx.message.channel:
-            count = 0
-            while True:
-                if channel not in channels:
-                    if count < 1:
-                        # noinspection PyBroadException
-                        try:
-                            channel = channel.split("<#")[1].split(">")[0]
-                            break
-                        except Exception:
-                            await ctx.send(f"Não foi possível encontrar o canal: {channel}")
-
-                            return None
-                    count += 1
-                else:
-                    break
-
-        if channel != ctx.message.channel:
-            channel = self.bot.get_channel(int(channel))
-
-        new_data = {
-            "id": channel.id,
-            "name": channel.name,
-            "position": channel.position,
-            "nsfw": str(channel.nsfw),
-            "category_id": channel.category_id
-
-        }
-
-        DATABASE.child("WELCOMER_DATA").child(str(ctx.guild.id)).set(new_data)
-
-        await ctx.reply(f"O novo canal de boas vindas é o <#{channel.id}> <a:blobhype:780576199558299649>")
+        await ctx.reply(f"O novo canal de boas vindas é o {welcome_channel.mention} <a:blobhype:780576199558299649>")
 
 
 def setup(bot):
