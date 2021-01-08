@@ -13,7 +13,8 @@ class OsuDroidProfile:
         modstring.replace("DoubleTime", "DT").replace(
             "Hidden", "HD").replace("HardRock", "HR").replace(
             "Precise", "PR").replace("NoFail", "NF").replace(
-            "Easy", "EZ").replace("NightCore", "NC").replace(",", "").strip().replace(" ", "")
+            "Easy", "EZ").replace("NightCore", "NC").replace(
+            "Precise", "PR").replace(",", "").strip().replace(" ", "")
 
         if modstring == "":
             modstring = "NM"

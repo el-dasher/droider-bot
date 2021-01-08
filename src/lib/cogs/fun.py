@@ -53,7 +53,7 @@ class Funny(commands.Cog):
             reaction_emoji_name = reaction.emoji
         else:
             reaction_emoji_name = reaction.emoji.name
-        print(reaction_emoji_name)
+
         if reaction_emoji_name == "AuTiStIcSoUl":
             valid_reaction_count = len(list(filter(lambda x: x is not False, [
                 u != user async for u in reaction.users()
