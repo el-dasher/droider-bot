@@ -306,24 +306,24 @@ class OsuDroid(commands.Cog):
     @commands.command(name="ppcheck")
     async def pp_check(self, ctx, uid=None, faster=None):
 
-        uid_original = uid
+        uid_original: int = uid
+        discord_id: Union[int, None] = None
 
         if uid is None:
             # noinspection PyBroadException
+            discord_id = ctx.author.id
             try:
                 uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
             except Exception:
                 return await ctx.reply(self.missing_uid_msg)
         elif len(uid) >= 9:
+            discord_id = uid_original
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
         user = OsuDroidProfile(uid)
 
         if uid == "+" or faster == "+":
-            if not faster == "+":
-                uid = ctx.author.id
-            else:
-                uid = uid_original
-
+            if uid == "+":
+                discord_id = ctx.author.id
             faster = True
         else:
             faster = False
@@ -334,7 +334,7 @@ class OsuDroid(commands.Cog):
 
         if faster is True:
             try:
-                pp_data = DATABASE.child("DROID_USERS").child(uid).child("user").child("pp_data").get().val()
+                pp_data = DATABASE.child("DROID_USERS").child(discord_id).child("user").child("pp_data").get().val()
             except Exception:
                 return await ctx.reply(not_registered_msg)
         else:
@@ -355,16 +355,18 @@ class OsuDroid(commands.Cog):
             )
 
             bpp_data = False
-            total_bpp = None
+
             try:
-                total_bpp = pp_data['total_bpp']
-            except KeyError:
-                total_bpp = 0
+                total_bpp = DATABASE.child(
+                    "DROID_USERS"
+                ).child(discord_id).child("user").child("pp_data").get().val()['total_bpp']
+            except TypeError:
+                total_bpp = 0.00
             else:
                 bpp_data = True
-            finally:
-                embed.add_field(name="\u200b", value=f">>> ```\n{float(pp_data['total']):.2f}dpp /"
-                                                     f" {float(total_bpp):.2f}bpp\n```")
+
+            embed.add_field(name="\u200b", value=f">>> ```\n{float(pp_data['total']):.2f}dpp /"
+                                                 f" {float(total_bpp):.2f}bpp\n```")
             for i_, play_ in enumerate(pp_data['list'][index_start:index_end]):
                 if faster:
                     if bpp_data:
