@@ -10,7 +10,7 @@ from dateutil.parser import parse
 from discord.ext import commands, tasks
 
 from src.lib.utils.basic_utils import ready_up_cog
-from src.lib.utils.osu.osu_droid.br_pp_calculator import get_bpp
+from src.lib.utils.osu.osu_droid.br_pp_calculator import OsuDroidBeatmapData
 from src.lib.utils.osu.osu_droid.droid_data_getter import OsuDroidProfile
 from src.paths import debug
 from src.setup import DATABASE
@@ -263,11 +263,14 @@ class OsuDroid(commands.Cog):
             rs_embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{rs_bm_data['beatmapset_id']}l.jpg")
 
             if is_beatmap_valid(rs_bm_data):
-                play_bpp = get_bpp(int(rs_bm_data['beatmap_id']), rs_data['mods'],
-                                   int(rs_data['misscount']), float(rs_data['accuracy'][:-1]),
-                                   int(rs_data['combo'][:-1]),
-                                   True)['raw_pp']
-                max_bpp = get_bpp(int(rs_bm_data['beatmap_id']), rs_data['mods'], formatted=True)['raw_pp']
+                play_bpp = OsuDroidBeatmapData(int(rs_bm_data['beatmap_id']), rs_data['mods'],
+                                               int(rs_data['misscount']), float(rs_data['accuracy'][:-1]),
+                                               int(rs_data['combo'][:-1]),
+                                               True).get_bpp()['raw_pp']
+                max_bpp = OsuDroidBeatmapData(
+                    int(rs_bm_data['beatmap_id']), rs_data['mods'],
+                    accuracy=float(rs_data['accuracy'][:-1]), formatted=True
+                ).get_bpp()['raw_pp']
 
                 bm_data_string = (">>> **"
                                   f"CS/OD/AR/HP:"
@@ -464,12 +467,12 @@ class OsuDroid(commands.Cog):
         for play in pp_data['list']:
             await asyncio.sleep(1)
             try:
-                play['bpp'] = get_bpp((await get_beatmap_data(play['hash']))['beatmap_id'],
-                                      mods=play['mods'],
-                                      misses=play['miss'],
-                                      accuracy=play['accuracy'],
-                                      max_combo=play['combo']
-                                      )['raw_pp']
+                play['bpp'] = OsuDroidBeatmapData((await get_beatmap_data(play['hash']))['beatmap_id'],
+                                                  mods=play['mods'],
+                                                  misses=play['miss'],
+                                                  accuracy=play['accuracy'],
+                                                  max_combo=play['combo']
+                                                  ).get_bpp()['raw_pp']
 
             except KeyError:
                 play['bpp'] = 0
@@ -596,6 +599,7 @@ class OsuDroid(commands.Cog):
         mods: str = "NM"
         misses: int = 0
         accuracy: float = 100.00
+        speed: float = 1.00
 
         parameter: str
         for parameter in params:
@@ -605,8 +609,10 @@ class OsuDroid(commands.Cog):
                 misses = int(parameter[1:])
             elif parameter.endswith("%"):
                 accuracy = float(parameter[:-1])
+            elif parameter.endswith("s"):
+                speed = float(parameter[:-1])
 
-        beatmap_pp_data = get_bpp(beatmap_id, mods, misses, accuracy)
+        beatmap_pp_data = OsuDroidBeatmapData(beatmap_id, mods, misses, accuracy, custom_speed=speed).get_bpp()
 
         if len(beatmap_pp_data) == 0:
             return await ctx.send(error_message)
@@ -616,7 +622,7 @@ class OsuDroid(commands.Cog):
             calc_embed = discord.Embed(color=ctx.author.color)
 
             calc_embed.set_author(
-                name=f"{beatmap_data['title']} +{mods} -{misses} {float(accuracy):.2f}%",
+                name=f"{beatmap_data['title']} +{mods} -{misses} {float(accuracy):.2f}% {speed}x",
                 url=link
             )
 
@@ -635,7 +641,10 @@ class OsuDroid(commands.Cog):
     async def _update_pps(self):
         discord_ids: list = list((pp_datas := DATABASE.child("DROID_USERS").get().val()))
         for uid in discord_ids:
-            await self.submit_user_data(pp_datas[uid]['user']['user_id'], uid)
+            try:
+                await self.submit_user_data(pp_datas[uid]['user']['user_id'], uid)
+            except JSONDecodeError:
+                pass
 
     @tasks.loop(hours=1)
     async def _brdpp_rank(self):

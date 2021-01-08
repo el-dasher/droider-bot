@@ -135,7 +135,6 @@ class OsuDroidProfile:
             "li", attrs={"class": "list-group-item"})[0].find_all("a")[-1])
 
         recent_play['mods'] = self._replace_mods(recent_play['mods'])
-        print(self._replace_mods(recent_play['mods']))
 
         return recent_play
 
