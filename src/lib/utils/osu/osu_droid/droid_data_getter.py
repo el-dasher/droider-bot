@@ -10,7 +10,7 @@ class OsuDroidProfile:
 
     @staticmethod
     def _replace_mods(modstring: str):
-        modstring.replace("DoubleTime", "DT").replace(
+        modstring = modstring.replace("DoubleTime", "DT").replace(
             "Hidden", "HD").replace("HardRock", "HR").replace(
             "Precise", "PR").replace("NoFail", "NF").replace(
             "Easy", "EZ").replace("NightCore", "NC").replace(
@@ -133,6 +133,9 @@ class OsuDroidProfile:
             f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
                                                        ).find_all("section", attrs={"class": "scrollable"})[1].find_all(
             "li", attrs={"class": "list-group-item"})[0].find_all("a")[-1])
+
+        recent_play['mods'] = self._replace_mods(recent_play['mods'])
+        print(self._replace_mods(recent_play['mods']))
 
         return recent_play
 
