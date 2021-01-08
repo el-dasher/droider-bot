@@ -234,6 +234,7 @@ class OsuDroid(commands.Cog):
     async def on_ready(self):
         ready_up_cog(self.bot, __name__)
         self._brdpp_rank.start()
+        self._update_pps.start()
 
     @commands.command(name="rs", aliases=["recentme"])
     async def droidrecent(self, ctx, uid=None):
@@ -481,6 +482,9 @@ class OsuDroid(commands.Cog):
 
         DATABASE.child("DROID_USERS").child(discord_id).child("user").child("pp_data").set(pp_data)
 
+        pp_data = DATABASE.child("DROID_USERS").child(discord_id).child("user").child("pp_data").get().val()
+        return pp_data
+
     @commands.command(name="pf", aliases=["pfme"])
     async def droid_pfme(self, ctx, uid=None):
         """
@@ -611,7 +615,13 @@ class OsuDroid(commands.Cog):
                                  )
             return await ctx.reply(f"<@{ctx.author.id}>", embed=calc_embed)
 
-    @tasks.loop(hours=1, minutes=0, seconds=0)
+    @tasks.loop(hours=12)
+    async def _update_pps(self):
+        discord_ids: list = list((pp_datas := DATABASE.child("DROID_USERS").get().val()))
+        for uid in discord_ids:
+            await self.submit_user_data(pp_datas[uid]['user']['user_id'], uid)
+
+    @tasks.loop(hours=1)
     async def _brdpp_rank(self):
 
         if debug:
