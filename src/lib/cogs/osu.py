@@ -535,8 +535,8 @@ class OsuDroid(commands.Cog):
             await ctx.reply(f"Não existe uma user id chamada: {uid}")
 
     @commands.command(name="droidset", aliases=["bind"])
-    async def droid_set(self, ctx, uid: Union[str, int] = None, discord_user: discord.Member = None):
-        user_to_bind = ctx.author.id
+    async def droid_set(self, ctx, uid: Union[str, int] = None, discord_user: Union[discord.Member, str] = None):
+        user_to_bind: Union[str, int, discord.Member] = ctx.author.id
         if dict(ctx.author.guild_permissions)['administrator'] is True:
             if discord_user is not None:
                 user_to_bind = discord_user
@@ -551,12 +551,28 @@ class OsuDroid(commands.Cog):
         user = OsuDroidProfile(uid)
         profile = user.profile
 
-        if user_to_bind is None:
+        if type(user_to_bind) == discord.Member:
+            user_to_bind = user_to_bind.id
+        else:
+            try:
+                user_to_bind = int(user_to_bind)
+            except ValueError:
+                return await ctx.reply("O id precisa ser um íntegro!")
+
+        if user_to_bind == ctx.author.id:
             bind_msg = f"Você cadastrou seu usuário! {profile['username']}"
         else:
-            bind_msg = f"O adm cadastrou o(a) {profile['username']} pro {user_to_bind}"
+            user_to_bind = ctx.guild.get_member(user_to_bind)
+
+            if type(user_to_bind) != discord.Member:
+                bind_msg_user = "ele(a)"
+            else:
+                bind_msg_user = user_to_bind.display_name
+                user_to_bind = user_to_bind.id
+
+            bind_msg = f"O adm cadastrou o(a) {profile['username']} pro(a) {bind_msg_user}"
         if profile['username'] != "":
-            DATABASE.child("DROID_USERS").child(user_to_bind.id).set({"user": user.profile})
+            DATABASE.child("DROID_USERS").child(user_to_bind).set({"user": user.profile})
         else:
             return await ctx.reply(f"Não existe uma uid chamada: {uid}")
 
