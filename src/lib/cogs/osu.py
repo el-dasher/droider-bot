@@ -754,7 +754,6 @@ class OsuDroid(commands.Cog):
                     "reading": calculated[0],
                     "speed": calculated[1],
                     "aim": calculated[2],
-                    "consistency": calculated[3] * 100 / 6142 / 10
                 }
 
                 fetched_data.append(user_data)
