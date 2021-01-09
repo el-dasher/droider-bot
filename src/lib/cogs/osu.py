@@ -279,8 +279,10 @@ class OsuDroid(commands.Cog):
 
                 bm_data_string = (">>> **"
                                   f"CS/OD/AR/HP:"
-                                  f" {float(beatmap_stats['diff_size']):.2f}/{float(beatmap_stats['diff_overall']):.2f}/"
-                                  f"{float(beatmap_stats['diff_approach']):.2f}/{float(beatmap_stats['diff_drain']):.2f}\n"
+                                  f" {float(beatmap_stats['diff_size']):.2f}/"
+                                  f"{float(beatmap_stats['diff_overall']):.2f}/"
+                                  f"{float(beatmap_stats['diff_approach']):.2f}/"
+                                  f"{float(beatmap_stats['diff_drain']):.2f}\n"
                                   "**")
             else:
                 play_bpp = 0
@@ -475,15 +477,19 @@ class OsuDroid(commands.Cog):
         for play in pp_data['list']:
             await asyncio.sleep(30)
             try:
-                play['bpp'] = OsuDroidBeatmapData((await get_beatmap_data(play['hash']))['beatmap_id'],
-                                                  mods=play['mods'],
-                                                  misses=play['miss'],
-                                                  accuracy=play['accuracy'],
-                                                  max_combo=play['combo']
-                                                  ).get_bpp()['raw_pp']
+                beatmap_data = OsuDroidBeatmapData((await get_beatmap_data(play['hash']))['beatmap_id'],
+                                                   mods=play['mods'],
+                                                   misses=play['miss'],
+                                                   accuracy=play['accuracy'],
+                                                   max_combo=play['combo']
+                                                   )
+
+                play['bpp'] = beatmap_data.get_bpp()['raw_pp']
+                play['diff'] = beatmap_data.get_diff()
 
             except KeyError:
                 play['bpp'] = 0
+                play['diff'] = {"diff_approach": 0, "diff_drain": 0, "diff_size": 0, "diff_overall": 0}
 
         pp_data['total_bpp'] = 0
         for i, play in enumerate(pp_data['list']):
@@ -491,9 +497,11 @@ class OsuDroid(commands.Cog):
             play['net_bpp'] = play_bpp * 0.95 ** i
             pp_data['total_bpp'] += play['net_bpp']
 
+        print(pp_data)
+
+        DATABASE.child("DROID_UID_DATA").child(uid).set(pp_data)
         DATABASE.child("DROID_USERS").child(discord_id).child("user").child("pp_data").set(pp_data)
 
-        pp_data = DATABASE.child("DROID_USERS").child(discord_id).child("user").child("pp_data").get().val()
         return pp_data
 
     @commands.command(name="pf", aliases=["pfme"])
@@ -654,7 +662,7 @@ class OsuDroid(commands.Cog):
             except JSONDecodeError:
                 pass
 
-    @tasks.loop(hours=1)
+    @tasks.loop(hours=12)
     async def _brdpp_rank(self):
 
         if debug:
@@ -674,53 +682,68 @@ class OsuDroid(commands.Cog):
 
             diff_aim_list, diff_speed_list, diff_ar_list, diff_size_list, combo_list = [], [], [], [], []
 
-            await asyncio.sleep(0.5)
-            user = OsuDroidProfile(uid)
+            raw_user_data = OsuDroidProfile(uid)
+
+            db_user_data = DATABASE.child("DROID_UID_DATA").child(uid).get().val()
+            top_plays = db_user_data['list']
+
             try:
-                if user.total_pp is not None or user.pp_data["list"] is not None:
+                for top_play in top_plays:
+                    await asyncio.sleep(12)
+                    beatmap_data = OsuDroidBeatmapData((
+                        await get_beatmap_data(top_play["hash"])['beatmap_id']
+                    ), mods=top_play['mods'], misses=top_plays['miss'],
+                        accuracy=top_play['accuracy'], max_combo=top_play['combo'],
+                        formatted=True, custom_speed=1.00
+                    ).get_diff()
 
-                    for top_play in user.pp_data['list']:
-                        await asyncio.sleep(1.25)
-                        beatmap_data = await get_beatmap_data(top_play["hash"])
+                    combo_list.append(top_play["combo"])
+                    diff_ar_list.append((float(beatmap_data["diff_approach"])))
+                    diff_aim_list.append(float(beatmap_data["diff_aim"]))
+                    diff_speed_list.append(float(beatmap_data["diff_speed"]))
+                    diff_size_list.append(float(beatmap_data["diff_size"]))
 
-                        combo_list.append(top_play["combo"])
-                        if "DT" not in top_play["mods"]:
-                            diff_ar_list.append(float(beatmap_data["diff_approach"]))
-                            diff_aim_list.append(float(beatmap_data["diff_aim"]))
-                            diff_speed_list.append(float(beatmap_data["diff_speed"]))
-                            diff_size_list.append(float(beatmap_data["diff_size"]))
-                        else:
-                            diff_ar_list.append((float(beatmap_data["diff_approach"]) * 2 + 13) / 3)
-                            diff_aim_list.append(float(beatmap_data["diff_aim"]) * 1.50)
-                            diff_speed_list.append(float(beatmap_data["diff_speed"]) * 1.50)
-                            diff_size_list.append(float(beatmap_data["diff_size"]) / 1.50)
+                to_calculate = [
+                    diff_ar_list,
+                    diff_speed_list,
+                    diff_aim_list,
+                    combo_list
+                ]
 
-                    to_calculate = [
-                        diff_ar_list,
-                        diff_speed_list,
-                        diff_aim_list,
-                        combo_list
-                    ]
+                calculated = []
 
-                    calculated = []
+                for calc_list in to_calculate:
+                    try:
+                        res = sum(calc_list) / len(calc_list)
+                    except ZeroDivisionError:
+                        pass
+                    else:
+                        calculated.append(res)
 
-                    for calc_list in to_calculate:
-                        try:
-                            res = sum(calc_list) / len(calc_list)
-                        except ZeroDivisionError:
-                            pass
-                        else:
-                            calculated.append(res)
+                total_bpp = 0
+                if db_user_data is not None:
+                    try:
+                        total_bpp = db_user_data['total_bpp']
+                    except KeyError:
+                        pass
 
-                    user_data = {"profile": user.profile, "pp_data": user.pp_data["list"], "reading": calculated[0],
-                                 "speed": calculated[1], "aim": calculated[2],
-                                 "consistency": calculated[3] * 100 / 6142 / 10}
+                user_data = {
+                    "profile": raw_user_data.profile,
+                    "total_bpp": total_bpp,
+                    "pp_data": top_plays,
+                    "reading": calculated[0],
+                    "speed": calculated[1],
+                    "aim": calculated[2],
+                    "consistency": calculated[3] * 100 / 6142 / 10
+                }
 
-                    fetched_data.append(user_data)
+                fetched_data.append(user_data)
             except (KeyError, JSONDecodeError):
                 pass
+
         print(fetched_data)
-        fetched_data.sort(key=lambda e: e["profile"]["raw_pp"], reverse=True)
+
+        fetched_data.sort(key=lambda e: e['profile']['raw_pp'], reverse=True)
         top_players = fetched_data[:25]
 
         DATABASE.child("TOP_PLAYERS").child("data").set(top_players)
@@ -731,6 +754,7 @@ class OsuDroid(commands.Cog):
         for i, data in enumerate(top_players):
 
             data['profile']['raw_pp'] = float(data['profile']['raw_pp'])
+            data['total_bpp'] = float(data['total_bpp'])
             data['profile']['overall_acc'] = float(data['profile']['overall_acc'][:-1])
             data['speed'] = float(data['speed'])
             data['aim'] = float(data['aim'])
@@ -743,9 +767,16 @@ class OsuDroid(commands.Cog):
             updated_data.add_field(
                 name=f"{i + 1} - {data['profile']['username']}",
                 value=(
-                    f">>> ```\n{data['profile']['raw_pp']:.2f}pp - accuracy: {data['profile']['overall_acc']:.2f}%\n"
-                    f"[speed: {data['speed']:.2f} | aim: {data['aim']:.2f} | reading: AR{data['reading']:.2f}]\n"
-                    f" / consistência: {data['consistency']:.2f}]\n```"
+                    f">>> ```\n{data['profile']['raw_pp']:.2f}pp - {data['total_bpp']}bpp\n"
+                    f" accuracy: {data['profile']['overall_acc']:.2f}% - rankscore: {data['profile']['rankscore']}\n"
+                    f""
+                    f"[speed: {data['speed']:.2f} |"
+                    f" aim: {data['aim']:.2f} |"
+                    f" reading: AR{data['reading']:.2f} |"
+                    f" consistência: {data['consistency']:.2f}]"
+                    f"\n"
+                    f"```"
+                    f""
                 ),
                 inline=False
             )

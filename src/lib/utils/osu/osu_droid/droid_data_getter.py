@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 from src.setup import DPPBOARD_API as DPP_BOARD_API
 from typing import Dict
 
-import pytz
 from datetime import datetime, timedelta
 
 
@@ -46,7 +45,6 @@ class OsuDroidProfile:
 
         stats = list(map(lambda a: a.strip(), play.find("small").text.split("/")))
         date = datetime.strptime(stats[0], '%Y-%m-%d %H:%M:%S') - timedelta(hours=1)
-        print(date)
         score = stats[1]
         mods = self._replace_mods(stats[2])
 
