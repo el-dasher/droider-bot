@@ -84,7 +84,7 @@ class OsuGame(commands.Cog):
             except KeyError:
                 user_json = OSU_API.get_user({"u": user})
 
-                if user_json == []:
+                if len(user_json) == 0:
                     return await ctx.reply("Não foi possivel encontrar o usuário!")
         else:
             try:
@@ -236,20 +236,26 @@ class OsuDroid(commands.Cog):
         self._update_pps.start()
 
     @commands.command(name="rs", aliases=["recentme"])
-    async def droidrecent(self, ctx, uid=None):
+    async def droidrecent(self, ctx: commands.Context, uid: Union[discord.Member, int, str] = None):
         """
         Veja sua play mais recente do osu!droid, ou a de outro jogador
         se você passar o paramêtro de <uid>, ms!rs <uid>
         """
 
+        user_db_data = None
         if uid is None:
             # noinspection PyBroadException
             try:
-                uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
+                user_db_data = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").get().val()
             except Exception:
                 return await ctx.reply(self.missing_uid_msg)
+            else:
+                uid = user_db_data["user_id"]
         elif len(uid) >= 9:
-            uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
+            user_db_data = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").get().val()
+
+        avatar_url = user_db_data['avatar_url']
+
         user = OsuDroidProfile(uid)
         try:
             rs_data = user.recent_play
@@ -288,8 +294,10 @@ class OsuDroid(commands.Cog):
                 max_bpp = 0
                 bm_data_string = "> Não foi possivel encontrar o beatmap nos servidores do osu..."
 
+            profile = user.basic_user_data
+
             rs_embed.add_field(
-                name=f"Dados da play do(a) {user.profile['username']}",
+                name=f"Dados da play do(a) {profile['username']}",
                 value=">>> **"
                       f"BPP: {play_bpp}/{max_bpp}\n"
                       f"Precisão: {rs_data['accuracy']}\n"
@@ -308,29 +316,34 @@ class OsuDroid(commands.Cog):
 
             rs_embed.set_author(
                 name=f"{rs_data['title']} +{rs_data['mods']} - {float(rs_bm_data['difficultyrating']):.2f}★",
-                url=f"https://osu.ppy.sh/b/{rs_bm_data['beatmap_id']}",
-                icon_url=user.profile['avatar_url']
+                url=f"https://osu.ppy.sh/b/{rs_bm_data['beatmap_id']}", icon_url=avatar_url
             )
 
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=rs_embed)
 
     # noinspection PyBroadException
     @commands.command(name="ppcheck")
-    async def pp_check(self, ctx, uid=None, faster=None):
+    async def pp_check(self, ctx: commands.Context, uid=None, faster=None):
 
         uid_original: int = uid
-        discord_id: Union[int, None] = None
 
+        user_db_data = None
+        discord_id = 0
         if uid is None:
             # noinspection PyBroadException
             discord_id = ctx.author.id
             try:
-                uid = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").child("user_id").get().val()
+                user_db_data = DATABASE.child("DROID_USERS").child(ctx.author.id).child("user").get().val()
             except Exception:
                 return await ctx.reply(self.missing_uid_msg)
+            else:
+                uid = user_db_data["user_id"]
         elif len(uid) >= 9:
-            discord_id = uid_original
-            uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
+            discord_id = mention_to_uid(uid)
+            user_db_data = DATABASE.child("DROID_USERS").child(discord_id).child("user").get().val()
+
+        avatar_url = user_db_data['avatar_url']
+
         user = OsuDroidProfile(uid)
 
         if uid == "+" or faster == "+":
@@ -365,7 +378,7 @@ class OsuDroid(commands.Cog):
         async def generate_ppcheck_embed(embed: discord.Embed, index_start: int = 0, index_end: int = 5):
             embed.set_author(
                 name=f"TOP PLAYS DO(A) {pp_data['username'].upper()}",
-                url=f"http://droidppboard.herokuapp.com/profile?uid={uid}",
+                url=f"http://droidppboard.herokuapp.com/profile?uid={uid}", icon_url=avatar_url
             )
 
             bpp_data = False
@@ -496,8 +509,6 @@ class OsuDroid(commands.Cog):
             play['net_bpp'] = play_bpp * 0.95 ** i
             pp_data['total_bpp'] += play['net_bpp']
 
-        print(pp_data)
-
         DATABASE.child("DROID_UID_DATA").child(uid).set(pp_data)
         DATABASE.child("DROID_USERS").child(discord_id).child("user").child("pp_data").set(pp_data)
 
@@ -523,13 +534,12 @@ class OsuDroid(commands.Cog):
         user = OsuDroidProfile(uid)
         try:
             try:
-                dict(user.profile)
+                profile_data = user.profile
             except IndexError:
                 return await ctx.reply(
                     f"Não existe uma uid ou o usuário não se cadastrou: {uid_original}")
 
             profile_embed = discord.Embed(color=ctx.author.color)
-            profile_data = user.profile
 
             profile_embed.set_thumbnail(url=profile_data['avatar_url'])
             profile_embed.set_author(url=f"http://ops.dgsrz.com/profile.php?uid={uid}",
@@ -590,7 +600,7 @@ class OsuDroid(commands.Cog):
 
             bind_msg = f"O adm cadastrou o(a) {profile['username']} pro(a) {bind_msg_user}"
         if profile['username'] != "":
-            DATABASE.child("DROID_USERS").child(user_to_bind).set({"user": user.profile})
+            DATABASE.child("DROID_USERS").child(user_to_bind).set({"user": profile})
         else:
             return await ctx.reply(f"Não existe uma uid chamada: {uid}")
 
