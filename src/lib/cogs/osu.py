@@ -279,8 +279,8 @@ class OsuDroid(commands.Cog):
 
                 bm_data_string = (">>> **"
                                   f"CS/OD/AR/HP:"
-                                  f" {beatmap_stats['diff_size']}/{beatmap_stats['diff_overall']}/"
-                                  f"{beatmap_stats['diff_approach']}/{beatmap_stats['diff_drain']}\n"
+                                  f" {float(beatmap_stats['diff_size']):.2f}/{float(beatmap_stats['diff_overall']):.2f}/"
+                                  f"{float(beatmap_stats['diff_approach']):.2f}/{float(beatmap_stats['diff_drain']):.2f}\n"
                                   "**")
             else:
                 play_bpp = 0
