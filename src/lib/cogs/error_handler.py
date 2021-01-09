@@ -1,6 +1,7 @@
 from discord.ext import commands
 
 from src.lib.utils.basic_utils import ready_up_cog
+from src.paths import debug
 
 
 class ErrorHandler(commands.Cog):
@@ -29,6 +30,11 @@ class ErrorHandler(commands.Cog):
             raise exc.original
         else:
             raise exc
+        if not debug:
+            if isinstance(exc, commands.CommandError):
+                await ctx.reply(
+                    "Ocorreu um erro na execução do comando! verifique se você colocou as informações certas, "
+                    "avisa o daxi sobre esse bug!")
 
 
 def setup(bot):

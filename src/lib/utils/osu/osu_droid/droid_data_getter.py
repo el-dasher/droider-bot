@@ -2,6 +2,10 @@ import requests
 from bs4 import BeautifulSoup
 
 from src.setup import DPPBOARD_API as DPP_BOARD_API
+from typing import Dict
+
+import pytz
+from datetime import datetime, timedelta
 
 
 class OsuDroidProfile:
@@ -21,12 +25,28 @@ class OsuDroidProfile:
 
         return modstring
 
+    @staticmethod
+    def _handle_rank(rank_src) -> Dict[str, str]:
+        rank_url: str = f"http://ops.dgsrz.com/{rank_src}"
+        rank_str: str = rank_src.split("/")[-1].split("-")[-2]
+
+        return {
+            "rank_url": rank_url,
+            "rank_str": rank_str
+        }
+
     def get_play_data(self, play_html):
         play = play_html
 
         title = play.find("strong", attrs={"class": "block"}).text
+
+        rank_data = self._handle_rank(play.find("img")['src'])
+        rank_str = rank_data['rank_str']
+        rank_url = rank_data['rank_url']
+
         stats = list(map(lambda a: a.strip(), play.find("small").text.split("/")))
-        date = stats[0]
+        date = datetime.strptime(stats[0], '%Y-%m-%d %H:%M:%S') - timedelta(hours=1)
+        print(date)
         score = stats[1]
         mods = self._replace_mods(stats[2])
 
@@ -47,7 +67,9 @@ class OsuDroidProfile:
             "accuracy": accuracy,
             "misscount": misscount,
             "date": date,
-            "hash": hash_
+            "hash": hash_,
+            "rank_str": rank_str,
+            "rank_url": rank_url
         }
 
     @property
@@ -131,8 +153,8 @@ class OsuDroidProfile:
     def recent_play(self):
         recent_play = self.get_play_data(BeautifulSoup(requests.get(
             f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
-                                                       ).find_all("section", attrs={"class": "scrollable"})[1].find_all(
-            "li", attrs={"class": "list-group-item"})[0].find_all("a")[-1])
+                                                       ).find_all("section", attrs={"class": "scrollable"})[1].find(
+            "li", attrs={"class": "list-group-item"}))
 
         recent_play['mods'] = self._replace_mods(recent_play['mods'])
 

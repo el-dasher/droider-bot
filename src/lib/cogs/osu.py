@@ -10,7 +10,7 @@ from dateutil.parser import parse
 from discord.ext import commands, tasks
 
 from src.lib.utils.basic_utils import ready_up_cog
-from src.lib.utils.osu.osu_droid.br_pp_calculator import OsuDroidBeatmapData
+from src.lib.utils.osu.osu_droid.droid_calculator import OsuDroidBeatmapData
 from src.lib.utils.osu.osu_droid.droid_data_getter import OsuDroidProfile
 from src.paths import debug
 from src.setup import DATABASE
@@ -259,23 +259,28 @@ class OsuDroid(commands.Cog):
         else:
             rs_bm_data = await get_beatmap_data(rs_data["hash"])
 
-            rs_embed = discord.Embed(color=ctx.author.color)
+            rs_embed = discord.Embed(color=ctx.author.color, timestamp=rs_data['date'])
             rs_embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{rs_bm_data['beatmapset_id']}l.jpg")
 
             if is_beatmap_valid(rs_bm_data):
-                play_bpp = OsuDroidBeatmapData(int(rs_bm_data['beatmap_id']), rs_data['mods'],
-                                               int(rs_data['misscount']), float(rs_data['accuracy'][:-1]),
-                                               int(rs_data['combo'][:-1]),
-                                               True).get_bpp()['raw_pp']
+                beatmap_data = OsuDroidBeatmapData(int(rs_bm_data['beatmap_id']), rs_data['mods'],
+                                                   int(rs_data['misscount']), float(rs_data['accuracy'][:-1]),
+                                                   int(rs_data['combo'][:-1]),
+                                                   True)
+
+                play_bpp = beatmap_data.get_bpp()['raw_pp']
+
                 max_bpp = OsuDroidBeatmapData(
                     int(rs_bm_data['beatmap_id']), rs_data['mods'],
                     accuracy=float(rs_data['accuracy'][:-1]), formatted=True
                 ).get_bpp()['raw_pp']
 
+                beatmap_stats = beatmap_data.get_diff()
+
                 bm_data_string = (">>> **"
                                   f"CS/OD/AR/HP:"
-                                  f" {rs_bm_data['diff_size']}/{rs_bm_data['diff_overall']}/"
-                                  f"{rs_bm_data['diff_approach']}/{rs_bm_data['diff_drain']}\n"
+                                  f" {beatmap_stats['diff_size']}/{beatmap_stats['diff_overall']}/"
+                                  f"{beatmap_stats['diff_approach']}/{beatmap_stats['diff_drain']}\n"
                                   "**")
             else:
                 play_bpp = 0
@@ -297,6 +302,8 @@ class OsuDroid(commands.Cog):
                 name="Dados do beatmap",
                 value=bm_data_string
             )
+
+            rs_embed.set_footer(text="\u200b", icon_url=rs_data['rank_url'])
 
             rs_embed.set_author(
                 name=f"{rs_data['title']} +{rs_data['mods']} - {float(rs_bm_data['difficultyrating']):.2f}★",
@@ -428,6 +435,7 @@ class OsuDroid(commands.Cog):
                 await message.edit(embed=next_ppcheck_embed)
         return await message.clear_reactions()
 
+    @commands.has_permissions(administrator=True)
     @commands.command(name="completecalc", aliases=["pp"])
     async def submit_pp(self, ctx: commands.Context, user: discord.Member = None):
         """
@@ -435,13 +443,13 @@ class OsuDroid(commands.Cog):
         """
 
         user_to_submit = ctx.author.id
-        submit_string: str = "O seu pp sera submitado à database em 1 à 3 minutos!"
+        submit_string: str = "O seu pp sera submitado à database em 3 à 9 minutos!"
         succesful_msg: str = "O seu pp foi submitado com sucesso!"
         fail_msg: str = "Não foi possível submitar seu pp!"
         if dict(ctx.author.guild_permissions)['administrator'] is True:
             if user is not None:
                 user_to_submit = user.id
-                submit_string = "O pp dele será submitado à database em 1 à 3 minutos!"
+                submit_string = "O pp dele será submitado à database em 3 à 9 minutos!"
                 succesful_msg = "O pp dele foi submitado com sucesso!"
                 fail_msg = "Não foi possivel submitar o pp dele!"
 
@@ -465,7 +473,7 @@ class OsuDroid(commands.Cog):
         pp_data = user.pp_data
 
         for play in pp_data['list']:
-            await asyncio.sleep(1)
+            await asyncio.sleep(30)
             try:
                 play['bpp'] = OsuDroidBeatmapData((await get_beatmap_data(play['hash']))['beatmap_id'],
                                                   mods=play['mods'],
@@ -637,7 +645,7 @@ class OsuDroid(commands.Cog):
                                  )
             return await ctx.reply(f"<@{ctx.author.id}>", embed=calc_embed)
 
-    @tasks.loop(hours=12)
+    @tasks.loop(hours=24)
     async def _update_pps(self):
         discord_ids: list = list((pp_datas := DATABASE.child("DROID_USERS").get().val()))
         for uid in discord_ids:

@@ -1,6 +1,8 @@
 from src.lib.utils.osu.osu_std.ppv2_calculator import get_ppv2
 
 
+# A fórmula para calcular o OD do droid não é exatamente OD do std -5 mas isso deve servir por enquanto
+# eu não consegui entender a fórmula do rian since eu sou bem mongol.
 class OsuDroidBeatmapData:
     def __init__(self, beatmap_id, mods: str = "NM", misses: int = 0,
                  accuracy: float = 100.00, max_combo: int = None, formatted: bool = False, custom_speed: float = 1.00):
@@ -49,7 +51,7 @@ class OsuDroidBeatmapData:
         acc_pp = pp_data.acc_pp
         acc_percent = pp_data.accuracy
 
-        raw_pp -= pp_data.aim_pp
+        raw_pp -= aim_pp
         raw_pp -= speed_pp
 
         aim_pp *= 0.8
@@ -79,3 +81,35 @@ class OsuDroidBeatmapData:
                 "acc_pp": f"{acc_pp: .2f}",
                 "acc_percent": f"{acc_percent: .2f}"
             }
+
+    def get_diff(self):
+        beatmap_id = self._beatmap_id
+        mods = self._mods
+        misses = self._misses
+        accuracy = self._accuracy
+        max_combo = self._max_combo
+
+        mods = mods.upper()
+        useful_data = get_ppv2(beatmap_id, mods, misses, accuracy, max_combo, formatted=False)
+
+        beatmap = useful_data["beatmap"]
+
+        if "PR" in mods:
+            beatmap.od += 5
+        if "SC" in mods:
+            beatmap.cs += 4
+        if "REZ" in mods:
+            beatmap.ar -= 0.5
+            beatmap.cs -= 4
+            beatmap.od /= 4
+            beatmap.hp /= 4
+
+        diff_data = beatmap.getDifficulty(Mods=mods, recalculate=True)
+
+        return {
+            "diff_approach": diff_data.ar,
+            "diff_size": diff_data.cs,
+            "diff_overall": diff_data.od,
+            "diff_drain": diff_data.hp,
+            "mods": mods
+        }
