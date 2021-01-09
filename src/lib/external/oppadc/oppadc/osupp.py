@@ -182,7 +182,7 @@ class OsuPP(object):
             final_multiplier *= 0.95
 
         self.total_pp = (((self.aim_pp ** 1.1) + (self.speed_pp ** 1.1) + (self.acc_pp ** 1.1)) ** (
-                    1.0 / 1.1)) * final_multiplier
+                1.0 / 1.1)) * final_multiplier
         # set the vars we calculated with
         self.accuracy = accuracy * 100
         self.combo = combo

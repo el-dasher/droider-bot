@@ -1,10 +1,10 @@
+from datetime import datetime, timedelta
+from typing import Dict
+
 import requests
 from bs4 import BeautifulSoup
 
 from src.setup import DPPBOARD_API as DPP_BOARD_API
-from typing import Dict
-
-from datetime import datetime, timedelta
 
 
 class OsuDroidProfile:

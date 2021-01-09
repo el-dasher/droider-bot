@@ -1,11 +1,11 @@
 import asyncio
 import time
 from datetime import datetime
+from json.decoder import JSONDecodeError
+from typing import Union
 
 import discord
 import requests
-
-from typing import Union
 from dateutil.parser import parse
 from discord.ext import commands, tasks
 
@@ -16,7 +16,6 @@ from src.paths import debug
 from src.setup import DATABASE
 from src.setup import OSU_API
 from src.setup import OSU_API_KEY
-from json.decoder import JSONDecodeError
 
 
 def mention_to_uid(msg):
@@ -662,7 +661,7 @@ class OsuDroid(commands.Cog):
             except JSONDecodeError:
                 pass
 
-    @tasks.loop(hours=12)
+    @tasks.loop(hours=24)
     async def _brdpp_rank(self):
 
         if debug:
@@ -679,35 +678,46 @@ class OsuDroid(commands.Cog):
         uid_list = DATABASE.child("BR_UIDS").get().val()["uids"]
 
         for uid in uid_list:
-
-            diff_aim_list, diff_speed_list, diff_ar_list, diff_size_list, combo_list = [], [], [], [], []
+            bpp_aim_list, bpp_speed_list, diff_ar_list = [], [], []
 
             raw_user_data = OsuDroidProfile(uid)
 
             db_user_data = DATABASE.child("DROID_UID_DATA").child(uid).get().val()
-            top_plays = db_user_data['list']
+
+            try:
+                top_plays = db_user_data['list']
+            except (KeyError, TypeError):
+                try:
+                    top_plays = raw_user_data.pp_data['list']
+                except KeyError:
+                    continue
+
+                for x in top_plays:
+                    x['bpp'], x['net_bpp'] = 0, 0
 
             try:
                 for top_play in top_plays:
-                    await asyncio.sleep(12)
+                    # Sleep = loop_time * 1.50 if 30 UIDS or less
+                    await asyncio.sleep(36)
+
                     beatmap_data = OsuDroidBeatmapData((
-                        await get_beatmap_data(top_play["hash"])['beatmap_id']
-                    ), mods=top_play['mods'], misses=top_plays['miss'],
+                        (await get_beatmap_data(top_play["hash"]))['beatmap_id']
+                    ), mods=top_play['mods'], misses=top_play['miss'],
                         accuracy=top_play['accuracy'], max_combo=top_play['combo'],
                         formatted=True, custom_speed=1.00
-                    ).get_diff()
+                    )
+                    beatmap_diff_data = beatmap_data.get_diff()
+                    beatmap_bpp_data = beatmap_data.get_bpp()
 
-                    combo_list.append(top_play["combo"])
-                    diff_ar_list.append((float(beatmap_data["diff_approach"])))
-                    diff_aim_list.append(float(beatmap_data["diff_aim"]))
-                    diff_speed_list.append(float(beatmap_data["diff_speed"]))
-                    diff_size_list.append(float(beatmap_data["diff_size"]))
+                    bpp_aim_list.append(float(beatmap_bpp_data['aim_pp']))
+                    bpp_speed_list.append(float(beatmap_bpp_data["speed_pp"]))
+
+                    diff_ar_list.append((float(beatmap_diff_data["diff_approach"])))
 
                 to_calculate = [
                     diff_ar_list,
-                    diff_speed_list,
-                    diff_aim_list,
-                    combo_list
+                    bpp_speed_list,
+                    bpp_aim_list,
                 ]
 
                 calculated = []
@@ -738,6 +748,7 @@ class OsuDroid(commands.Cog):
                 }
 
                 fetched_data.append(user_data)
+                print(fetched_data)
             except (KeyError, JSONDecodeError):
                 pass
 
@@ -768,15 +779,15 @@ class OsuDroid(commands.Cog):
                 name=f"{i + 1} - {data['profile']['username']}",
                 value=(
                     f">>> ```\n{data['profile']['raw_pp']:.2f}pp - {data['total_bpp']}bpp\n"
-                    f" accuracy: {data['profile']['overall_acc']:.2f}% - rankscore: {data['profile']['rankscore']}\n"
+                    f" accuracy: {data['profile']['overall_acc']:.2f}% - rankscore: #{data['profile']['rankscore']}\n"
                     f""
                     f"[speed: {data['speed']:.2f} |"
                     f" aim: {data['aim']:.2f} |"
-                    f" reading: AR{data['reading']:.2f} |"
-                    f" consistência: {data['consistency']:.2f}]"
+                    f" reading: AR{data['reading']:.2f}]"
                     f"\n"
                     f"```"
                     f""
+                    # f" consistência: {data['consistency']:.2f}]"
                 ),
                 inline=False
             )
