@@ -30,11 +30,6 @@ class ErrorHandler(commands.Cog):
             raise exc.original
         else:
             raise exc
-        if not debug:
-            if isinstance(exc, commands.CommandError):
-                await ctx.reply(
-                    "Ocorreu um erro na execução do comando! verifique se você colocou as informações certas, "
-                    "avisa o daxi sobre esse bug!")
 
 
 def setup(bot):
