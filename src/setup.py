@@ -38,6 +38,4 @@ GOOGLE_USEFULS: dict = {
     "api_key": getenv("SEARCH_ENGINE_API_KEY")
 }
 
-print(DPPBOARD_API)
-
 logging.basicConfig(level=logging.INFO)

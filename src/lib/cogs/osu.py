@@ -334,19 +334,21 @@ class OsuDroid(commands.Cog):
         elif len(uid) >= 9:
             discord_id = uid_original
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
-        try:
-            user = OsuDroidProfile(uid)
-        except KeyError:
-            return await ctx.reply("Não foi posssivel encontrar o usuário :(")
 
         if uid == "+" or faster == "+":
             discord_id = mention_to_uid(str(uid_original))
             if uid == "+":
+                uid = ctx.author.id
                 discord_id = ctx.author.id
 
             faster = True
         else:
             faster = False
+
+        try:
+            user = OsuDroidProfile(uid)
+        except KeyError:
+            return await ctx.reply("Não foi posssivel encontrar o usuário :(")
 
         not_registered_msg = "O usuário ou você não possui uma conta registrada na database" \
                              " ou você esqueceu de submitar seus pp's use `&pp` ou `&bind uid>`" \
