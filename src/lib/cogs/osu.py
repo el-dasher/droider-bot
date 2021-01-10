@@ -571,7 +571,7 @@ class OsuDroid(commands.Cog):
             except IndexError:
                 return await ctx.reply("O uid pode apenas conter números :(")
 
-        user = OsuDroidProfile(uid)
+        user = OsuDroidProfile(uid, needs_player_html=True)
         profile = user.profile
 
         if type(user_to_bind) == discord.Member:
@@ -685,7 +685,7 @@ class OsuDroid(commands.Cog):
         for uid in uid_list:
             bpp_aim_list, bpp_speed_list, diff_ar_list = [], [], []
 
-            raw_user_data = OsuDroidProfile(uid)
+            raw_user_data = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
 
             db_user_data = DATABASE.child("DROID_UID_DATA").child(uid).get().val()
 
