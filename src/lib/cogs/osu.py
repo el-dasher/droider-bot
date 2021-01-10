@@ -450,13 +450,13 @@ class OsuDroid(commands.Cog):
         """
 
         user_to_submit = ctx.author.id
-        submit_string: str = "O seu pp sera submitado à database em 3 à 9 minutos!"
+        submit_string: str = "O seu pp sera submitado à database em até 40 minutos!"
         succesful_msg: str = "O seu pp foi submitado com sucesso!"
         fail_msg: str = "Não foi possível submitar seu pp!"
         if dict(ctx.author.guild_permissions)['administrator'] is True:
             if user is not None:
                 user_to_submit = user.id
-                submit_string = "O pp dele será submitado à database em 3 à 9 minutos!"
+                submit_string = "O pp dele será submitado à database em até 40 minutos!"
                 succesful_msg = "O pp dele foi submitado com sucesso!"
                 fail_msg = "Não foi possivel submitar o pp dele!"
 
