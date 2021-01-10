@@ -684,8 +684,11 @@ class OsuDroid(commands.Cog):
 
         for uid in uid_list:
             bpp_aim_list, bpp_speed_list, diff_ar_list = [], [], []
-
-            raw_user_data = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
+            
+            try:
+                raw_user_data = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
+            except KeyError:
+                continue
 
             db_user_data = DATABASE.child("DROID_UID_DATA").child(uid).get().val()
 
