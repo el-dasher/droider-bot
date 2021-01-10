@@ -251,7 +251,7 @@ class OsuDroid(commands.Cog):
         elif len(uid) >= 9:
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
         try:
-            user = OsuDroidProfile(uid)
+            user = OsuDroidProfile(uid, needs_player_html=True)
         except KeyError:
             return await ctx.reply("Não foi possível encontrar esse usuário!")
         try:
@@ -346,7 +346,7 @@ class OsuDroid(commands.Cog):
             faster = False
 
         try:
-            user = OsuDroidProfile(uid)
+            user = OsuDroidProfile(uid, needs_pp_data=True)
         except KeyError:
             return await ctx.reply("Não foi posssivel encontrar o usuário :(")
 
@@ -478,7 +478,7 @@ class OsuDroid(commands.Cog):
 
     @staticmethod
     async def submit_user_data(uid: int, discord_id: int):
-        user = OsuDroidProfile(uid)
+        user = OsuDroidProfile(uid, needs_pp_data=True)
         pp_data = user.pp_data
 
         for play in pp_data['list']:
@@ -504,8 +504,6 @@ class OsuDroid(commands.Cog):
             play['net_bpp'] = play_bpp * 0.95 ** i
             pp_data['total_bpp'] += play['net_bpp']
 
-        print(pp_data)
-
         DATABASE.child("DROID_UID_DATA").child(uid).set(pp_data)
         DATABASE.child("DROID_USERS").child(discord_id).child("user").child("pp_data").set(pp_data)
 
@@ -528,16 +526,15 @@ class OsuDroid(commands.Cog):
                 return await ctx.reply(self.missing_uid_msg)
         elif len(uid) >= 9:
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
-        user = OsuDroidProfile(uid)
+        user = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
         try:
             try:
-                dict(user.profile)
+                profile_data = user.profile
             except IndexError:
                 return await ctx.reply(
                     f"Não existe uma uid ou o usuário não se cadastrou: {uid_original}")
 
             profile_embed = discord.Embed(color=ctx.author.color)
-            profile_data = user.profile
 
             profile_embed.set_thumbnail(url=profile_data['avatar_url'])
             profile_embed.set_author(url=f"http://ops.dgsrz.com/profile.php?uid={uid}",

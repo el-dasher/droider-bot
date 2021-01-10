@@ -8,14 +8,19 @@ from src.setup import DPPBOARD_API as DPP_BOARD_API
 
 
 class OsuDroidProfile:
-    def __init__(self, uid: int):
+    def __init__(self, uid: int, needs_player_html: bool = False, needs_pp_data: bool = False):
         self.uid = uid
-        self._player_html = BeautifulSoup(requests.get(
-            f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
-                                     )
-        self._user_pp_data_json = requests.get(
-            f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPP_BOARD_API}&uid={self.uid}"
-        ).json()['data']
+
+        print("REQUEST")
+
+        if needs_player_html:
+            self._player_html = BeautifulSoup(requests.get(
+                f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
+                                         )
+        if needs_pp_data:
+            self._user_pp_data_json = requests.get(
+                f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPP_BOARD_API}&uid={self.uid}"
+            ).json()['data']
 
     @staticmethod
     def _replace_mods(modstring: str):
@@ -88,7 +93,7 @@ class OsuDroidProfile:
 
         try:
             raw_pp = self.total_pp
-        except KeyError:
+        except (KeyError, AttributeError):
             raw_pp = 0
 
         return {
