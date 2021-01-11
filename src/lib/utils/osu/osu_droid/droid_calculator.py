@@ -28,11 +28,11 @@ class OsuDroidBeatmapData:
 
         beatmap = useful_data["beatmap"]
 
-        beatmap.od -= 5
+        beatmap.od = 5 - (75 + 5 * (5 - beatmap.od) - 50) / 6
         beatmap.cs -= 4
 
         if "PR" in mods:
-            beatmap.od += 5
+            beatmap.od = 3 + 1.2 * beatmap.od
         if "SC" in mods:
             beatmap.cs += 4
         if "REZ" in mods:
@@ -95,7 +95,7 @@ class OsuDroidBeatmapData:
         beatmap = useful_data["beatmap"]
 
         if "PR" in mods:
-            beatmap.od += 5
+            beatmap.od = 3 + 1.2 * beatmap.od
         if "SC" in mods:
             beatmap.cs += 4
         if "REZ" in mods:
