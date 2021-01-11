@@ -76,6 +76,7 @@ class OsuGame(commands.Cog):
     @commands.command(name="osu")
     async def osuplayer(self, ctx: commands.Context, *user):
         # user_json = OSU_API.get_user({"u": user})[0]
+        await ctx.trigger_typing()
 
         if user:
             user = self.get_user(mention_to_uid(user))
@@ -143,7 +144,8 @@ class OsuGame(commands.Cog):
         await ctx.reply(content=f"<@{ctx.author.id}>", embed=user_embed)
 
     @commands.command(name="osu-set", aliases=["osuset"])
-    async def osu_set(self, ctx, *user):
+    async def osu_set(self, ctx: commands.Context, *user):
+        await ctx.trigger_typing()
         if user:
             user = self.get_user(user)
         else:
@@ -164,7 +166,8 @@ class OsuGame(commands.Cog):
         await ctx.reply(f"<@{ctx.author.id}>", embed=osuset_embed)
 
     @commands.command(name="osu-rs")
-    async def recent(self, ctx, *user):
+    async def recent(self, ctx: commands.Context, *user):
+        await ctx.trigger_typing()
         user = self.get_user(user)
 
         async def get_username(user_):
@@ -242,6 +245,7 @@ class OsuDroid(commands.Cog):
         se você passar o paramêtro de <uid>, ms!rs <uid>
         """
 
+        await ctx.trigger_typing()
         if uid is None:
             # noinspection PyBroadException
             try:
@@ -256,7 +260,7 @@ class OsuDroid(commands.Cog):
             return await ctx.reply("Não foi possível encontrar esse usuário!")
         try:
             rs_data = user.recent_play
-        except (IndexError, KeyError):
+        except (IndexError, KeyError, AttributeError):
             await ctx.reply(f"O usuário infelizmente não possui nenhuma play ou o mesmo não possui uma conta...")
         else:
             rs_bm_data = await get_beatmap_data(rs_data["hash"])
@@ -319,8 +323,9 @@ class OsuDroid(commands.Cog):
 
     # noinspection PyBroadException
     @commands.command(name="ppcheck")
-    async def pp_check(self, ctx, uid=None, faster=None):
+    async def pp_check(self, ctx: commands.Context, uid=None, faster=None):
 
+        await ctx.trigger_typing()
         uid_original: int = uid
         discord_id: Union[int, None] = None
 
@@ -447,9 +452,12 @@ class OsuDroid(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.command(name="completecalc", aliases=["pp"])
     async def submit_pp(self, ctx: commands.Context, user: discord.Member = None):
+
         """
         Submita o seu ppcheck atual para a database :)
         """
+
+        await ctx.trigger_typing()
 
         user_to_submit = ctx.author.id
         submit_string: str = "O seu pp sera submitado à database em até 40 minutos!"
@@ -516,6 +524,7 @@ class OsuDroid(commands.Cog):
         ou o perfil de outra pessoa.
         """
 
+        await ctx.trigger_typing()
         uid_original = uid
 
         if uid is None:
@@ -559,6 +568,8 @@ class OsuDroid(commands.Cog):
 
     @commands.command(name="droidset", aliases=["bind"])
     async def droid_set(self, ctx, uid: Union[str, int] = None, discord_user: Union[discord.Member, str] = None):
+        await ctx.trigger_typing()
+
         user_to_bind: Union[str, int, discord.Member] = ctx.author.id
         if dict(ctx.author.guild_permissions)['administrator'] is True:
             if discord_user is not None:
@@ -605,7 +616,8 @@ class OsuDroid(commands.Cog):
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
     @commands.command()
-    async def calc(self, ctx, link: str = None, *params):
+    async def calc(self, ctx: commands.Context, link: str = None, *params):
+        await ctx.trigger_typing()
         error_message: str = f'"{link}", Não é um link ou id válido!'
 
         if link is None:

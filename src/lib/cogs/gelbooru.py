@@ -19,8 +19,9 @@ class Gelbooru(commands.Cog):
         ready_up_cog(self.bot, __name__)
 
     @commands.command()
-    async def boorusearch(self, ctx, *query) -> None:
+    async def boorusearch(self, ctx: commands.Context, *query):
 
+        await ctx.trigger_typing()
         exclude: tuple = ("loli", "gore", "vore", "furry", "scat", "shota", "piss")
 
         if len(query) == 0:

@@ -41,6 +41,7 @@ class Welcomer(Cog):
 
     @Cog.listener()
     async def on_member_join(self, member: discord.Member):
+
         if debug:
             return None
 
@@ -68,7 +69,7 @@ class Welcomer(Cog):
 
         welcome_channel = self.bot.get_channel(self.welcomer_data()[joined_guild]["id"])
 
-        await welcome_channel.send(f"<@{member.id}>", embed=join_embed)
+        return await welcome_channel.send(f"<@{member.id}>", embed=join_embed)
 
     @Cog.listener()
     async def on_member_remove(self, member: discord.Member):
@@ -100,11 +101,12 @@ class Welcomer(Cog):
         left_guild = str(member.guild.id)
         welcome_channel = self.bot.get_channel(self.welcomer_data()[left_guild]["id"])
 
-        await welcome_channel.send(embed=remove_embed)
+        return await welcome_channel.send(embed=remove_embed)
 
     @commands.command(aliases=("welcome", "convidados", "setwelcome", "welcomechannel"))
     @commands.has_permissions(manage_channels=True)
     async def set_welcome(self, ctx: discord.ext.commands.context, welcome_channel: discord.TextChannel = None):
+        await ctx.trigger_typing()
         if welcome_channel is None:
             welcome_channel = ctx.channel
 
@@ -117,7 +119,7 @@ class Welcomer(Cog):
 
         })
 
-        await ctx.reply(f"O novo canal de boas vindas é o {welcome_channel.mention} <a:blobhype:780576199558299649>")
+        return await ctx.reply(f"O novo canal de boas vindas é o {welcome_channel.mention} <a:blobhype:780576199558299649>")
 
 
 def setup(bot):

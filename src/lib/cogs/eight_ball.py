@@ -18,6 +18,7 @@ class EightBall(commands.Cog):
 
     @commands.command(aliases=("8ball", "sorte"))
     async def lucky(self, ctx: commands.Context, question=None):
+        await ctx.trigger_typing()
         if question is None:
             await ctx.reply("Aprende a usar o bot, BURRO, cadê a pergunta?")
         else:

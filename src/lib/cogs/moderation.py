@@ -19,6 +19,7 @@ class Moderation(commands.Cog):
     @commands.has_permissions(kick_members=True)
     @commands.command()
     async def kick(self, ctx: commands.Context, user: discord.Member, reason: str = "UNDEFINED"):
+        await ctx.trigger_typing()
         if user is None:
             return await ctx.reply("Você esqueceu de por o usúario que você quer kickar!")
         try:
@@ -31,6 +32,7 @@ class Moderation(commands.Cog):
     @commands.has_permissions(ban_members=True)
     @commands.command()
     async def ban(self, ctx: commands.Context, user: discord.Member = None, reason: str = "UNDEFINED"):
+        await ctx.trigger_typing()
         if user is None:
             return await ctx.reply("Você esqueceu de por o usuário que você quer banir!")
         try:
@@ -42,6 +44,7 @@ class Moderation(commands.Cog):
 
     @commands.command()
     async def clear(self, ctx: commands.Context, limit: Union[str, int] = 10):
+        await ctx.trigger_typing()
         try:
             limit = int(float(limit)) + 2
         except ValueError:

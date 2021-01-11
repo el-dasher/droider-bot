@@ -22,6 +22,7 @@ class GoogleSearch(commands.Cog):
 
     @commands.command(aliases=['gsearch'])
     async def googlesearch(self, ctx: discord.ext.commands.Context, *query):
+        await ctx.trigger_typing()
         query = list(query)
 
         if not query:
@@ -57,7 +58,8 @@ class GoogleSearch(commands.Cog):
         return await ctx.reply(content=f"<@{ctx.author.id}>", embed=result_embed)
 
     @commands.command()
-    async def im(self, ctx, *query) -> None:
+    async def im(self, ctx: commands.Context, *query) -> None:
+        await ctx.trigger_typing()
         if not query:
             return await ctx.reply("Você esqueceu de por os parâmetros para a pesquisa!")
         query = " ".join(query)

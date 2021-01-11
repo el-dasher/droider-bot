@@ -19,6 +19,8 @@ class Avatar(commands.Cog):
     @commands.command()
     async def avatar(self, ctx: discord.ext.commands.Context, member: discord.Member = None):
 
+        await ctx.trigger_typing()
+
         if member is not None:
             ava_desc: str = choice(("Aproveita e me paga um café", f"Avatar bonito o do <@{member.id}> né mano?"))
         else:

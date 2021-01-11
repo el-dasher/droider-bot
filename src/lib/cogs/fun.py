@@ -23,14 +23,16 @@ class Funny(commands.Cog):
         ready_up_cog(self.bot, __name__)
 
     @commands.command()
-    async def owo(self, ctx):
+    async def owo(self, ctx: commands.Context):
+        await ctx.trigger_typing()
         return await ctx.reply("UwU")
 
     async def presences(self):
         return await self.bot.change_presence(activity=(choice(bot_presences)))
 
     @commands.command()
-    async def ping(self, ctx):
+    async def ping(self, ctx: commands.Context):
+        await ctx.trigger_typing()
         return await ctx.reply(
             f"Pingo, tô levando {self.bot.latency:.3f} milissegundos pra responder a api do Discord."
         )
@@ -43,6 +45,7 @@ class Funny(commands.Cog):
 
     @commands.command()
     async def unfollow(self, ctx: commands.Context):
+        await ctx.trigger_typing()
         follower_role = ctx.guild.get_role(789638184048525363)
         await ctx.author.remove_roles(follower_role)
         return await ctx.reply("Sinceramente, pau no seu cu.")
@@ -85,6 +88,7 @@ class Funny(commands.Cog):
 
     @commands.command()
     async def setpearl(self, ctx: commands.Context, pearl_channel: discord.TextChannel = None):
+        await ctx.trigger_typing()
         if pearl_channel is None:
             pearl_channel = ctx.channel
 
