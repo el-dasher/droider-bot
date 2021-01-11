@@ -804,7 +804,7 @@ class OsuDroid(commands.Cog):
             updated_data.add_field(
                 name=f"{i + 1} - {data['profile']['username']}",
                 value=(
-                    f">>> ```\n{data['profile']['raw_pp']:.2f}pp - {data['total_bpp']:.2f}bpp\n"
+                    f">>> ```\n{data['profile']['raw_pp']:.2f}dpp - {data['total_bpp']:.2f}bpp\n"
                     f" accuracy: {data['profile']['overall_acc']:.2f}% - rankscore: #{data['profile']['rankscore']}\n"
                     f""
                     f"[speed: {data['speed']:.2f} |"

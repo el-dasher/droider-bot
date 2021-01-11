@@ -1,4 +1,5 @@
 from src.lib.utils.osu.osu_std.ppv2_calculator import get_ppv2
+from src.lib.external.oppadc import oppadc
 
 
 # A fórmula para calcular o OD do droid não é exatamente OD do std -5 mas isso deve servir por enquanto
@@ -14,19 +15,8 @@ class OsuDroidBeatmapData:
         self._formatted = formatted
         self._custom_speed = custom_speed
 
-    def get_bpp(self):
-        beatmap_id = self._beatmap_id
+    def _calculate_droid_stats(self, beatmap: oppadc.OsuMap):
         mods = self._mods
-        misses = self._misses
-        accuracy = self._accuracy
-        max_combo = self._max_combo
-        custom_speed = self._custom_speed
-        formatted = self._formatted
-
-        mods = f"{mods.upper()}TD"
-        useful_data = get_ppv2(beatmap_id, mods, misses, accuracy, max_combo, formatted=False)
-
-        beatmap = useful_data["beatmap"]
 
         beatmap.od = 5 - (75 + 5 * (5 - beatmap.od) - 50) / 6
         beatmap.cs -= 4
@@ -41,8 +31,22 @@ class OsuDroidBeatmapData:
             beatmap.od /= 4
             beatmap.hp /= 4
         if "SU" in mods:
-            custom_speed = 1.25 * custom_speed
+            self._custom_speed = 1.25 * self._custom_speed
 
+    def get_bpp(self):
+        beatmap_id = self._beatmap_id
+        mods = self._mods
+        misses = self._misses
+        accuracy = self._accuracy
+        max_combo = self._max_combo
+        formatted = self._formatted
+        custom_speed = self._custom_speed
+
+        mods = f"{mods.upper()}TD"
+        useful_data = get_ppv2(beatmap_id, mods, misses, accuracy, max_combo, formatted=False)
+
+        beatmap: oppadc.OsuMap = useful_data["beatmap"]
+        self._calculate_droid_stats(beatmap)
         pp_data = beatmap.getPP(Mods=mods, accuracy=accuracy, misses=misses, combo=max_combo, recalculate=True)
 
         raw_pp = pp_data.total_pp
@@ -54,8 +58,26 @@ class OsuDroidBeatmapData:
         raw_pp -= aim_pp
         raw_pp -= speed_pp
 
-        aim_pp *= 0.8
-        speed_pp *= custom_speed
+        length_bonus = self.get_length_bonus()
+
+        if length_bonus < 1.75:
+            length_nerf = 0.5
+        elif length_bonus < 2:
+            length_nerf = 0.6
+        elif length_bonus < 2.25:
+            length_nerf = 0.7
+        else:
+            length_nerf = None
+
+        extra_speed_nerf = 0.1
+        if length_nerf is None:
+            bpp_nerf = 0.8
+
+            aim_pp *= bpp_nerf
+            speed_pp *= custom_speed * bpp_nerf - extra_speed_nerf
+        else:
+            aim_pp *= length_nerf
+            speed_pp *= custom_speed * length_nerf - extra_speed_nerf
 
         raw_pp += aim_pp
         raw_pp += speed_pp
@@ -82,7 +104,7 @@ class OsuDroidBeatmapData:
                 "acc_percent": f"{acc_percent: .2f}"
             }
 
-    def get_diff(self):
+    def get_diff(self, raw_data=False):
         beatmap_id = self._beatmap_id
         mods = self._mods
         misses = self._misses
@@ -92,19 +114,14 @@ class OsuDroidBeatmapData:
         mods = mods.upper()
         useful_data = get_ppv2(beatmap_id, mods, misses, accuracy, max_combo, formatted=False)
 
-        beatmap = useful_data["beatmap"]
+        beatmap: oppadc.OsuMap = useful_data["beatmap"]
 
-        if "PR" in mods:
-            beatmap.od = 3 + 1.2 * beatmap.od
-        if "SC" in mods:
-            beatmap.cs += 4
-        if "REZ" in mods:
-            beatmap.ar -= 0.5
-            beatmap.cs -= 4
-            beatmap.od /= 4
-            beatmap.hp /= 4
+        self._calculate_droid_stats(beatmap)
 
         diff_data = beatmap.getDifficulty(Mods=mods, recalculate=True)
+
+        if raw_data:
+            return diff_data
 
         return {
             "diff_approach": diff_data.ar,
@@ -113,3 +130,17 @@ class OsuDroidBeatmapData:
             "diff_drain": diff_data.hp,
             "mods": mods
         }
+
+    def get_length_bonus(self):
+        beatmap_id = self._beatmap_id
+        mods = self._mods.upper()
+
+        useful_data = get_ppv2(beatmap_id, mods, formatted=False)
+        beatmap: oppadc.OsuMap = useful_data["beatmap"]
+
+        self._calculate_droid_stats(beatmap)
+
+        beatmap_stats = beatmap.getStats(Mods=mods)
+        length_bonus = beatmap_stats.aim_length_bonus + beatmap_stats.aim_length_bonus
+
+        return length_bonus
