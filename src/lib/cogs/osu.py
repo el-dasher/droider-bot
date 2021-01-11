@@ -678,7 +678,7 @@ class OsuDroid(commands.Cog):
             except JSONDecodeError:
                 pass
 
-    @tasks.loop(hours=1)
+    @tasks.loop(hours=2)
     async def _brdpp_rank(self):
 
         if debug:
@@ -692,84 +692,83 @@ class OsuDroid(commands.Cog):
 
         fetched_data = []
 
-        async with br_rank_channel.typing():
-            uid_list = DATABASE.child("BR_UIDS").get().val()["uids"]
+        uid_list = DATABASE.child("BR_UIDS").get().val()["uids"]
 
-            for uid in uid_list:
-                bpp_aim_list, bpp_speed_list, diff_ar_list = [], [], []
+        for uid in uid_list:
+            bpp_aim_list, bpp_speed_list, diff_ar_list = [], [], []
 
+            try:
+                raw_user_data = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
+            except KeyError:
+                continue
+
+            db_user_data = DATABASE.child("DROID_UID_DATA").child(uid).get().val()
+
+            try:
+                top_plays = db_user_data['list']
+            except (KeyError, TypeError):
                 try:
-                    raw_user_data = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
+                    top_plays = raw_user_data.pp_data['list']
                 except KeyError:
                     continue
 
-                db_user_data = DATABASE.child("DROID_UID_DATA").child(uid).get().val()
+                for x in top_plays:
+                    x['bpp'], x['net_bpp'] = 0, 0
 
-                try:
-                    top_plays = db_user_data['list']
-                except (KeyError, TypeError):
+            try:
+                for top_play in top_plays:
+                    # Sleep = loop_time * 1.50 if 30 UIDS or less
+                    await asyncio.sleep(3)
+
+                    beatmap_data = OsuDroidBeatmapData((
+                        (await get_beatmap_data(top_play["hash"]))['beatmap_id']
+                    ), mods=top_play['mods'], misses=top_play['miss'],
+                        accuracy=top_play['accuracy'], max_combo=top_play['combo'],
+                        formatted=True, custom_speed=1.00
+                    )
+                    beatmap_diff_data = beatmap_data.get_diff()
+                    beatmap_bpp_data = beatmap_data.get_bpp()
+
+                    bpp_aim_list.append(float(beatmap_bpp_data['aim_pp']))
+                    bpp_speed_list.append(float(beatmap_bpp_data["speed_pp"]))
+
+                    diff_ar_list.append((float(beatmap_diff_data["diff_approach"])))
+
+                to_calculate = [
+                    diff_ar_list,
+                    bpp_speed_list,
+                    bpp_aim_list,
+                ]
+
+                calculated = []
+
+                for calc_list in to_calculate:
                     try:
-                        top_plays = raw_user_data.pp_data['list']
+                        res = sum(calc_list) / len(calc_list)
+                    except ZeroDivisionError:
+                        pass
+                    else:
+                        calculated.append(res)
+
+                total_bpp = 0
+                if db_user_data is not None:
+                    try:
+                        total_bpp = db_user_data['total_bpp']
                     except KeyError:
-                        continue
+                        pass
 
-                    for x in top_plays:
-                        x['bpp'], x['net_bpp'] = 0, 0
+                user_data = {
+                    "profile": raw_user_data.profile,
+                    "total_bpp": total_bpp,
+                    "pp_data": top_plays,
+                    "reading": calculated[0],
+                    "speed": calculated[1],
+                    "aim": calculated[2],
+                }
 
-                try:
-                    for top_play in top_plays:
-                        # Sleep = loop_time * 1.50 if 30 UIDS or less
-                        await asyncio.sleep(1.50)
-
-                        beatmap_data = OsuDroidBeatmapData((
-                            (await get_beatmap_data(top_play["hash"]))['beatmap_id']
-                        ), mods=top_play['mods'], misses=top_play['miss'],
-                            accuracy=top_play['accuracy'], max_combo=top_play['combo'],
-                            formatted=True, custom_speed=1.00
-                        )
-                        beatmap_diff_data = beatmap_data.get_diff()
-                        beatmap_bpp_data = beatmap_data.get_bpp()
-
-                        bpp_aim_list.append(float(beatmap_bpp_data['aim_pp']))
-                        bpp_speed_list.append(float(beatmap_bpp_data["speed_pp"]))
-
-                        diff_ar_list.append((float(beatmap_diff_data["diff_approach"])))
-
-                    to_calculate = [
-                        diff_ar_list,
-                        bpp_speed_list,
-                        bpp_aim_list,
-                    ]
-
-                    calculated = []
-
-                    for calc_list in to_calculate:
-                        try:
-                            res = sum(calc_list) / len(calc_list)
-                        except ZeroDivisionError:
-                            pass
-                        else:
-                            calculated.append(res)
-
-                    total_bpp = 0
-                    if db_user_data is not None:
-                        try:
-                            total_bpp = db_user_data['total_bpp']
-                        except KeyError:
-                            pass
-
-                    user_data = {
-                        "profile": raw_user_data.profile,
-                        "total_bpp": total_bpp,
-                        "pp_data": top_plays,
-                        "reading": calculated[0],
-                        "speed": calculated[1],
-                        "aim": calculated[2],
-                    }
-
-                    fetched_data.append(user_data)
-                except (KeyError, JSONDecodeError):
-                    pass
+                fetched_data.append(user_data)
+            except (KeyError, JSONDecodeError):
+                pass
 
             print(fetched_data)
 
@@ -810,11 +809,11 @@ class OsuDroid(commands.Cog):
                     inline=False
                 )
 
-        # noinspection PyBroadException
-        try:
-            return await br_rank_message.edit(content="", embed=updated_data)
-        except Exception:
-            return await br_rank_channel.send("Não foi possivel encontrar a mensagem do rank dpp")
+            # noinspection PyBroadException
+            try:
+                return await br_rank_message.edit(content="", embed=updated_data)
+            except Exception:
+                return await br_rank_channel.send("Não foi possivel encontrar a mensagem do rank dpp")
 
 
 def setup(bot):
