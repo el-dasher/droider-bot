@@ -15,16 +15,18 @@ class OsuDroidBeatmapData:
         self._formatted = formatted
         self._custom_speed = custom_speed
 
-    def _calculate_droid_stats(self, beatmap: oppadc.OsuMap):
+    def _calculate_droid_stats(self, beatmap: oppadc.OsuMap, change_cs=True):
         mods = self._mods
 
-        beatmap.od = 5 - (75 + 5 * (5 - beatmap.od) - 50) / 6
-        beatmap.cs -= 4
+        if change_cs:
+            beatmap.od = 5 - (75 + 5 * (5 - beatmap.od) - 50) / 6
+            beatmap.cs -= 4
+
+            if "SC" in mods:
+                beatmap.cs += 4
 
         if "PR" in mods:
             beatmap.od = 3 + 1.2 * beatmap.od
-        if "SC" in mods:
-            beatmap.cs += 4
         if "REZ" in mods:
             beatmap.ar -= 0.5
             beatmap.cs -= 4
@@ -116,7 +118,7 @@ class OsuDroidBeatmapData:
 
         beatmap: oppadc.OsuMap = useful_data["beatmap"]
 
-        self._calculate_droid_stats(beatmap)
+        self._calculate_droid_stats(beatmap, change_cs=False)
 
         diff_data = beatmap.getDifficulty(Mods=mods, recalculate=True)
 
@@ -138,8 +140,8 @@ class OsuDroidBeatmapData:
         useful_data = get_ppv2(beatmap_id, mods, formatted=False)
         beatmap: oppadc.OsuMap = useful_data["beatmap"]
 
-        self._calculate_droid_stats(beatmap)
-
+        self._calculate_droid_stats(beatmap, change_cs=True)
+        
         beatmap_stats = beatmap.getStats(Mods=mods)
         length_bonus = beatmap_stats.aim_length_bonus + beatmap_stats.aim_length_bonus
 
