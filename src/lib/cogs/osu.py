@@ -767,7 +767,6 @@ class OsuDroid(commands.Cog):
                 }
 
                 fetched_data.append(user_data)
-                print(fetched_data)
             except (KeyError, JSONDecodeError):
                 pass
 
