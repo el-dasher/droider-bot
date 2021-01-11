@@ -449,7 +449,6 @@ class OsuDroid(commands.Cog):
                 await message.edit(embed=next_ppcheck_embed)
         return await message.clear_reactions()
 
-    @commands.has_permissions(administrator=True)
     @commands.command(name="completecalc", aliases=["pp"])
     async def submit_pp(self, ctx: commands.Context, user: discord.Member = None):
 
@@ -460,13 +459,13 @@ class OsuDroid(commands.Cog):
         await ctx.trigger_typing()
 
         user_to_submit = ctx.author.id
-        submit_string: str = "O seu pp sera submitado à database em até 40 minutos!"
+        submit_string: str = "O seu pp sera submitado à database em até 1 hora!"
         succesful_msg: str = "O seu pp foi submitado com sucesso!"
         fail_msg: str = "Não foi possível submitar seu pp!"
         if dict(ctx.author.guild_permissions)['administrator'] is True:
             if user is not None:
                 user_to_submit = user.id
-                submit_string = "O pp dele será submitado à database em até 40 minutos!"
+                submit_string = "O pp dele será submitado à database em até 1 hora!"
                 succesful_msg = "O pp dele foi submitado com sucesso!"
                 fail_msg = "Não foi possivel submitar o pp dele!"
 
@@ -479,18 +478,19 @@ class OsuDroid(commands.Cog):
             await ctx.reply(submit_string)
             # noinspection PyBroadException
             try:
-                await self.submit_user_data(uid, user_to_submit)
-                return await ctx.reply(succesful_msg)
+                await self.submit_user_data(uid, user_to_submit, 36)
             except Exception:
                 return await ctx.reply(fail_msg)
+            else:
+                return await ctx.reply(succesful_msg)
 
     @staticmethod
-    async def submit_user_data(uid: int, discord_id: Union[int, str]):
+    async def submit_user_data(uid: int, discord_id: Union[int, str], sleep_time=6):
         user = OsuDroidProfile(uid, needs_pp_data=True)
         pp_data = user.pp_data
 
         for play in pp_data['list']:
-            await asyncio.sleep(6)
+            await asyncio.sleep(sleep_time)
             try:
                 beatmap_data = OsuDroidBeatmapData((await get_beatmap_data(play['hash']))['beatmap_id'],
                                                    mods=play['mods'],
