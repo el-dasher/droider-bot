@@ -695,6 +695,7 @@ class OsuDroid(commands.Cog):
         uid_list = DATABASE.child("BR_UIDS").get().val()["uids"]
 
         for uid in uid_list:
+
             bpp_aim_list, bpp_speed_list, diff_ar_list = [], [], []
             
             try:
@@ -795,7 +796,7 @@ class OsuDroid(commands.Cog):
             updated_data.add_field(
                 name=f"{i + 1} - {data['profile']['username']}",
                 value=(
-                    f">>> ```\n{data['profile']['raw_pp']:.2f}pp - {data['total_bpp']}bpp\n"
+                    f">>> ```\n{data['profile']['raw_pp']:.2f}pp - {data['total_bpp']:.2f}bpp\n"
                     f" accuracy: {data['profile']['overall_acc']:.2f}% - rankscore: #{data['profile']['rankscore']}\n"
                     f""
                     f"[speed: {data['speed']:.2f} |"
