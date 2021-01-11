@@ -364,6 +364,8 @@ class OsuDroid(commands.Cog):
                 pp_data = DATABASE.child("DROID_USERS").child(discord_id).child("user").child("pp_data").get().val()
             except Exception:
                 return await ctx.reply(not_registered_msg)
+            else:
+                pp_data['list'] = sorted(pp_data['list'], key=lambda item: item['bpp'], reverse=True)
         else:
             try:
                 pp_data = user.pp_data
@@ -485,10 +487,10 @@ class OsuDroid(commands.Cog):
                 return await ctx.reply(succesful_msg)
 
     @staticmethod
-    async def submit_user_data(uid: int, discord_id: Union[int, str], sleep_time=6):
+    async def submit_user_data(uid: int, discord_id: Union[int, str], sleep_time=3):
         try:
             user = OsuDroidProfile(uid, needs_pp_data=True)
-        except keyError:
+        except KeyError:
             return
 
         pp_data = user.pp_data
@@ -676,7 +678,7 @@ class OsuDroid(commands.Cog):
                                  )
             return await ctx.reply(f"<@{ctx.author.id}>", embed=calc_embed)
 
-    @tasks.loop(hours=12)
+    @tasks.loop(hours=6)
     async def _update_pps(self):
         discord_ids: list = list((pp_datas := DATABASE.child("DROID_USERS").get().val()))
 
@@ -686,7 +688,7 @@ class OsuDroid(commands.Cog):
             except JSONDecodeError:
                 pass
 
-    @tasks.loop(hours=6)
+    @tasks.loop(hours=3)
     async def _brdpp_rank(self):
 
         if debug:
@@ -727,7 +729,7 @@ class OsuDroid(commands.Cog):
             try:
                 for top_play in top_plays:
                     # Sleep = loop_time * 1.50 if 30 UIDS or less
-                    await asyncio.sleep(9)
+                    await asyncio.sleep(4.5)
 
                     beatmap_data = OsuDroidBeatmapData((
                         (await get_beatmap_data(top_play["hash"]))['beatmap_id']
