@@ -486,7 +486,11 @@ class OsuDroid(commands.Cog):
 
     @staticmethod
     async def submit_user_data(uid: int, discord_id: Union[int, str], sleep_time=6):
-        user = OsuDroidProfile(uid, needs_pp_data=True)
+        try:
+            user = OsuDroidProfile(uid, needs_pp_data=True)
+        except keyError:
+            return
+
         pp_data = user.pp_data
 
         for play in pp_data['list']:
@@ -535,7 +539,10 @@ class OsuDroid(commands.Cog):
                 return await ctx.reply(self.missing_uid_msg)
         elif len(uid) >= 9:
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
-        user = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
+        try:
+            user = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
+        except KeyError:
+            return await ctx.reply("Não foi possível encontrar este usuário!")
         try:
             try:
                 profile_data = user.profile

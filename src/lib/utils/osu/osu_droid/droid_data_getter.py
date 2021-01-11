@@ -28,7 +28,7 @@ class OsuDroidProfile:
             "Hidden", "HD").replace("HardRock", "HR").replace(
             "Precise", "PR").replace("NoFail", "NF").replace(
             "Easy", "EZ").replace("NightCore", "NC").replace(
-            "Precise", "PR").replace(",", "").strip().replace(" ", "")
+            "Precise", "PR").replace("None", "NM").replace(",", "").strip().replace(" ", "")
 
         if modstring == "":
             modstring = "NM"
