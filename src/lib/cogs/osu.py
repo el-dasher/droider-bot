@@ -681,7 +681,7 @@ class OsuDroid(commands.Cog):
     @tasks.loop(hours=1)
     async def _brdpp_rank(self):
 
-        if debug:
+        if not debug:
             return None
 
         try:
@@ -692,122 +692,123 @@ class OsuDroid(commands.Cog):
 
         fetched_data = []
 
-        uid_list = DATABASE.child("BR_UIDS").get().val()["uids"]
+        async with br_rank_channel.typing():
+            uid_list = DATABASE.child("BR_UIDS").get().val()["uids"]
 
-        for uid in uid_list:
-            bpp_aim_list, bpp_speed_list, diff_ar_list = [], [], []
-            
-            try:
-                raw_user_data = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
-            except KeyError:
-                continue
+            for uid in uid_list:
+                bpp_aim_list, bpp_speed_list, diff_ar_list = [], [], []
 
-            db_user_data = DATABASE.child("DROID_UID_DATA").child(uid).get().val()
-
-            try:
-                top_plays = db_user_data['list']
-            except (KeyError, TypeError):
                 try:
-                    top_plays = raw_user_data.pp_data['list']
+                    raw_user_data = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
                 except KeyError:
                     continue
 
-                for x in top_plays:
-                    x['bpp'], x['net_bpp'] = 0, 0
+                db_user_data = DATABASE.child("DROID_UID_DATA").child(uid).get().val()
 
-            try:
-                for top_play in top_plays:
-                    # Sleep = loop_time * 1.50 if 30 UIDS or less
-                    await asyncio.sleep(1.50)
-
-                    beatmap_data = OsuDroidBeatmapData((
-                        (await get_beatmap_data(top_play["hash"]))['beatmap_id']
-                    ), mods=top_play['mods'], misses=top_play['miss'],
-                        accuracy=top_play['accuracy'], max_combo=top_play['combo'],
-                        formatted=True, custom_speed=1.00
-                    )
-                    beatmap_diff_data = beatmap_data.get_diff()
-                    beatmap_bpp_data = beatmap_data.get_bpp()
-
-                    bpp_aim_list.append(float(beatmap_bpp_data['aim_pp']))
-                    bpp_speed_list.append(float(beatmap_bpp_data["speed_pp"]))
-
-                    diff_ar_list.append((float(beatmap_diff_data["diff_approach"])))
-
-                to_calculate = [
-                    diff_ar_list,
-                    bpp_speed_list,
-                    bpp_aim_list,
-                ]
-
-                calculated = []
-
-                for calc_list in to_calculate:
+                try:
+                    top_plays = db_user_data['list']
+                except (KeyError, TypeError):
                     try:
-                        res = sum(calc_list) / len(calc_list)
-                    except ZeroDivisionError:
-                        pass
-                    else:
-                        calculated.append(res)
-
-                total_bpp = 0
-                if db_user_data is not None:
-                    try:
-                        total_bpp = db_user_data['total_bpp']
+                        top_plays = raw_user_data.pp_data['list']
                     except KeyError:
-                        pass
+                        continue
 
-                user_data = {
-                    "profile": raw_user_data.profile,
-                    "total_bpp": total_bpp,
-                    "pp_data": top_plays,
-                    "reading": calculated[0],
-                    "speed": calculated[1],
-                    "aim": calculated[2],
-                }
+                    for x in top_plays:
+                        x['bpp'], x['net_bpp'] = 0, 0
 
-                fetched_data.append(user_data)
-            except (KeyError, JSONDecodeError):
-                pass
+                try:
+                    for top_play in top_plays:
+                        # Sleep = loop_time * 1.50 if 30 UIDS or less
+                        await asyncio.sleep(1.50)
 
-        print(fetched_data)
+                        beatmap_data = OsuDroidBeatmapData((
+                            (await get_beatmap_data(top_play["hash"]))['beatmap_id']
+                        ), mods=top_play['mods'], misses=top_play['miss'],
+                            accuracy=top_play['accuracy'], max_combo=top_play['combo'],
+                            formatted=True, custom_speed=1.00
+                        )
+                        beatmap_diff_data = beatmap_data.get_diff()
+                        beatmap_bpp_data = beatmap_data.get_bpp()
 
-        fetched_data.sort(key=lambda e: e['profile']['raw_pp'], reverse=True)
-        top_players = fetched_data[:25]
+                        bpp_aim_list.append(float(beatmap_bpp_data['aim_pp']))
+                        bpp_speed_list.append(float(beatmap_bpp_data["speed_pp"]))
 
-        DATABASE.child("TOP_PLAYERS").child("data").set(top_players)
+                        diff_ar_list.append((float(beatmap_diff_data["diff_approach"])))
 
-        updated_data = discord.Embed(title="RANK DPP BR", timestamp=datetime.utcnow(), color=self.bot.user.color)
-        updated_data.set_footer(text="Atualizado")
+                    to_calculate = [
+                        diff_ar_list,
+                        bpp_speed_list,
+                        bpp_aim_list,
+                    ]
 
-        for i, data in enumerate(top_players):
+                    calculated = []
 
-            data['profile']['raw_pp'] = float(data['profile']['raw_pp'])
-            data['total_bpp'] = float(data['total_bpp'])
-            data['profile']['overall_acc'] = float(data['profile']['overall_acc'][:-1])
-            data['speed'] = float(data['speed'])
-            data['aim'] = float(data['aim'])
-            data['reading'] = float(data['reading'])
+                    for calc_list in to_calculate:
+                        try:
+                            res = sum(calc_list) / len(calc_list)
+                        except ZeroDivisionError:
+                            pass
+                        else:
+                            calculated.append(res)
 
-            if len(data["pp_data"]) < 75:
-                data["speed"], data["aim"], data["reading"], data["consistency"] = 0, 0, 0, 0
+                    total_bpp = 0
+                    if db_user_data is not None:
+                        try:
+                            total_bpp = db_user_data['total_bpp']
+                        except KeyError:
+                            pass
 
-            updated_data.add_field(
-                name=f"{i + 1} - {data['profile']['username']}",
-                value=(
-                    f">>> ```\n{data['profile']['raw_pp']:.2f}pp - {data['total_bpp']}bpp\n"
-                    f" accuracy: {data['profile']['overall_acc']:.2f}% - rankscore: #{data['profile']['rankscore']}\n"
-                    f""
-                    f"[speed: {data['speed']:.2f} |"
-                    f" aim: {data['aim']:.2f} |"
-                    f" reading: AR{data['reading']:.2f}]"
-                    f"\n"
-                    f"```"
-                    f""
-                    # f" consistência: {data['consistency']:.2f}]"
-                ),
-                inline=False
-            )
+                    user_data = {
+                        "profile": raw_user_data.profile,
+                        "total_bpp": total_bpp,
+                        "pp_data": top_plays,
+                        "reading": calculated[0],
+                        "speed": calculated[1],
+                        "aim": calculated[2],
+                    }
+
+                    fetched_data.append(user_data)
+                except (KeyError, JSONDecodeError):
+                    pass
+
+            print(fetched_data)
+
+            fetched_data.sort(key=lambda e: e['profile']['raw_pp'], reverse=True)
+            top_players = fetched_data[:25]
+
+            DATABASE.child("TOP_PLAYERS").child("data").set(top_players)
+
+            updated_data = discord.Embed(title="RANK DPP BR", timestamp=datetime.utcnow(), color=self.bot.user.color)
+            updated_data.set_footer(text="Atualizado")
+
+            for i, data in enumerate(top_players):
+
+                data['profile']['raw_pp'] = float(data['profile']['raw_pp'])
+                data['total_bpp'] = float(data['total_bpp'])
+                data['profile']['overall_acc'] = float(data['profile']['overall_acc'][:-1])
+                data['speed'] = float(data['speed'])
+                data['aim'] = float(data['aim'])
+                data['reading'] = float(data['reading'])
+
+                if len(data["pp_data"]) < 75:
+                    data["speed"], data["aim"], data["reading"], data["consistency"] = 0, 0, 0, 0
+
+                updated_data.add_field(
+                    name=f"{i + 1} - {data['profile']['username']}",
+                    value=(
+                        f">>> ```\n{data['profile']['raw_pp']:.2f}dpp - {data['total_bpp']:.2f}bpp\n"
+                        f"accuracy: {data['profile']['overall_acc']:.2f}% - rankscore: #{data['profile']['rankscore']}"
+                        f"\n"
+                        f"[speed: {data['speed']:.2f} |"
+                        f" aim: {data['aim']:.2f} |"
+                        f" reading: AR{data['reading']:.2f}]"
+                        f"\n"
+                        f"```"
+                        f""
+                        # f" consistência: {data['consistency']:.2f}]"
+                    ),
+                    inline=False
+                )
 
         # noinspection PyBroadException
         try:
