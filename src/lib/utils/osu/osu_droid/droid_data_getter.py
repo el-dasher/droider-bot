@@ -6,21 +6,28 @@ from bs4 import BeautifulSoup
 
 from src.setup import DPPBOARD_API as DPP_BOARD_API
 
+import aiohttp
+
 
 class OsuDroidProfile:
     def __init__(self, uid: int, needs_player_html: bool = False, needs_pp_data: bool = False):
+        self.needs_player_html = needs_player_html,
+        self.needs_pp_data = needs_pp_data
+
         self.uid = uid
+        self._user_pp_data_json = None
+        self._player_html = None
 
-        print("REQUEST")
-
-        if needs_player_html:
-            self._player_html = BeautifulSoup(requests.get(
-                f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
-                                         )
-        if needs_pp_data:
-            self._user_pp_data_json = requests.get(
-                f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPP_BOARD_API}&uid={self.uid}"
-            ).json()['data']
+    async def setup(self):
+        async with aiohttp.ClientSession() as session:
+            if self.needs_player_html:
+                url = f"http://ops.dgsrz.com/profile.php?uid={self.uid}"
+                async with session.get(url) as res:
+                    self._player_html = BeautifulSoup(await res.text(), features="html.parser")
+            if self.needs_pp_data:
+                url = f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPP_BOARD_API}&uid={self.uid}"
+                async with session.get(url) as res:
+                    self._user_pp_data_json = (await res.json(content_type='text/html'))['data']
 
     @staticmethod
     def _replace_mods(modstring: str):
@@ -119,7 +126,14 @@ class OsuDroidProfile:
 
     @property
     def pp_data(self):
-        data = (raw_data := self._user_pp_data_json)['pp']
+        try:
+            data = (raw_data := self._user_pp_data_json)['pp']
+        except KeyError:
+            return {
+                "uid": 0,
+                "username": "None",
+                "list": []
+            }
 
         data['uid'] = raw_data['uid']
         data['username'] = raw_data['username']

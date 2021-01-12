@@ -258,6 +258,8 @@ class OsuDroid(commands.Cog):
             user = OsuDroidProfile(uid, needs_player_html=True)
         except KeyError:
             return await ctx.reply("Não foi possível encontrar esse usuário!")
+        else:
+            await user.setup()
         try:
             rs_data = user.recent_play
         except (IndexError, KeyError, AttributeError):
@@ -354,6 +356,8 @@ class OsuDroid(commands.Cog):
             user = OsuDroidProfile(uid, needs_pp_data=True)
         except KeyError:
             return await ctx.reply("Não foi posssivel encontrar o usuário :(")
+        else:
+            await user.setup()
 
         not_registered_msg = "O usuário ou você não possui uma conta registrada na database" \
                              " ou você esqueceu de submitar seus pp's use `&pp` ou `&bind uid>`" \
@@ -488,10 +492,14 @@ class OsuDroid(commands.Cog):
 
     @staticmethod
     async def submit_user_data(uid: int, discord_id: Union[int, str], sleep_time=12):
+        await asyncio.sleep(3)
+
         try:
             user = OsuDroidProfile(uid, needs_pp_data=True)
         except KeyError:
             return
+        else:
+            await user.setup()
 
         pp_data = user.pp_data
 
@@ -545,9 +553,12 @@ class OsuDroid(commands.Cog):
             user = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
         except KeyError:
             return await ctx.reply("Não foi possível encontrar este usuário!")
+        else:
+            await user.setup()
         try:
             try:
                 profile_data = user.profile
+                print(user.pp_data)
             except IndexError:
                 return await ctx.reply(
                     f"Não existe uma uid ou o usuário não se cadastrou: {uid_original}")
@@ -590,8 +601,13 @@ class OsuDroid(commands.Cog):
                 uid = [int(s) for s in uid.split() if s.isdigit()][0]
             except IndexError:
                 return await ctx.reply("O uid pode apenas conter números :(")
+        try:
+            user = OsuDroidProfile(uid, needs_player_html=True)
+        except KeyError:
+            return await ctx.reply("Não foi possível encontrar esse usúario!")
+        else:
+            await user.setup()
 
-        user = OsuDroidProfile(uid, needs_player_html=True)
         profile = user.profile
 
         if type(user_to_bind) == discord.Member:
@@ -678,20 +694,20 @@ class OsuDroid(commands.Cog):
                                  )
             return await ctx.reply(f"<@{ctx.author.id}>", embed=calc_embed)
 
-    @tasks.loop(hours=24)
+    @tasks.loop(hours=12)
     async def _update_pps(self):
         discord_ids: list = list((pp_datas := DATABASE.child("DROID_USERS").get().val()))
 
         for uid in discord_ids:
             try:
-                await self.submit_user_data(pp_datas[uid]['user']['user_id'], uid)
+                await self.submit_user_data(pp_datas[uid]['user']['user_id'], uid, sleep_time=6)
             except JSONDecodeError:
                 pass
 
-    @tasks.loop(hours=24)
+    @tasks.loop(hours=6)
     async def _brdpp_rank(self):
 
-        if debug:
+        if not debug:
             return None
 
         try:
@@ -712,6 +728,8 @@ class OsuDroid(commands.Cog):
                 raw_user_data = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
             except KeyError:
                 continue
+            else:
+                await raw_user_data.setup()
 
             db_user_data = DATABASE.child("DROID_UID_DATA").child(uid).get().val()
 
@@ -729,7 +747,7 @@ class OsuDroid(commands.Cog):
             try:
                 for top_play in top_plays:
                     # Sleep = loop_time * 1.50 if 30 UIDS or less
-                    await asyncio.sleep(36)
+                    await asyncio.sleep(9)
 
                     beatmap_data = OsuDroidBeatmapData((
                         (await get_beatmap_data(top_play["hash"]))['beatmap_id']
