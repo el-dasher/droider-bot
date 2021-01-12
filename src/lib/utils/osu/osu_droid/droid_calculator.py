@@ -48,7 +48,10 @@ class OsuDroidBeatmapData:
         useful_data = get_ppv2(beatmap_id, mods, misses, accuracy, max_combo, formatted=False)
 
         beatmap: oppadc.OsuMap = useful_data["beatmap"]
+
         self._calculate_droid_stats(beatmap)
+
+        # noinspection PyTypeChecker
         pp_data = beatmap.getPP(Mods=mods, accuracy=accuracy, misses=misses, combo=max_combo, recalculate=True)
 
         raw_pp = pp_data.total_pp

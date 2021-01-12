@@ -1,7 +1,6 @@
 import requests
 
 from src.lib.external.oppadc import oppadc
-from src.paths import RECENT_OSU_FILE_PATH
 
 
 def get_ppv2(beatmap_id, mods: str = "NM", misses: int = 0,
@@ -20,11 +19,7 @@ def get_ppv2(beatmap_id, mods: str = "NM", misses: int = 0,
                                          ).content).replace("\\n", "\n").replace("\\r", "\r"
                                                                                  )[2:][:-2].replace("\n", "")
 
-    with open(RECENT_OSU_FILE_PATH, "w+") as recent_file:
-        recent_file.write(beatmap_data)
-        recent_file.close()
-
-    beatmap: oppadc.OsuMap = oppadc.OsuMap(file_path=RECENT_OSU_FILE_PATH)
+    beatmap: oppadc.OsuMap = oppadc.OsuMap(raw_str=beatmap_data)
 
     if max_combo is None:
         max_combo = beatmap.maxCombo()

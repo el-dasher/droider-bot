@@ -58,7 +58,7 @@ class GoogleSearch(commands.Cog):
         return await ctx.reply(content=f"<@{ctx.author.id}>", embed=result_embed)
 
     @commands.command()
-    async def im(self, ctx: commands.Context, *query) -> None:
+    async def im(self, ctx: commands.Context, *query):
         await ctx.trigger_typing()
         if not query:
             return await ctx.reply("Você esqueceu de por os parâmetros para a pesquisa!")
