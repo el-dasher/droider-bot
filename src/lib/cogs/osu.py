@@ -715,7 +715,7 @@ class OsuDroid(commands.Cog):
                                  )
 
             calc_embed.add_field(name="Dados do beatmap", value=">>> **"
-                                                                f"CS/OD/AR/HP:\n {cs}/{od}/{ar}/{hp}"
+                                                                f"CS/OD/AR/HP:\n {cs:.2f}/{od:.2f}/{ar:.2f}/{hp.2f}"
                                                                 f"**")
 
             return await ctx.reply(f"<@{ctx.author.id}>", embed=calc_embed)
