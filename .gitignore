@@ -249,3 +249,4 @@ fabric.properties
 /.idea/workspace.xml
 .idea/workspace.xml~
 /src/lib/db/json/firebase_config.json
+pypy

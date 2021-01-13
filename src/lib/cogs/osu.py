@@ -596,7 +596,6 @@ class OsuDroid(commands.Cog):
 
             total_dpp = f"{user.total_pp:.2f}"
             total_bpp = f"{DATABASE.child('DROID_UID_DATA').child(uid).child('total_bpp').get().val():.2f}"
-            print(total_bpp)
 
             profile_embed.add_field(name="---Performance", value="**"
                                                                  f"Ele(a) é do(a)"
