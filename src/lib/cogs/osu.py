@@ -595,7 +595,8 @@ class OsuDroid(commands.Cog):
                                      name=f"Perfil do(a) {profile_data['username']}")
 
             total_dpp = f"{user.total_pp:.2f}"
-            total_bpp = DATABASE.child("DROID_UID_DATA").child(uid).child("total_bpp").get().val()
+            total_bpp = f"{DATABASE.child('DROID_UID_DATA').child(uid).child('total_bpp').get().val():.2f}"
+            print(total_bpp)
 
             profile_embed.add_field(name="---Performance", value="**"
                                                                  f"Ele(a) é do(a)"
@@ -604,7 +605,7 @@ class OsuDroid(commands.Cog):
                                                                  f"Rank: #{profile_data['rankscore']}\n"
                                                                  f"Total score: {profile_data['total_score']}\n"
                                                                  f"Total DPP: {total_dpp}\n"
-                                                                 f"Total BPP: {total_bpp:.2f}"
+                                                                 f"Total BPP: {total_bpp}\n"
                                                                  f"Overall acc: {profile_data['overall_acc']}\n"
                                                                  f"Playcount: {profile_data['playcount']}"
                                                                  "**")
@@ -802,8 +803,6 @@ class OsuDroid(commands.Cog):
                     bpp_speed_list.append(float(beatmap_bpp_data["speed_pp"]))
 
                     diff_ar_list.append((float(beatmap_diff_data.ar)))
-
-                    print("OWO")
 
                 to_calculate = [
                     diff_ar_list,

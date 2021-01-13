@@ -37,6 +37,7 @@ class OsuDroidProfile:
                             "list": []
                         }
 
+
     @staticmethod
     def _replace_mods(modstring: str):
         modstring = modstring.replace("DoubleTime", "DT").replace(
@@ -104,7 +105,7 @@ class OsuDroidProfile:
         stats = list(map(lambda a: a.text, profile_info.find_all("span", class_="pull-right")[-5:]))
         username = profile_info.find("div", class_="h3 m-t-xs m-b-xs").text
         country = profile_info.find("small", class_="text-muted").text
-        avatar = profile_info.find("a", class_="thumb-lg")
+        avatar = profile_info.find("a", class_="thumb-lg").find("img")['src']
         rankscore = profile_info.find("span", class_="m-b-xs h4 block").text
 
         try:
