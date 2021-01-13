@@ -24,19 +24,15 @@ class OsuDroidBeatmapData:
         self._calculate_droid_stats(beatmap=self._beatmap_data)
 
     @property
-    def original_diff(self, raw_diff: bool = False):
+    def data(self):
+        beatmap = self._beatmap_data
+        return beatmap
+
+    @property
+    def original_diff(self):
         diff_data = self._beatmap_diff_before_readjust
 
-        if raw_diff:
-            return diff_data
-        else:
-            return {
-                "diff_approach": diff_data.ar,
-                "diff_size": diff_data.cs,
-                "diff_overall": diff_data.od,
-                "diff_drain": diff_data.hp,
-                "mods": self._mods
-            }
+        return diff_data
 
     def _calculate_droid_stats(self, beatmap: oppadc.OsuMap):
         mods = self._mods
@@ -128,7 +124,7 @@ class OsuDroidBeatmapData:
                 "acc_percent": f"{acc_percent: .2f}"
             }
 
-    def get_diff(self, raw_data=False):
+    def get_diff(self):
         mods = self._mods
 
         beatmap: oppadc.OsuMap = self._beatmap_data
@@ -137,16 +133,7 @@ class OsuDroidBeatmapData:
 
         diff_data = beatmap.getDifficulty(Mods=mods, recalculate=True)
 
-        if raw_data:
-            return diff_data
-
-        return {
-            "diff_approach": diff_data.ar,
-            "diff_size": diff_data.cs,
-            "diff_overall": diff_data.od,
-            "diff_drain": diff_data.hp,
-            "mods": mods
-        }
+        return diff_data
 
     def get_length_bonus(self):
         mods = self._mods.upper()

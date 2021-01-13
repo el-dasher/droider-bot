@@ -283,11 +283,11 @@ class OsuDroid(commands.Cog):
 
                 bm_data_string = (
                     ">>> **"
-                    f"CS/OD/AR/HP:"
-                    f" {float(beatmap_stats['diff_size']):.2f}/"
-                    f"{float(beatmap_stats['diff_overall']):.2f}/"
-                    f"{float(beatmap_stats['diff_approach']):.2f}/"
-                    f"{float(beatmap_stats['diff_drain']):.2f}\n"
+                    "CS/OD/AR/HP:"
+                    f" {beatmap_stats.cs:.2f}/"
+                    f"{beatmap_stats.od:.2f}/"
+                    f"{beatmap_stats.ar:.2f}/"
+                    f"{beatmap_stats.hp:.2f}"
                     "**"
                 )
 
@@ -665,30 +665,43 @@ class OsuDroid(commands.Cog):
                 accuracy = float(parameter[:-1])
             elif parameter.endswith("s"):
                 speed = float(parameter[:-1])
-
-        beatmap_pp_data = OsuDroidBeatmapData(beatmap_id, mods, misses, accuracy, custom_speed=speed).get_bpp()
-
-        if len(beatmap_pp_data) == 0:
+        try:
+            beatmap_data = OsuDroidBeatmapData(beatmap_id, mods, misses, accuracy, custom_speed=speed)
+        except AttributeError:
             return await ctx.reply(error_message)
         else:
-            beatmap_data = OSU_API.get_beatmaps({"b": beatmap_id})[0]
+            beatmap_pp_data = beatmap_data.get_bpp()
+            beatmap_diff_data = beatmap_data.original_diff
+            raw_beatmap_data = beatmap_data.data
 
             calc_embed = discord.Embed(color=ctx.author.color)
 
+            title = raw_beatmap_data.title
+
             calc_embed.set_author(
-                name=f"{beatmap_data['title']} +{mods} -{misses} {float(accuracy):.2f}% {speed}x",
+                name=f"{title} +{mods} -{misses} {float(accuracy):.2f}% {speed}x",
                 url=link
             )
 
-            calc_embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{beatmap_data['beatmapset_id']}l.jpg")
+            calc_embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{beatmap_id}l.jpg")
 
-            calc_embed.add_field(name="Calculado...", value=">>> **"
+            cs = beatmap_diff_data.cs
+            od = beatmap_diff_data.od
+            ar = beatmap_diff_data.ar
+            hp = beatmap_diff_data.hp
+
+            calc_embed.add_field(name="Dados de BPP", value=">>> **"
                                                             f"BPP: {beatmap_pp_data['raw_pp']: .2f}\n"
                                                             f"Aim BPP: {beatmap_pp_data['aim_pp']: .2f}\n"
                                                             f"Speed BPP: {beatmap_pp_data['speed_pp']: .2f}\n"
                                                             f"Acc BPP: {beatmap_pp_data['acc_pp']: .2f}"
                                                             f"**"
                                  )
+
+            calc_embed.add_field(name="Dados do beatmap", value=">>> **"
+                                                                f"CS/OD/AR/HP:\n {cs}/{od}/{ar}/{hp}"
+                                                                f"**")
+
             return await ctx.reply(f"<@{ctx.author.id}>", embed=calc_embed)
 
     @tasks.loop(hours=12)
@@ -758,7 +771,7 @@ class OsuDroid(commands.Cog):
                     bpp_aim_list.append(float(beatmap_bpp_data['aim_pp']))
                     bpp_speed_list.append(float(beatmap_bpp_data["speed_pp"]))
 
-                    diff_ar_list.append((float(beatmap_diff_data["diff_approach"])))
+                    diff_ar_list.append((float(beatmap_diff_data.ar)))
 
                 to_calculate = [
                     diff_ar_list,
