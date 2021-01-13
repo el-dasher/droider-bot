@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from src.setup import DPPBOARD_API as DPP_BOARD_API
 
 import aiohttp
+from json.decoder import JSONDecodeError
 
 
 class OsuDroidProfile:
@@ -27,7 +28,14 @@ class OsuDroidProfile:
             if self.needs_pp_data:
                 url = f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPP_BOARD_API}&uid={self.uid}"
                 async with session.get(url) as res:
-                    self._user_pp_data_json = (await res.json(content_type='text/html'))['data']
+                    try:
+                        self._user_pp_data_json = (await res.json(content_type='text/html'))['data']
+                    except JSONDecodeError:
+                        self._user_pp_data_json = {
+                            "uid": 0,
+                            "username": "None",
+                            "list": []
+                        }
 
     @staticmethod
     def _replace_mods(modstring: str):

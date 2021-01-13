@@ -278,20 +278,19 @@ class OsuDroid(commands.Cog):
 
                 play_bpp = beatmap_data.get_bpp()['raw_pp']
 
-                max_bpp = OsuDroidBeatmapData(
-                    int(rs_bm_data['beatmap_id']), rs_data['mods'],
-                    accuracy=float(rs_data['accuracy'][:-1]), formatted=True
-                ).get_bpp()['raw_pp']
+                max_bpp = beatmap_data.get_bpp(max_values=True)['raw_pp']
+                beatmap_stats = beatmap_data.original_diff
 
-                beatmap_stats = beatmap_data.get_diff()
+                bm_data_string = (
+                    ">>> **"
+                    f"CS/OD/AR/HP:"
+                    f" {float(beatmap_stats['diff_size']):.2f}/"
+                    f"{float(beatmap_stats['diff_overall']):.2f}/"
+                    f"{float(beatmap_stats['diff_approach']):.2f}/"
+                    f"{float(beatmap_stats['diff_drain']):.2f}\n"
+                    "**"
+                )
 
-                bm_data_string = (">>> **"
-                                  f"CS/OD/AR/HP:"
-                                  f" {float(beatmap_stats['diff_size']):.2f}/"
-                                  f"{float(beatmap_stats['diff_overall']):.2f}/"
-                                  f"{float(beatmap_stats['diff_approach']):.2f}/"
-                                  f"{float(beatmap_stats['diff_drain']):.2f}\n"
-                                  "**")
             else:
                 play_bpp = 0
                 max_bpp = 0
@@ -492,8 +491,6 @@ class OsuDroid(commands.Cog):
 
     @staticmethod
     async def submit_user_data(uid: int, discord_id: Union[int, str], sleep_time=12):
-        await asyncio.sleep(3)
-
         try:
             user = OsuDroidProfile(uid, needs_pp_data=True)
         except KeyError:
@@ -646,12 +643,12 @@ class OsuDroid(commands.Cog):
         error_message: str = f'"{link}", Não é um link ou id válido!'
 
         if link is None:
-            return await ctx.send("Você esqueceu do link do beatmap!")
+            return await ctx.reply("Você esqueceu do link do beatmap!")
         else:
             try:
                 beatmap_id: int = int(link.split("/")[-1])
             except ValueError:
-                return await ctx.send(error_message)
+                return await ctx.reply(error_message)
 
         mods: str = "NM"
         misses: int = 0
@@ -672,7 +669,7 @@ class OsuDroid(commands.Cog):
         beatmap_pp_data = OsuDroidBeatmapData(beatmap_id, mods, misses, accuracy, custom_speed=speed).get_bpp()
 
         if len(beatmap_pp_data) == 0:
-            return await ctx.send(error_message)
+            return await ctx.reply(error_message)
         else:
             beatmap_data = OSU_API.get_beatmaps({"b": beatmap_id})[0]
 
@@ -694,13 +691,13 @@ class OsuDroid(commands.Cog):
                                  )
             return await ctx.reply(f"<@{ctx.author.id}>", embed=calc_embed)
 
-    @tasks.loop(hours=6)
+    @tasks.loop(hours=12)
     async def _update_pps(self):
         discord_ids: list = list((pp_datas := DATABASE.child("DROID_USERS").get().val()))
 
         for uid in discord_ids:
             try:
-                await self.submit_user_data(pp_datas[uid]['user']['user_id'], uid, sleep_time=3)
+                await self.submit_user_data(pp_datas[uid]['user']['user_id'], uid, sleep_time=6)
             except JSONDecodeError:
                 pass
 
@@ -723,7 +720,7 @@ class OsuDroid(commands.Cog):
         for uid in uid_list:
 
             bpp_aim_list, bpp_speed_list, diff_ar_list = [], [], []
-            
+
             try:
                 raw_user_data = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
             except KeyError:
@@ -785,15 +782,17 @@ class OsuDroid(commands.Cog):
                         total_bpp = db_user_data['total_bpp']
                     except KeyError:
                         pass
-
-                user_data = {
-                    "profile": raw_user_data.profile,
-                    "total_bpp": total_bpp,
-                    "pp_data": top_plays,
-                    "reading": calculated[0],
-                    "speed": calculated[1],
-                    "aim": calculated[2],
-                }
+                try:
+                    user_data = {
+                        "profile": raw_user_data.profile,
+                        "total_bpp": total_bpp,
+                        "pp_data": top_plays,
+                        "reading": calculated[0],
+                        "speed": calculated[1],
+                        "aim": calculated[2],
+                    }
+                except IndexError:
+                    return None
 
                 fetched_data.append(user_data)
             except (KeyError, JSONDecodeError):
