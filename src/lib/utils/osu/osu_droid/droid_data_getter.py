@@ -154,11 +154,7 @@ class OsuDroidProfile:
         data = self._user_pp_data_json
 
         # noinspection PyBroadException
-        try:
-            return data["pp"]["total"]
-        except Exception:
-            return 0
-
+        return data["pp"]["total"]
     @property
     def best_play(self):
         data = self._user_pp_data_json

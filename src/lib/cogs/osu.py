@@ -374,11 +374,11 @@ class OsuDroid(commands.Cog):
                 pp_data = user.pp_data
             except KeyError:
                 return await ctx.reply(f"Não existe uid: {uid_original}, cadastrada na alice, Ok?")
-
         if pp_data is None:
             return await ctx.reply(not_registered_msg)
 
         ppcheck_embed = discord.Embed(color=ctx.author.color)
+        dpp_board_is_offline = False
 
         async def generate_ppcheck_embed(embed: discord.Embed, index_start: int = 0, index_end: int = 5):
             embed.set_author(
@@ -396,8 +396,13 @@ class OsuDroid(commands.Cog):
                 total_bpp = 0.00
             else:
                 bpp_data = True
-
-            embed.add_field(name="\u200b", value=f">>> ```\n{float(pp_data['total']):.2f}dpp /"
+            try:
+                total_dpp = pp_data['total']
+            except KeyError:
+                nonlocal dpp_board_is_offline
+                dpp_board_is_offline = True
+                return await ctx.reply("O site do rian está infelizmente está offline :(")
+            embed.add_field(name="\u200b", value=f">>> ```\n{total_dpp}dpp /"
                                                  f" {float(total_bpp):.2f}bpp\n```")
             for i_, play_ in enumerate(pp_data['list'][index_start:index_end]):
                 if faster:
@@ -416,6 +421,9 @@ class OsuDroid(commands.Cog):
                           f" | {play_['miss']} miss | {int(float(play_['pp']))}dpp |\n{bpp_string}"
                           f"```", inline=False
                 )
+
+        if dpp_board_is_offline:
+            return
 
         await generate_ppcheck_embed(ppcheck_embed, index_end=5)
         message = await ctx.reply(content=f"<@{ctx.author.id}>", embed=ppcheck_embed)
