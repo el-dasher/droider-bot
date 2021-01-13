@@ -256,10 +256,9 @@ class OsuDroid(commands.Cog):
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
         try:
             user = OsuDroidProfile(uid, needs_player_html=True)
+            await user.setup()
         except KeyError:
             return await ctx.reply("Não foi possível encontrar esse usuário!")
-        else:
-            await user.setup()
         try:
             rs_data = user.recent_play
         except (IndexError, KeyError, AttributeError):
@@ -357,13 +356,9 @@ class OsuDroid(commands.Cog):
 
         try:
             user = OsuDroidProfile(uid, needs_pp_data=True)
+            await user.setup()
         except KeyError:
             return await ctx.reply("Não foi posssivel encontrar o usuário :(")
-        else:
-            try:
-                await user.setup()
-            except KeyError:
-                return await ctx.reply(not_registered_msg)
 
         if faster is True:
             try:
@@ -509,13 +504,9 @@ class OsuDroid(commands.Cog):
     async def submit_user_data(uid: int, discord_id: Union[int, str], sleep_time: float = 12):
         try:
             user = OsuDroidProfile(uid, needs_pp_data=True)
+            await user.setup()
         except KeyError:
             return
-        else:
-            try:
-                await user.setup()
-            except KeyError:
-                return
 
         pp_data = user.pp_data
 
@@ -575,13 +566,9 @@ class OsuDroid(commands.Cog):
         not_registered = f"Não existe uma uid ou o usuário não se cadastrou: {uid_original}"
         try:
             user = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
+            await user.setup()
         except KeyError:
             return await ctx.reply("Não foi possível encontrar este usuário!")
-        else:
-            try:
-                await user.setup()
-            except KeyError:
-                return await ctx.reply(not_registered)
         try:
             try:
                 profile_data = user.profile
@@ -630,10 +617,9 @@ class OsuDroid(commands.Cog):
                 return await ctx.reply("O uid pode apenas conter números :(")
         try:
             user = OsuDroidProfile(uid, needs_player_html=True)
+            await user.setup()
         except KeyError:
             return await ctx.reply("Não foi possível encontrar esse usúario!")
-        else:
-            await user.setup()
 
         profile = user.profile
 
@@ -736,6 +722,9 @@ class OsuDroid(commands.Cog):
 
     @tasks.loop(hours=24)
     async def _update_pps(self):
+        if debug:
+            return None
+
         discord_ids: list = list((pp_datas := DATABASE.child("DROID_USERS").get().val()))
 
         for uid in discord_ids:
@@ -766,10 +755,9 @@ class OsuDroid(commands.Cog):
 
             try:
                 raw_user_data = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
+                await raw_user_data.setup()
             except KeyError:
                 continue
-            else:
-                await raw_user_data.setup()
 
             db_user_data = DATABASE.child("DROID_UID_DATA").child(uid).get().val()
 
@@ -795,13 +783,13 @@ class OsuDroid(commands.Cog):
                         accuracy=top_play['accuracy'], max_combo=top_play['combo'],
                         formatted=True, custom_speed=1.00
                     )
-                    beatmap_diff_data = beatmap_data.get_diff()
+
                     beatmap_bpp_data = beatmap_data.get_bpp()
 
                     bpp_aim_list.append(float(beatmap_bpp_data['aim_pp']))
                     bpp_speed_list.append(float(beatmap_bpp_data["speed_pp"]))
 
-                    diff_ar_list.append((float(beatmap_diff_data.ar)))
+                    diff_ar_list.append((float(beatmap_data.data.ar)))
 
                 to_calculate = [
                     diff_ar_list,

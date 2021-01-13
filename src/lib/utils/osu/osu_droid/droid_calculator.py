@@ -124,17 +124,6 @@ class OsuDroidBeatmapData:
                 "acc_percent": f"{acc_percent: .2f}"
             }
 
-    def get_diff(self):
-        mods = self._mods
-
-        beatmap: oppadc.OsuMap = self._beatmap_data
-
-        self._calculate_droid_stats(beatmap)
-
-        diff_data = beatmap.getDifficulty(Mods=mods, recalculate=True)
-
-        return diff_data
-
     def get_length_bonus(self):
         mods = self._mods.upper()
 
