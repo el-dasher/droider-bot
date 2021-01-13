@@ -408,8 +408,10 @@ class OsuDroid(commands.Cog):
                 nonlocal dpp_board_is_offline
                 dpp_board_is_offline = True
                 return await ctx.reply("O site do rian está infelizmente está offline :(")
-            embed.add_field(name="\u200b", value=f">>> ```\n{total_dpp:.2f}dpp /"
-                                                 f" {float(total_bpp):.2f}bpp\n```")
+            else:
+                embed.add_field(name="\u200b", value=f">>> ```\n{total_dpp:.2f}dpp /"
+                                                     f" {float(total_bpp):.2f}bpp\n```")
+
             for i_, play_ in enumerate(pp_data['list'][index_start:index_end]):
                 if faster:
                     if bpp_data:
@@ -504,13 +506,16 @@ class OsuDroid(commands.Cog):
                 return await ctx.reply(succesful_msg)
 
     @staticmethod
-    async def submit_user_data(uid: int, discord_id: Union[int, str], sleep_time: float =12):
+    async def submit_user_data(uid: int, discord_id: Union[int, str], sleep_time: float = 12):
         try:
             user = OsuDroidProfile(uid, needs_pp_data=True)
         except KeyError:
             return
         else:
-            await user.setup()
+            try:
+                await user.setup()
+            except KeyError:
+                return
 
         pp_data = user.pp_data
 
@@ -539,12 +544,11 @@ class OsuDroid(commands.Cog):
                 play['diff'] = {"diff_approach": ar, "diff_drain": hp, "diff_size": cs, "diff_overall": od}
 
         pp_data['total_bpp'] = 0
-        print(pp_data)
         for i, play in enumerate(pp_data['list']):
             play_bpp = play['bpp']
             play['net_bpp'] = play_bpp * 0.95 ** i
             pp_data['total_bpp'] += play['net_bpp']
-        print(pp_data)
+
         DATABASE.child("DROID_UID_DATA").child(uid).set(pp_data)
         DATABASE.child("DROID_USERS").child(discord_id).child("user").child("pp_data").set(pp_data)
 
@@ -590,7 +594,7 @@ class OsuDroid(commands.Cog):
             profile_embed.set_author(url=f"http://ops.dgsrz.com/profile.php?uid={uid}",
                                      name=f"Perfil do(a) {profile_data['username']}")
 
-            total_dpp = f"{user.total_pp: .2f}"
+            total_dpp = f"{user.total_pp:.2f}"
             total_bpp = DATABASE.child("DROID_UID_DATA").child(uid).child("total_bpp").get().val()
 
             profile_embed.add_field(name="---Performance", value="**"
@@ -600,7 +604,7 @@ class OsuDroid(commands.Cog):
                                                                  f"Rank: #{profile_data['rankscore']}\n"
                                                                  f"Total score: {profile_data['total_score']}\n"
                                                                  f"Total DPP: {total_dpp}\n"
-                                                                 f"Total BPP: {total_bpp}"
+                                                                 f"Total BPP: {total_bpp:.2f}"
                                                                  f"Overall acc: {profile_data['overall_acc']}\n"
                                                                  f"Playcount: {profile_data['playcount']}"
                                                                  "**")
@@ -798,6 +802,8 @@ class OsuDroid(commands.Cog):
                     bpp_speed_list.append(float(beatmap_bpp_data["speed_pp"]))
 
                     diff_ar_list.append((float(beatmap_diff_data.ar)))
+
+                    print("OWO")
 
                 to_calculate = [
                     diff_ar_list,

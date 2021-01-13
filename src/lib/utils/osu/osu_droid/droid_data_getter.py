@@ -41,6 +41,7 @@ class OsuDroidProfile:
     def _replace_mods(modstring: str):
         modstring = modstring.replace("DoubleTime", "DT").replace(
             "Hidden", "HD").replace("HardRock", "HR").replace(
+            "Hidden", "HD").replace("HardRock", "HR").replace(
             "Precise", "PR").replace("NoFail", "NF").replace(
             "Easy", "EZ").replace("NightCore", "NC").replace(
             "Precise", "PR").replace("None", "NM").replace(",", "").strip().replace(" ", "")
@@ -63,7 +64,7 @@ class OsuDroidProfile:
     def get_play_data(self, play_html):
         play = play_html
 
-        title = play.find("strong", attrs={"class": "block"}).text
+        title = play.find("strong", class_="block").text
 
         rank_data = self._handle_rank(play.find("img")['src'])
         rank_str = rank_data['rank_str']
@@ -78,7 +79,7 @@ class OsuDroidProfile:
         accuracy = stats[4]
 
         hidden_data = list(map(lambda a: a.strip().split(":")[1].replace("}", ""),
-                               play.find("span", attrs={"class": "hidden"}).text.split(",")))
+                               play.find("span", class_="hidden").text.split(",")))
 
         misscount = hidden_data[0]
         hash_ = hidden_data[1]
@@ -100,11 +101,11 @@ class OsuDroidProfile:
     def profile(self):
         profile_info = self._player_html
 
-        stats = list(map(lambda a: a.text, profile_info.find_all("span", attrs={"class": "pull-right"})[-5:]))
-        username = profile_info.find("div", attrs={"class": "h3 m-t-xs m-b-xs"}).text
-        country = profile_info.find("small", attrs={"class": "text-muted"}).text
-        avatar = profile_info.find("a", attrs={"class": "thumb-lg"}).find("img")['src']
-        rankscore = profile_info.find("span", attrs={"class": "m-b-xs h4 block"}).text
+        stats = list(map(lambda a: a.text, profile_info.find_all("span", class_="pull-right")[-5:]))
+        username = profile_info.find("div", class_="h3 m-t-xs m-b-xs").text
+        country = profile_info.find("small", class_="text-muted").text
+        avatar = profile_info.find("a", class_="thumb-lg")
+        rankscore = profile_info.find("span", class_="m-b-xs h4 block").text
 
         try:
             raw_pp = self.total_pp
@@ -166,7 +167,7 @@ class OsuDroidProfile:
     def recent_play(self):
         recent_play = self.get_play_data(BeautifulSoup(requests.get(
             f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
-                                                       ).find("li", attrs={"class": "list-group-item"}))
+                                                       ).find("li", class_="list-group-item"))
 
         recent_play['mods'] = self._replace_mods(recent_play['mods'])
 
@@ -176,7 +177,7 @@ class OsuDroidProfile:
     def recent_plays(self):
         unfiltered_recent_plays = BeautifulSoup(requests.get(
             f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
-                                                ).find_all("li", attrs={"class": "list-group-item"})
+                                                ).find_all("li", class_="list-group-item")
 
         recent_plays = []
         for play in unfiltered_recent_plays:
