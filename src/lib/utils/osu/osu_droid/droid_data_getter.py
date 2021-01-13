@@ -108,7 +108,7 @@ class OsuDroidProfile:
 
         try:
             raw_pp = self.total_pp
-        except (KeyError, AttributeError):
+        except (KeyError, AttributeError, TypeError):
             raw_pp = 0
 
         return {
@@ -155,6 +155,7 @@ class OsuDroidProfile:
 
         # noinspection PyBroadException
         return data["pp"]["total"]
+
     @property
     def best_play(self):
         data = self._user_pp_data_json

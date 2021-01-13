@@ -341,6 +341,10 @@ class OsuDroid(commands.Cog):
             discord_id = uid_original
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
 
+        not_registered_msg = "O usuário ou você não possui uma conta registrada na database" \
+                             " ou você esqueceu de submitar seus pp's use `&pp` ou `&bind uid>`" \
+                             " Para os respectivos erros."
+
         if uid == "+" or faster == "+":
             discord_id = mention_to_uid(str(uid_original))
             if uid == "+":
@@ -356,11 +360,10 @@ class OsuDroid(commands.Cog):
         except KeyError:
             return await ctx.reply("Não foi posssivel encontrar o usuário :(")
         else:
-            await user.setup()
-
-        not_registered_msg = "O usuário ou você não possui uma conta registrada na database" \
-                             " ou você esqueceu de submitar seus pp's use `&pp` ou `&bind uid>`" \
-                             " Para os respectivos erros."
+            try:
+                await user.setup()
+            except KeyError:
+                return await ctx.reply(not_registered_msg)
 
         if faster is True:
             try:
@@ -368,7 +371,10 @@ class OsuDroid(commands.Cog):
             except Exception:
                 return await ctx.reply(not_registered_msg)
             else:
-                pp_data['list'] = sorted(pp_data['list'], key=lambda item: item['bpp'], reverse=True)
+                try:
+                    pp_data['list'] = sorted(pp_data['list'], key=lambda item: item['bpp'], reverse=True)
+                except KeyError:
+                    return await ctx.reply("Ocorreu um erro ao pegar o bpp das plays do usúario!")
         else:
             try:
                 pp_data = user.pp_data
@@ -402,7 +408,7 @@ class OsuDroid(commands.Cog):
                 nonlocal dpp_board_is_offline
                 dpp_board_is_offline = True
                 return await ctx.reply("O site do rian está infelizmente está offline :(")
-            embed.add_field(name="\u200b", value=f">>> ```\n{total_dpp}dpp /"
+            embed.add_field(name="\u200b", value=f">>> ```\n{total_dpp:.2f}dpp /"
                                                  f" {float(total_bpp):.2f}bpp\n```")
             for i_, play_ in enumerate(pp_data['list'][index_start:index_end]):
                 if faster:
@@ -498,7 +504,7 @@ class OsuDroid(commands.Cog):
                 return await ctx.reply(succesful_msg)
 
     @staticmethod
-    async def submit_user_data(uid: int, discord_id: Union[int, str], sleep_time=12):
+    async def submit_user_data(uid: int, discord_id: Union[int, str], sleep_time: float =12):
         try:
             user = OsuDroidProfile(uid, needs_pp_data=True)
         except KeyError:
@@ -517,20 +523,28 @@ class OsuDroid(commands.Cog):
                                                    accuracy=play['accuracy'],
                                                    max_combo=play['combo']
                                                    )
-
-                play['bpp'] = beatmap_data.get_bpp()['raw_pp']
-                play['diff'] = beatmap_data.get_diff()
-
             except KeyError:
                 play['bpp'] = 0
                 play['diff'] = {"diff_approach": 0, "diff_drain": 0, "diff_size": 0, "diff_overall": 0}
+            else:
+                play['bpp'] = beatmap_data.get_bpp()['raw_pp']
+
+                raw_data = beatmap_data.data
+
+                ar = raw_data.ar
+                cs = raw_data.cs
+                hp = raw_data.hp
+                od = raw_data.od
+
+                play['diff'] = {"diff_approach": ar, "diff_drain": hp, "diff_size": cs, "diff_overall": od}
 
         pp_data['total_bpp'] = 0
+        print(pp_data)
         for i, play in enumerate(pp_data['list']):
             play_bpp = play['bpp']
             play['net_bpp'] = play_bpp * 0.95 ** i
             pp_data['total_bpp'] += play['net_bpp']
-
+        print(pp_data)
         DATABASE.child("DROID_UID_DATA").child(uid).set(pp_data)
         DATABASE.child("DROID_USERS").child(discord_id).child("user").child("pp_data").set(pp_data)
 
@@ -554,19 +568,21 @@ class OsuDroid(commands.Cog):
                 return await ctx.reply(self.missing_uid_msg)
         elif len(uid) >= 9:
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
+        not_registered = f"Não existe uma uid ou o usuário não se cadastrou: {uid_original}"
         try:
             user = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
         except KeyError:
             return await ctx.reply("Não foi possível encontrar este usuário!")
         else:
-            await user.setup()
+            try:
+                await user.setup()
+            except KeyError:
+                return await ctx.reply(not_registered)
         try:
             try:
                 profile_data = user.profile
-                print(user.pp_data)
             except IndexError:
-                return await ctx.reply(
-                    f"Não existe uma uid ou o usuário não se cadastrou: {uid_original}")
+                return await ctx.reply(not_registered)
 
             profile_embed = discord.Embed(color=ctx.author.color)
 
@@ -575,6 +591,7 @@ class OsuDroid(commands.Cog):
                                      name=f"Perfil do(a) {profile_data['username']}")
 
             total_dpp = f"{user.total_pp: .2f}"
+            total_bpp = DATABASE.child("DROID_UID_DATA").child(uid).child("total_bpp").get().val()
 
             profile_embed.add_field(name="---Performance", value="**"
                                                                  f"Ele(a) é do(a)"
@@ -582,7 +599,8 @@ class OsuDroid(commands.Cog):
                                                                  f"(:flag_{user_country.lower()}:)\n"
                                                                  f"Rank: #{profile_data['rankscore']}\n"
                                                                  f"Total score: {profile_data['total_score']}\n"
-                                                                 f"Total dpp: {total_dpp}\n"
+                                                                 f"Total DPP: {total_dpp}\n"
+                                                                 f"Total BPP: {total_bpp}"
                                                                  f"Overall acc: {profile_data['overall_acc']}\n"
                                                                  f"Playcount: {profile_data['playcount']}"
                                                                  "**")
