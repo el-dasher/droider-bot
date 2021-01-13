@@ -25,6 +25,7 @@ class OsuDroidProfile:
                 url = f"http://ops.dgsrz.com/profile.php?uid={self.uid}"
                 async with session.get(url) as res:
                     self._player_html = BeautifulSoup(await res.text(), features="html.parser")
+                
             if self.needs_pp_data:
                 url = f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPP_BOARD_API}&uid={self.uid}"
                 async with session.get(url) as res:
