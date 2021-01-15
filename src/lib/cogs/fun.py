@@ -1,9 +1,7 @@
 from random import choice
 
 import discord
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger
-from discord.ext import commands
+from discord.ext import commands,tasks
 
 from src.lib.db.pydata.pydata import bot_presences
 from src.lib.utils.basic_utils import ready_up_cog
@@ -13,12 +11,10 @@ from src.setup import DATABASE
 class Funny(commands.Cog):
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self.scheduler = AsyncIOScheduler()
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.scheduler.add_job(self.presences, CronTrigger(second=0))
-        self.scheduler.start()
+        self.presences.start()
 
         ready_up_cog(self.bot, __name__)
 
@@ -27,6 +23,7 @@ class Funny(commands.Cog):
         await ctx.trigger_typing()
         return await ctx.reply("UwU")
 
+    @tasks.loop(minutes=1)
     async def presences(self):
         return await self.bot.change_presence(activity=(choice(bot_presences)))
 

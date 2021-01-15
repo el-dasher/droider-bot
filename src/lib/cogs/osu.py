@@ -733,7 +733,7 @@ class OsuDroid(commands.Cog):
             except JSONDecodeError:
                 pass
 
-    @tasks.loop(hours=24)
+    @tasks.loop(hours=3)
     async def _brdpp_rank(self):
 
         if debug:
@@ -750,7 +750,6 @@ class OsuDroid(commands.Cog):
         uid_list = DATABASE.child("BR_UIDS").get().val()["uids"]
 
         for uid in uid_list:
-
             bpp_aim_list, bpp_speed_list, diff_ar_list = [], [], []
 
             try:
@@ -775,7 +774,7 @@ class OsuDroid(commands.Cog):
             try:
                 for top_play in top_plays:
                     # Sleep = loop_time * 1.50 if 30 UIDS or less
-                    await asyncio.sleep(36)
+                    await asyncio.sleep(4.5)
 
                     beatmap_data = OsuDroidBeatmapData((
                         (await get_beatmap_data(top_play["hash"]))['beatmap_id']
@@ -823,9 +822,11 @@ class OsuDroid(commands.Cog):
                         "aim": calculated[2],
                     }
                 except IndexError:
+                    print("ERRO " + str(uid))
                     return None
-
-                fetched_data.append(user_data)
+                else:
+                    print(user_data)
+                    fetched_data.append(user_data)
             except (KeyError, JSONDecodeError):
                 pass
 
