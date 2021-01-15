@@ -752,6 +752,8 @@ class OsuDroid(commands.Cog):
         for uid in uid_list:
             bpp_aim_list, bpp_speed_list, diff_ar_list = [], [], []
 
+            print(uid)
+
             try:
                 raw_user_data = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
                 await raw_user_data.setup()
