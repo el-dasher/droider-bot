@@ -825,7 +825,7 @@ class OsuDroid(commands.Cog):
                     }
                 except IndexError:
                     print("ERRO " + str(uid))
-                    return None
+                    pass
                 else:
                     fetched_data.append(user_data)
             except (KeyError, JSONDecodeError):
