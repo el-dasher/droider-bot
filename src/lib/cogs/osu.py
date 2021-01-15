@@ -736,7 +736,7 @@ class OsuDroid(commands.Cog):
     @tasks.loop(minutes=30)
     async def _brdpp_rank(self):
 
-        if not debug:
+        if debug:
             return None
 
         try:
