@@ -18,6 +18,7 @@ class OsuDroidProfile:
         self.uid = uid
         self._user_pp_data_json = None
         self._player_html = None
+        self._stats = None
 
     async def setup(self):
         async with aiohttp.ClientSession() as session:
@@ -25,7 +26,8 @@ class OsuDroidProfile:
                 url = f"http://ops.dgsrz.com/profile.php?uid={self.uid}"
                 async with session.get(url) as res:
                     self._player_html = BeautifulSoup(await res.text(), features="html.parser")
-                
+                    self._stats = list(map(lambda a: a.text,
+                                           self._player_html.find_all("span", class_="pull-right")[-5:]))
             if self.needs_pp_data:
                 url = f"http://droidppboard.herokuapp.com/api/getplayertop?key={DPP_BOARD_API}&uid={self.uid}"
                 async with session.get(url) as res:
@@ -37,7 +39,6 @@ class OsuDroidProfile:
                             "username": "None",
                             "list": []
                         }
-
 
     @staticmethod
     def _replace_mods(modstring: str):
@@ -63,6 +64,7 @@ class OsuDroidProfile:
             "rank_str": rank_str
         }
 
+    # I probably will make everything here acessible through a class later
     def get_play_data(self, play_html):
         play = play_html
 
@@ -101,30 +103,53 @@ class OsuDroidProfile:
 
     @property
     def profile(self):
-        profile_info = self._player_html
-
-        stats = list(map(lambda a: a.text, profile_info.find_all("span", class_="pull-right")[-5:]))
-        username = profile_info.find("div", class_="h3 m-t-xs m-b-xs").text
-        country = profile_info.find("small", class_="text-muted").text
-        avatar = profile_info.find("a", class_="thumb-lg").find("img")['src']
-        rankscore = profile_info.find("span", class_="m-b-xs h4 block").text
-
-        try:
-            raw_pp = self.total_pp
-        except (KeyError, AttributeError, TypeError):
-            raw_pp = 0
 
         return {
-            "username": username,
-            "avatar_url": avatar,
-            "rankscore": rankscore,
-            "raw_pp": raw_pp,
-            "country": country,
-            "total_score": stats[0],
-            "overall_acc": stats[1],
-            "playcount": stats[2],
+            "username": self.username,
+            "avatar_url": self.avatar,
+            "rankscore": self.rankscore,
+            "raw_pp": self.total_pp,
+            "country": self.country,
+            "total_score": self.score,
+            "overall_acc": self.acc,
+            "playcount": self.playcount,
             "user_id": self.uid
         }
+
+    @property
+    def score(self):
+        score = self._stats[0]
+        return score
+
+    @property
+    def acc(self):
+        accuracy = self._stats[1]
+        return accuracy
+
+    @property
+    def playcount(self):
+        playcount = self._stats[2]
+        return playcount
+
+    @property
+    def username(self):
+        username = self._player_html.find("div", class_="h3 m-t-xs m-b-xs").text
+        return username
+
+    @property
+    def rankscore(self):
+        rankscore = self._player_html.find("span", class_="m-b-xs h4 block").text
+        return rankscore
+
+    @property
+    def avatar(self):
+        avatar = self._player_html.find("a", class_="thumb-lg").find("img")['src']
+        return avatar
+
+    @property
+    def country(self):
+        country = self._player_html.find("small", class_="text-muted").text
+        return country
 
     @property
     def basic_user_data(self):
@@ -154,10 +179,16 @@ class OsuDroidProfile:
 
     @property
     def total_pp(self):
-        data = self._user_pp_data_json
 
-        # noinspection PyBroadException
-        return data["pp"]["total"]
+        total_pp = 0
+        try:
+            data = self._user_pp_data_json
+        except (KeyError, AttributeError, TypeError):
+            pass
+        else:
+            total_pp = data["pp"]["total"]
+        finally:
+            return total_pp
 
     @property
     def best_play(self):
@@ -167,11 +198,18 @@ class OsuDroidProfile:
 
     @property
     def recent_play(self):
-        recent_play = self.get_play_data(BeautifulSoup(requests.get(
-            f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
-                                                       ).find("li", class_="list-group-item"))
-
-        recent_play['mods'] = self._replace_mods(recent_play['mods'])
+        recent_play = {}
+        status_code = 200
+        try:
+            recent_play = self.get_play_data(BeautifulSoup(requests.get(
+                f"http://ops.dgsrz.com/profile.php?uid={self.uid}").text, features="html.parser"
+                                                           ).find("li", class_="list-group-item"))
+        except (IndexError, KeyError, AttributeError):
+            status_code = 400
+        else:
+            recent_play['mods'] = self._replace_mods(recent_play['mods'])
+        finally:
+            recent_play['code'] = status_code
 
         return recent_play
 

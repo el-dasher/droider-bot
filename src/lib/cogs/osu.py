@@ -254,14 +254,11 @@ class OsuDroid(commands.Cog):
                 return await ctx.reply(self.missing_uid_msg)
         elif len(uid) >= 9:
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
-        try:
-            user = OsuDroidProfile(uid, needs_player_html=True)
-            await user.setup()
-        except KeyError:
-            return await ctx.reply("Não foi possível encontrar esse usuário!")
-        try:
-            rs_data = user.recent_play
-        except (IndexError, KeyError, AttributeError):
+
+        user = OsuDroidProfile(uid, needs_player_html=True)
+        rs_data = user.recent_play
+
+        if rs_data['code'] == 400:
             await ctx.reply(f"O usuário infelizmente não possui nenhuma play ou o mesmo não possui uma conta...")
         else:
             rs_bm_data = await get_beatmap_data(rs_data["hash"])
@@ -296,7 +293,7 @@ class OsuDroid(commands.Cog):
                 bm_data_string = "> Não foi possivel encontrar o beatmap nos servidores do osu..."
 
             rs_embed.add_field(
-                name=f"Dados da play do(a) {user.profile['username']}",
+                name=f"Dados da play do(a) {user.username}",
                 value=">>> **"
                       f"BPP: {play_bpp}/{max_bpp}\n"
                       f"Precisão: {rs_data['accuracy']}\n"
@@ -316,7 +313,7 @@ class OsuDroid(commands.Cog):
             rs_embed.set_author(
                 name=f"{rs_data['title']} +{rs_data['mods']} - {float(rs_bm_data['difficultyrating']):.2f}★",
                 url=f"https://osu.ppy.sh/b/{rs_bm_data['beatmap_id']}",
-                icon_url=user.profile['avatar_url']
+                icon_url=user.avatar
             )
 
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=rs_embed)
@@ -545,7 +542,7 @@ class OsuDroid(commands.Cog):
 
         return pp_data
 
-    @commands.command(name="pf", aliases=["pfme"])
+    @commands.command(name="pf", aliases=["pfme", "pfid"])
     async def droid_pfme(self, ctx, uid=None):
         """
         Veja seu lindo perfil do osu!droid,
@@ -563,42 +560,35 @@ class OsuDroid(commands.Cog):
                 return await ctx.reply(self.missing_uid_msg)
         elif len(uid) >= 9:
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
-        not_registered = f"Não existe uma uid ou o usuário não se cadastrou: {uid_original}"
         try:
             user = OsuDroidProfile(uid, needs_player_html=True, needs_pp_data=True)
             await user.setup()
         except KeyError:
             return await ctx.reply("Não foi possível encontrar este usuário!")
-        try:
-            try:
-                profile_data = user.profile
-            except IndexError:
-                return await ctx.reply(not_registered)
-
+        else:
             profile_embed = discord.Embed(color=ctx.author.color)
 
-            profile_embed.set_thumbnail(url=profile_data['avatar_url'])
+            profile_embed.set_thumbnail(url=user.avatar)
             profile_embed.set_author(url=f"http://ops.dgsrz.com/profile.php?uid={uid}",
-                                     name=f"Perfil do(a) {profile_data['username']}")
+                                     name=f"Perfil do(a) {user.username}")
 
-            total_dpp = f"{user.total_pp:.2f}"
-            total_bpp = f"{DATABASE.child('DROID_UID_DATA').child(uid).child('total_bpp').get().val():.2f}"
+            total_bpp = DATABASE.child('DROID_USERS').child(uid_original).child('total_bpp').get().val()
+            if total_bpp is None:
+                total_bpp = 0
 
+            user_country = user.country
             profile_embed.add_field(name="---Performance", value="**"
                                                                  f"Ele(a) é do(a)"
-                                                                 f" {(user_country := profile_data['country'])}"
+                                                                 f" {user_country}"
                                                                  f"(:flag_{user_country.lower()}:)\n"
-                                                                 f"Rank: #{profile_data['rankscore']}\n"
-                                                                 f"Total score: {profile_data['total_score']}\n"
-                                                                 f"Total DPP: {total_dpp}\n"
-                                                                 f"Total BPP: {total_bpp}\n"
-                                                                 f"Overall acc: {profile_data['overall_acc']}\n"
-                                                                 f"Playcount: {profile_data['playcount']}"
+                                                                 f"Rank: #{user.rankscore}\n"
+                                                                 f"Total score: {user.score}\n"
+                                                                 f"Total DPP: {user.total_pp:.2f}\n"
+                                                                 f"Total BPP: {total_bpp:.2f}\n"
+                                                                 f"Overall acc: {user.acc}\n"
+                                                                 f"Playcount: {user.playcount}"
                                                                  "**")
             await ctx.reply(content=f"<@{ctx.author.id}>", embed=profile_embed)
-
-        except KeyError:
-            await ctx.reply(f"Não existe uma user id chamada: {uid}")
 
     @commands.command(name="droidset", aliases=["bind"])
     async def droid_set(self, ctx, uid: Union[str, int] = None, discord_user: Union[discord.Member, str] = None):
@@ -733,7 +723,7 @@ class OsuDroid(commands.Cog):
             except JSONDecodeError:
                 pass
 
-    @tasks.loop(minutes=30)
+    @tasks.loop(hours=6)
     async def _brdpp_rank(self):
 
         if debug:
@@ -776,7 +766,7 @@ class OsuDroid(commands.Cog):
             try:
                 for top_play in top_plays:
                     # Sleep = loop_time * 1.50 if 30 UIDS or less
-                    await asyncio.sleep(0.75)
+                    await asyncio.sleep(9)
 
                     beatmap_data = OsuDroidBeatmapData((
                         (await get_beatmap_data(top_play["hash"]))['beatmap_id']
