@@ -256,6 +256,7 @@ class OsuDroid(commands.Cog):
             uid = DATABASE.child("DROID_USERS").child(mention_to_uid(uid)).child("user").child("user_id").get().val()
 
         user = OsuDroidProfile(uid, needs_player_html=True)
+        await user.setup()
         rs_data = user.recent_play
 
         if rs_data['code'] == 400:
