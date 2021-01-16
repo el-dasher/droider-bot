@@ -606,14 +606,9 @@ class OsuDroid(commands.Cog):
                 uid = [int(s) for s in uid.split() if s.isdigit()][0]
             except IndexError:
                 return await ctx.reply("O uid pode apenas conter números :(")
-        try:
-            user = OsuDroidProfile(uid, needs_player_html=True)
-            await user.setup()
-        except KeyError:
-            return await ctx.reply("Não foi possível encontrar esse usúario!")
-
-        profile = user.profile
-
+        user = OsuDroidProfile(uid, needs_player_html=True)
+        await user.setup()
+        
         if type(user_to_bind) == discord.Member:
             user_to_bind = user_to_bind.id
         else:
@@ -622,8 +617,9 @@ class OsuDroid(commands.Cog):
             except ValueError:
                 return await ctx.reply("O id precisa ser um íntegro!")
 
+        username = user.username
         if user_to_bind == ctx.author.id:
-            bind_msg = f"Você cadastrou seu usuário! {profile['username']}"
+            bind_msg = f"Você cadastrou seu usuário! {username}"
         else:
             user_to_bind = ctx.guild.get_member(user_to_bind)
 
@@ -633,14 +629,14 @@ class OsuDroid(commands.Cog):
                 bind_msg_user = user_to_bind.display_name
                 user_to_bind = user_to_bind.id
 
-            bind_msg = f"O adm cadastrou o(a) {profile['username']} pro(a) {bind_msg_user}"
-        if profile['username'] != "":
+            bind_msg = f"O adm cadastrou o(a) {username} pro(a) {bind_msg_user}"
+        if username != "":
             DATABASE.child("DROID_USERS").child(user_to_bind).set({"user": user.profile})
         else:
             return await ctx.reply(f"Não existe uma uid chamada: {uid}")
 
         droidset_embed = discord.Embed(title=bind_msg, color=ctx.author.color)
-        droidset_embed.set_image(url=profile['avatar_url'])
+        droidset_embed.set_image(url=user.avatar)
 
         await ctx.reply(f"<@{ctx.author.id}>", embed=droidset_embed)
 
