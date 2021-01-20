@@ -201,7 +201,7 @@ class OsuDroidProfile:
         recent_play = {}
         status_code = 200
         try:
-            recent_play = self.get_play_data(self._player_html.text.find("li", class_="list-group-item"))
+            recent_play = self.get_play_data(self._player_html.find("li", class_="list-group-item"))
         except (IndexError, KeyError, AttributeError):
             status_code = 400
         else:
