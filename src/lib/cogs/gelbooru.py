@@ -22,7 +22,7 @@ class Gelbooru(commands.Cog):
     async def boorusearch(self, ctx: commands.Context, *query):
 
         await ctx.trigger_typing()
-        exclude: tuple = ("loli", "gore", "vore", "furry", "scat", "shota", "piss")
+        exclude: tuple = ("loli", "gore", "vore", "scat", "shota", "piss")
 
         if len(query) == 0:
             return await ctx.reply("Você esqueceu de por as tags! bobão")
